@@ -12,27 +12,37 @@ import { Construct } from 'constructs';
 interface RaffleHubApiGatewayProps {
   raffleIndexMicroservice: IFunction;
   raffleNewMicroservice: IFunction;
+  signInMicroservice: IFunction;
 }
 
 export class RaffleHubApiGateway extends Construct {
   constructor(scope: Construct, id: string, props: RaffleHubApiGatewayProps) {
     super(scope, id);
-    this.createRaffleApi(props.raffleIndexMicroservice, props.raffleNewMicroservice);
+    this.createApiGateway(
+      props.raffleIndexMicroservice,
+      props.raffleNewMicroservice,
+      props.signInMicroservice,
+    );
   }
 
-  private createRaffleApi(raffleIndexMicroservice: IFunction, raffleNewMicroservice: IFunction) {
+  private createApiGateway(
+    raffleIndexMicroservice: IFunction,
+    raffleNewMicroservice: IFunction,
+    signInMicroservice: IFunction,
+  ) {
     const apigw = new LambdaRestApi(this, 'raffleApi', {
-      restApiName: 'Raffle Service',
+      restApiName: 'Raffle Hub Service',
       handler: raffleIndexMicroservice,
       proxy: false,
       defaultCorsPreflightOptions: {
-        allowOrigins: Cors.ALL_ORIGINS,
+        allowOrigins: ['https://www.raffle-hub.net'],
         allowMethods: Cors.ALL_METHODS,
+        allowHeaders: Cors.DEFAULT_HEADERS,
         allowCredentials: true,
       },
     });
 
-    const createRaffleModel = new Model(this, 'model-validator', {
+    const createRaffleModel = new Model(this, 'createrafflevalidator', {
       restApi: apigw,
       contentType: 'application/json',
       description: 'Validates the request body for creating a new raffle',
@@ -50,16 +60,56 @@ export class RaffleHubApiGateway extends Construct {
       },
     });
 
-    const raffle = apigw.root.addResource('raffle');
-    raffle.addMethod('GET');
+    const raffle = apigw.root.addResource('raffle', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['https://www.raffle-hub.net'],
+        allowMethods: Cors.ALL_METHODS,
+        allowHeaders: Cors.DEFAULT_HEADERS,
+        allowCredentials: true,
+      },
+    });
+    raffle.addMethod('GET', new LambdaIntegration(raffleIndexMicroservice));
     raffle.addMethod('POST', new LambdaIntegration(raffleNewMicroservice), {
-      requestValidator: new RequestValidator(this, 'body-validator', {
+      requestValidator: new RequestValidator(this, 'createraffle-body-validator', {
         restApi: apigw,
-        requestValidatorName: 'body-validator',
+        requestValidatorName: 'createraffle-body-validator',
         validateRequestBody: true,
       }),
       requestModels: {
         'application/json': createRaffleModel,
+      },
+    });
+
+    const signInModel = new Model(this, 'signinvalidator', {
+      restApi: apigw,
+      contentType: 'application/json',
+      description: 'Validates the request body for signing in',
+      modelName: 'signinvalidator',
+      schema: {
+        type: JsonSchemaType.OBJECT,
+        required: ['code'],
+        properties: {
+          code: { type: JsonSchemaType.STRING, minLength: 1, maxLength: 255 },
+        },
+      },
+    });
+
+    const auth = apigw.root.addResource('auth', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['https://www.raffle-hub.net'],
+        allowMethods: Cors.ALL_METHODS,
+        allowHeaders: Cors.DEFAULT_HEADERS,
+        allowCredentials: true,
+      },
+    });
+    auth.addMethod('POST', new LambdaIntegration(signInMicroservice), {
+      requestValidator: new RequestValidator(this, 'signin-body-validator', {
+        restApi: apigw,
+        requestValidatorName: 'signin-body-validator',
+        validateRequestBody: true,
+      }),
+      requestModels: {
+        'application/json': signInModel,
       },
     });
   }

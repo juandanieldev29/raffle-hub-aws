@@ -19,6 +19,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return {
       statusCode: 200,
       body: JSON.stringify(Items.map((item) => unmarshall(item))),
+      headers: {
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Allow-Origin': 'https://www.raffle-hub.net',
+        'Access-Control-Allow-Methods': '*',
+        'Access-Control-Allow-Headers': '*',
+      },
     };
   } catch (err) {
     console.log(err);

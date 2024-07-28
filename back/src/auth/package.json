@@ -1,0 +1,14 @@
+{
+  "name": "@src/auth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.55.0",
+    "@aws-sdk/client-secrets-manager": "^3.616.0",
+    "@aws-sdk/util-dynamodb": "^3.55.0",
+    "google-auth-library": "^9.11.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.141"
+  }
+}
