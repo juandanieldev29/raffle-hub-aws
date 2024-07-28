@@ -15,13 +15,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       TableName: process.env.DYNAMODB_TABLE_NAME,
       Limit: limit,
     };
-    const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
+    const { Items = [] } = await ddbClient.send(new ScanCommand(params));
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        raffles: Items.map((item) => unmarshall(item)),
-        lastEvaluatedKey: LastEvaluatedKey,
-      }),
+      body: JSON.stringify(Items.map((item) => unmarshall(item))),
       headers: {
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Allow-Origin': 'https://www.raffle-hub.net',
