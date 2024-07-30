@@ -1,21 +1,21 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { App, GitHubSourceCodeProvider } from '@aws-cdk/aws-amplify-alpha';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 
-interface HostingStackProps extends StackProps {
+interface HostingStackProps {
   readonly githubTokenSecret: ISecret;
 }
 
-export class AmplifyHostingStack extends Stack {
+export class RaffleHubAmplifyHostingStack extends Stack {
   constructor(scope: Construct, id: string, props: HostingStackProps) {
-    super(scope, id, props);
+    super(scope, id);
     this.buildAppStack(props.githubTokenSecret);
   }
 
   private buildAppStack(githubTokenSecret: ISecret) {
     const amplifyApp = new App(this, 'AmplifyApp', {
-      appName: 'RaffleHub',
+      appName: 'raffle-hub',
       sourceCodeProvider: new GitHubSourceCodeProvider({
         owner: 'juandanieldev29',
         repository: 'raffle-hub-aws',
@@ -26,8 +26,11 @@ export class AmplifyHostingStack extends Stack {
         AMPLIFY_MONOREPO_APP_ROOT: 'src/front',
       },
     });
+    amplifyApp.addBranch('main', {
+      stage: 'PRODUCTION',
+    });
     amplifyApp.addBranch('dev', {
-      stage: 'DEV',
+      stage: 'DEVELOPMENT',
     });
   }
 }
