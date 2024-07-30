@@ -36,14 +36,6 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     // setLocalRaffles(data.raffles);
   };
 
-  const fetchCurrentUser = async () => {
-    const response = await fetch('/api/auth/currentuser', {
-      cache: 'no-store',
-    });
-    const { currentUser: user } = await response.json();
-    setCurrentUser(user);
-  };
-
   useEffect(() => {
     if (pageInitiallyRendered.current) {
       fetchRaffles();

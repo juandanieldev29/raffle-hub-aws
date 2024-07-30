@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 import { RaffleHubApiGateway } from './apigateway';
@@ -8,6 +8,7 @@ import { RaffleHubSecrets } from './secret';
 import { RaffleHubDomain } from './domain';
 import { RaffleHubCertificate } from './certificate';
 import { RaffleHubHostedZone } from './hosted-zone';
+import { RaffleHubCognito } from './cognito';
 
 export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -38,6 +39,18 @@ export class AwsMicroservicesStack extends Stack {
       raffleNewMicroservice: raffleNewMicroservice,
       signInMicroservice: signInMicroservice,
       domain: domain,
+    });
+    const cognito = new RaffleHubCognito(this, 'Cognito');
+
+    new CfnOutput(this, 'region', { value: this.region });
+    new CfnOutput(this, 'userPoolId', { value: cognito.userPool.userPoolId });
+    new CfnOutput(this, 'userPoolWebClientId', { value: cognito.userPoolClient.userPoolClientId });
+    new CfnOutput(this, 'identityPoolId', { value: cognito.identityPool.identityPoolId });
+    new CfnOutput(this, 'UserPoolDomainUrl', {
+      value: `${cognito.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`,
+    });
+    new CfnOutput(this, 'AuthorizedRedirectUserPoolDomainURL', {
+      value: `https://${cognito.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com/oauth2/idpresponse`,
     });
   }
 }

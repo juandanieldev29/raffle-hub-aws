@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Inter } from 'next/font/google';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import Header from '@/components/header';
 import UserContextProvider from '@/contexts/user-context';
@@ -23,12 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-slate-100 dark:bg-slate-700`}>
-        <GoogleOAuthProvider clientId="822068828971-84m1l68k8h0bhn3edkom8udrqka2dm80.apps.googleusercontent.com">
-          <UserContextProvider>
-            <Header />
-            {children}
-          </UserContextProvider>
-        </GoogleOAuthProvider>
+        <UserContextProvider>
+          <Header />
+          {children}
+        </UserContextProvider>
         <Script src="https://kit.fontawesome.com/ecb1fa5ff2.js" crossOrigin="anonymous" />
       </body>
     </html>

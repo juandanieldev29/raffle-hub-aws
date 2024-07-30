@@ -2,7 +2,6 @@
 import { useEffect, useState, useContext } from 'react';
 import Link from 'next/link';
 import classNames from 'classnames';
-import { useGoogleLogin } from '@react-oauth/google';
 
 import { UserContext } from '@/contexts/user-context';
 
@@ -23,26 +22,6 @@ export default function Header() {
     const darkThemePreffered = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setDarkMode(darkThemePreffered);
   };
-
-  const exchangeGoogleToken = async (code: string) => {
-    const res = await fetch('https://api.raffle-hub.net/auth/auth', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      cache: 'no-store',
-      body: JSON.stringify({ code }),
-    });
-    const user = await res.json();
-    setCurrentUser(user);
-  };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: ({ code }) => exchangeGoogleToken(code),
-    scope: 'profile',
-    flow: 'auth-code',
-  });
 
   useEffect(() => {
     initializeTheme();
@@ -94,13 +73,7 @@ export default function Header() {
   return (
     <header className="flex justify-between p-2 shadow-md sticky bg-slate-950 z-10">
       <h1 className="text-3xl md:text-5xl grow text-slate-50 dark:text-slate-400">RaffleHub</h1>
-      {currentUser ? (
-        <img src={currentUser.photoURL} className="w-8 h-8 my-auto rounded-full" />
-      ) : (
-        <button className="text-slate-50 dark:text-slate-400 google-button" onClick={googleLogin}>
-          Login
-        </button>
-      )}
+      {currentUser && <img src={currentUser.photoURL} className="w-8 h-8 my-auto rounded-full" />}
       <div className="px-2 cursor-pointer text-slate-50 dark:text-slate-400 my-auto">
         <i className={toggleThemeClass} onClick={toggleDarkMode} />
       </div>
