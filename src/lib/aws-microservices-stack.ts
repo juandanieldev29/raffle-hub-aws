@@ -9,6 +9,7 @@ import { RaffleHubDomain } from './domain';
 import { RaffleHubCertificate } from './certificate';
 import { RaffleHubHostedZone } from './hosted-zone';
 import { RaffleHubCognito } from './cognito';
+import { RaffleHubAmplifyHostingStack } from './amplify';
 
 export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -16,7 +17,7 @@ export class AwsMicroservicesStack extends Stack {
 
     const { raffleTable } = new RaffleHubDatabase(this, 'Database');
 
-    const { googleOAuthConfigSecret } = new RaffleHubSecrets(this, 'Secret');
+    const { googleOAuthConfigSecret, githubTokenSecret } = new RaffleHubSecrets(this, 'Secret');
 
     const { raffleIndexMicroservice, raffleNewMicroservice, signInMicroservice } =
       new RaffleHubMicroservices(this, 'Microservices', {
@@ -41,6 +42,9 @@ export class AwsMicroservicesStack extends Stack {
       domain: domain,
     });
     const cognito = new RaffleHubCognito(this, 'Cognito');
+    new RaffleHubAmplifyHostingStack(this, 'Amplify', {
+      githubTokenSecret: githubTokenSecret,
+    });
 
     new CfnOutput(this, 'region', { value: this.region });
     new CfnOutput(this, 'userPoolId', { value: cognito.userPool.userPoolId });
