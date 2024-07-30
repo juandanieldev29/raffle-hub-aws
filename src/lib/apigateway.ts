@@ -1,5 +1,7 @@
 import {
+  BasePathMapping,
   Cors,
+  DomainName,
   JsonSchemaType,
   LambdaIntegration,
   LambdaRestApi,
@@ -13,6 +15,7 @@ interface RaffleHubApiGatewayProps {
   raffleIndexMicroservice: IFunction;
   raffleNewMicroservice: IFunction;
   signInMicroservice: IFunction;
+  domain: DomainName;
 }
 
 export class RaffleHubApiGateway extends Construct {
@@ -22,6 +25,7 @@ export class RaffleHubApiGateway extends Construct {
       props.raffleIndexMicroservice,
       props.raffleNewMicroservice,
       props.signInMicroservice,
+      props.domain,
     );
   }
 
@@ -29,8 +33,9 @@ export class RaffleHubApiGateway extends Construct {
     raffleIndexMicroservice: IFunction,
     raffleNewMicroservice: IFunction,
     signInMicroservice: IFunction,
+    domain: DomainName,
   ) {
-    const apigw = new LambdaRestApi(this, 'raffleApi', {
+    const apigw = new LambdaRestApi(this, 'RaffleApi', {
       restApiName: 'Raffle Hub Service',
       handler: raffleIndexMicroservice,
       proxy: false,
@@ -42,11 +47,11 @@ export class RaffleHubApiGateway extends Construct {
       },
     });
 
-    const createRaffleModel = new Model(this, 'createrafflevalidator', {
+    const createRaffleModel = new Model(this, 'CreateRaffleValidator', {
       restApi: apigw,
       contentType: 'application/json',
       description: 'Validates the request body for creating a new raffle',
-      modelName: 'createrafflevalidator',
+      modelName: 'CreateRaffleValidator',
       schema: {
         type: JsonSchemaType.OBJECT,
         required: ['prize', 'description', 'ticketPrice'],
@@ -70,9 +75,9 @@ export class RaffleHubApiGateway extends Construct {
     });
     raffle.addMethod('GET', new LambdaIntegration(raffleIndexMicroservice));
     raffle.addMethod('POST', new LambdaIntegration(raffleNewMicroservice), {
-      requestValidator: new RequestValidator(this, 'createraffle-body-validator', {
+      requestValidator: new RequestValidator(this, 'CreateRaffleBodyValidator', {
         restApi: apigw,
-        requestValidatorName: 'createraffle-body-validator',
+        requestValidatorName: 'CreateRaffleBodyValidator',
         validateRequestBody: true,
       }),
       requestModels: {
@@ -80,11 +85,11 @@ export class RaffleHubApiGateway extends Construct {
       },
     });
 
-    const signInModel = new Model(this, 'signinvalidator', {
+    const signInModel = new Model(this, 'SigninValidator', {
       restApi: apigw,
       contentType: 'application/json',
       description: 'Validates the request body for signing in',
-      modelName: 'signinvalidator',
+      modelName: 'SigninValidator',
       schema: {
         type: JsonSchemaType.OBJECT,
         required: ['code'],
@@ -103,14 +108,19 @@ export class RaffleHubApiGateway extends Construct {
       },
     });
     auth.addMethod('POST', new LambdaIntegration(signInMicroservice), {
-      requestValidator: new RequestValidator(this, 'signin-body-validator', {
+      requestValidator: new RequestValidator(this, 'SigninBodyValidator', {
         restApi: apigw,
-        requestValidatorName: 'signin-body-validator',
+        requestValidatorName: 'SigninBodyValidator',
         validateRequestBody: true,
       }),
       requestModels: {
         'application/json': signInModel,
       },
+    });
+
+    new BasePathMapping(this, 'api-gw-base-path-mapping', {
+      domainName: domain,
+      restApi: apigw,
     });
   }
 }

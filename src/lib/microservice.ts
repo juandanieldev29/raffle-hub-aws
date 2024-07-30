@@ -1,3 +1,4 @@
+import { Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -31,9 +32,11 @@ export class RaffleHubMicroservices extends Construct {
         DYNAMODB_TABLE_NAME: raffleTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
-    const lambdaFunction = new NodejsFunction(this, 'raffleIndexLambdaFunction', {
-      entry: join(__dirname, `/../src/raffle/index.ts`),
+    const lambdaFunction = new NodejsFunction(this, 'RaffleIndexLambdaFunction', {
+      entry: join(__dirname, `/../back/raffle/index.ts`),
       ...nodeJsFunctionProps,
     });
 
@@ -52,8 +55,8 @@ export class RaffleHubMicroservices extends Construct {
       },
       runtime: Runtime.NODEJS_20_X,
     };
-    const lambdaFunction = new NodejsFunction(this, 'raffleNewLambdaFunction', {
-      entry: join(__dirname, `/../src/raffle/new.ts`),
+    const lambdaFunction = new NodejsFunction(this, 'RaffleNewLambdaFunction', {
+      entry: join(__dirname, `/../back/raffle/new.ts`),
       ...nodeJsFunctionProps,
     });
 
@@ -69,8 +72,8 @@ export class RaffleHubMicroservices extends Construct {
       },
       runtime: Runtime.NODEJS_20_X,
     };
-    const lambdaFunction = new NodejsFunction(this, 'signInLambdaFunction', {
-      entry: join(__dirname, `/../src/auth/signin.ts`),
+    const lambdaFunction = new NodejsFunction(this, 'SignInLambdaFunction', {
+      entry: join(__dirname, `/../back/auth/signin.ts`),
       ...nodeJsFunctionProps,
     });
     googleOAuthConfigSecret.grantRead(lambdaFunction);

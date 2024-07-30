@@ -11,7 +11,7 @@ export class RaffleHubDatabase extends Construct {
   }
 
   private createRaffleTable(): ITable {
-    const raffleTable = new Table(this, 'raffle', {
+    const raffleTable = new Table(this, 'RaffleDatabaseTable', {
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
