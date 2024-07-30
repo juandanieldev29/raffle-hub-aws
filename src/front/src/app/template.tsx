@@ -6,9 +6,9 @@ import { Amplify, ResourcesConfig } from 'aws-amplify';
 const config: ResourcesConfig = {
   Auth: {
     Cognito: {
-      userPoolId: 'us-west-2_V4TbSN7YN',
-      userPoolClientId: '7gr6lvbo1gk4393l49tqjtu0ud',
-      identityPoolId: 'us-west-2:f8083d71-091a-44fa-860c-32e27bda0c3b',
+      userPoolId: 'us-west-2_tGFAnJPxy',
+      userPoolClientId: 'fam3rusigd8te742bqrunv28g',
+      identityPoolId: 'us-west-2:5e9f3d98-110e-4613-b3e9-11df304c1366',
       loginWith: {
         oauth: {
           domain: 'raffle-hub.auth.us-west-2.amazoncognito.com',
