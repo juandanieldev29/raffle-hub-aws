@@ -10,6 +10,6 @@ export class RaffleHubSecrets extends Construct {
   }
 
   private createGoogleOAuthConfigSecret(): ISecret {
-    return Secret.fromSecretNameV2(this, `google-oauth-config`, 'GoogleClientConfig');
+    return Secret.fromSecretNameV2(this, 'GoogleOauthConfig', 'GoogleClientConfig');
   }
 }

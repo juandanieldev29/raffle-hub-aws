@@ -21,7 +21,9 @@ export default [
     'plugin:prettier/recommended',
   ),
   {
-    ignores: ['eslint.config.js'],
+    ignores: ['**/cdk.out'],
+  },
+  {
     plugins: {
       '@typescript-eslint': typescriptEslint,
       'unused-imports': unusedImports,
