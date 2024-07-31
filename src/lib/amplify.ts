@@ -1,6 +1,6 @@
-import { Stack } from 'aws-cdk-lib';
+import { SecretValue, Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { App, GitHubSourceCodeProvider } from '@aws-cdk/aws-amplify-alpha';
+import { App, GitHubSourceCodeProvider, Platform } from '@aws-cdk/aws-amplify-alpha';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 
@@ -25,33 +25,43 @@ export class RaffleHubAmplifyHostingStack extends Stack {
       autoBranchDeletion: true,
       environmentVariables: {
         AMPLIFY_MONOREPO_APP_ROOT: 'src/front',
+        AMPLIFY_DIFF_DEPLOY: 'false',
       },
+      platform: Platform.WEB_COMPUTE,
       buildSpec: BuildSpec.fromObjectToYaml({
         version: 1,
-        frontend: {
-          phases: {
-            preBuild: {
-              commands: ['npm ci'],
+        applications: [
+          {
+            frontend: {
+              phases: {
+                preBuild: {
+                  commands: ['npm ci --cache .npm --prefer-offline'],
+                },
+                build: {
+                  commands: ['npm run build'],
+                },
+              },
+              artifacts: {
+                baseDirectory: '.next',
+                files: ['**/*'],
+              },
+              cache: {
+                paths: ['.next/cache/**/*', '.npm/**/*'],
+              },
             },
-            build: {
-              commands: ['npm run build'],
-            },
+            appRoot: 'src/front',
           },
-          artifacts: {
-            baseDirectory: '.next',
-            files: ['**/*'],
-          },
-          cache: {
-            paths: ['node_modules/**/*'],
-          },
-        },
+        ],
       }),
+    });
+    const dev = amplifyApp.addBranch('dev', {
+      stage: 'DEVELOPMENT',
     });
     amplifyApp.addBranch('main', {
       stage: 'PRODUCTION',
     });
-    amplifyApp.addBranch('dev', {
-      stage: 'DEVELOPMENT',
-    });
+    const domain = amplifyApp.addDomain('raffle-hub.net');
+    domain.mapRoot(dev);
+    domain.mapSubDomain(dev, 'www');
   }
 }
