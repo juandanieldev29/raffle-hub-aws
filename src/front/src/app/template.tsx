@@ -13,7 +13,7 @@ const config: ResourcesConfig = {
       loginWith: {
         oauth: {
           domain: process.env.NEXT_PUBLIC_USER_POOL_DOMAIN_URL!,
-          scopes: ['openid', 'profile', 'email'],
+          scopes: ['openid', 'profile', 'email', 'aws.cognito.signin.user.admin'],
           redirectSignIn: ['https://www.raffle-hub.net/'],
           redirectSignOut: ['https://www.raffle-hub.net/'],
           responseType: 'code',
