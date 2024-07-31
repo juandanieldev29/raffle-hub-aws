@@ -1,31 +1,51 @@
 'use client';
 
+import { useEffect, useContext } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { fetchUserAttributes } from 'aws-amplify/auth';
-import { useEffect } from 'react';
+
+import { UserContext } from '@/contexts/user-context';
 
 export default function Avatar() {
+  const [currentUser, setCurrentUser] = useContext(UserContext);
   const { user, signOut } = useAuthenticator((context) => [context.user]);
 
   const fetchCurrentUser = async () => {
-    const user = await fetchUserAttributes();
-    console.log(user);
+    const { email, given_name, family_name, picture } = await fetchUserAttributes();
+    if (!email || !given_name) {
+      console.error('User does not have an email or name');
+      signOut();
+      return;
+    }
+    const name = formatName(given_name, family_name);
+    setCurrentUser({
+      id: user.userId,
+      email,
+      name,
+      photoURL: picture,
+    });
+  };
+
+  const formatName = (givenName: string, familyName: string | undefined) => {
+    if (!familyName) {
+      return givenName;
+    }
+    return `${givenName} ${familyName}`;
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && !currentUser) {
       fetchCurrentUser();
     }
-  }, [user]);
+  }, [user, currentUser]);
+
+  if (!currentUser) {
+    return null;
+  }
 
   return (
     <>
-      <h1 className="text-slate-50 dark:text-slate-400">
-        {user ? user.username : 'User not logged in'}
-      </h1>
-      <button className="text-slate-50 dark:text-slate-400" onClick={signOut}>
-        Sign Out
-      </button>
+      <img src={currentUser.photoURL} className="w-8 h-8 my-auto rounded-full" />
     </>
   );
 }
