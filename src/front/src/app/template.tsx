@@ -6,15 +6,15 @@ import { Amplify, ResourcesConfig } from 'aws-amplify';
 const config: ResourcesConfig = {
   Auth: {
     Cognito: {
-      userPoolId: 'us-west-2_tGFAnJPxy',
-      userPoolClientId: 'fam3rusigd8te742bqrunv28g',
-      identityPoolId: 'us-west-2:5e9f3d98-110e-4613-b3e9-11df304c1366',
+      userPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID!,
+      userPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID!,
+      identityPoolId: process.env.NEXT_PUBLIC_IDENTITY_POOL_ID!,
       loginWith: {
         oauth: {
-          domain: 'raffle-hub.auth.us-west-2.amazoncognito.com',
-          scopes: ['email', 'profile', 'openid', 'aws.cognito.signin.user.admin'],
-          redirectSignIn: ['https://www.raffle-hub.net', 'http://localhost:3000/'],
-          redirectSignOut: ['https://www.raffle-hub.net', 'http://localhost:3000/'],
+          domain: process.env.NEXT_PUBLIC_USER_POOL_DOMAIN_URL!,
+          scopes: ['openid', 'profile', 'email'],
+          redirectSignIn: ['https://www.raffle-hub.net/'],
+          redirectSignOut: ['https://www.raffle-hub.net/'],
           responseType: 'code',
         },
       },

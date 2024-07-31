@@ -2,6 +2,7 @@ import {
   IdentityPool,
   UserPoolAuthenticationProvider,
 } from '@aws-cdk/aws-cognito-identitypool-alpha';
+import { RemovalPolicy } from 'aws-cdk-lib';
 import {
   AccountRecovery,
   ProviderAttribute,
@@ -46,6 +47,7 @@ export class RaffleHubCognito extends Construct {
           mutable: true,
         },
       },
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const userPoolDomain = new UserPoolDomain(this, 'RaffleHubUserPoolDomain', {

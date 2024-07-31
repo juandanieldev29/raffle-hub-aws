@@ -1,4 +1,4 @@
-import { SecretValue, Stack } from 'aws-cdk-lib';
+import { Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { App, GitHubSourceCodeProvider, Platform } from '@aws-cdk/aws-amplify-alpha';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -6,15 +6,31 @@ import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 
 interface HostingStackProps {
   readonly githubTokenSecret: ISecret;
+  readonly userPoolId: string;
+  readonly userPoolClientId: string;
+  readonly identityPoolId: string;
+  readonly userPoolDomainUrl: string;
 }
 
 export class RaffleHubAmplifyHostingStack extends Stack {
   constructor(scope: Construct, id: string, props: HostingStackProps) {
     super(scope, id);
-    this.buildAppStack(props.githubTokenSecret);
+    this.buildAppStack(
+      props.githubTokenSecret,
+      props.userPoolId,
+      props.userPoolClientId,
+      props.identityPoolId,
+      props.userPoolDomainUrl,
+    );
   }
 
-  private buildAppStack(githubTokenSecret: ISecret) {
+  private buildAppStack(
+    githubTokenSecret: ISecret,
+    userPoolId: string,
+    userPoolClientId: string,
+    identityPoolId: string,
+    userPoolDomainUrl: string,
+  ) {
     const amplifyApp = new App(this, 'AmplifyApp', {
       appName: 'raffle-hub',
       sourceCodeProvider: new GitHubSourceCodeProvider({
@@ -26,6 +42,10 @@ export class RaffleHubAmplifyHostingStack extends Stack {
       environmentVariables: {
         AMPLIFY_MONOREPO_APP_ROOT: 'src/front',
         AMPLIFY_DIFF_DEPLOY: 'false',
+        NEXT_PUBLIC_USER_POOL_ID: userPoolId,
+        NEXT_PUBLIC_USER_POOL_CLIENT_ID: userPoolClientId,
+        NEXT_PUBLIC_IDENTITY_POOL_ID: identityPoolId,
+        NEXT_PUBLIC_USER_POOL_DOMAIN_URL: userPoolDomainUrl,
       },
       platform: Platform.WEB_COMPUTE,
       buildSpec: BuildSpec.fromObjectToYaml({
