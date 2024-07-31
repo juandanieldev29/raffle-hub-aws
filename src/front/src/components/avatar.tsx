@@ -3,7 +3,12 @@
 import { useAuthenticator } from '@aws-amplify/ui-react';
 
 export default function Avatar() {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user, route } = useAuthenticator((context) => [context.user, context.route]);
 
-  return <h1>{user ? user.username : ''}</h1>;
+  return (
+    <>
+      <h1>{user ? user.username : 'User not logged in'}</h1>
+      <p>Current route {route}</p>
+    </>
+  );
 }
