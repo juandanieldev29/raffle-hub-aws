@@ -44,6 +44,10 @@ export class AwsMicroservicesStack extends Stack {
     const cognito = new RaffleHubCognito(this, 'Cognito');
     new RaffleHubAmplifyHostingStack(this, 'Amplify', {
       githubTokenSecret: githubTokenSecret,
+      userPoolId: cognito.userPool.userPoolId,
+      userPoolClientId: cognito.userPoolClient.userPoolClientId,
+      identityPoolId: cognito.identityPool.identityPoolId,
+      userPoolDomainUrl: `${cognito.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`,
     });
 
     new CfnOutput(this, 'region', { value: this.region });
