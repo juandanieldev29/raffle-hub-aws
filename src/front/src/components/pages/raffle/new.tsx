@@ -26,7 +26,7 @@ export default function RaffleNew() {
       quantitySeries,
     };
     try {
-      const res = await fetch('/api/raffle', {
+      const res = await fetch('https://api.raffle-hub.net/raffle', {
         headers: {
           'Content-Type': 'application/json',
         },

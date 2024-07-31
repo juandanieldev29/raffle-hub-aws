@@ -1,5 +1,7 @@
 import {
+  AuthorizationType,
   BasePathMapping,
+  CognitoUserPoolsAuthorizer,
   Cors,
   DomainName,
   JsonSchemaType,
@@ -8,14 +10,15 @@ import {
   Model,
   RequestValidator,
 } from 'aws-cdk-lib/aws-apigateway';
+import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 interface RaffleHubApiGatewayProps {
   raffleIndexMicroservice: IFunction;
   raffleNewMicroservice: IFunction;
-  signInMicroservice: IFunction;
   domain: DomainName;
+  userPool: UserPool;
 }
 
 export class RaffleHubApiGateway extends Construct {
@@ -24,16 +27,16 @@ export class RaffleHubApiGateway extends Construct {
     this.createApiGateway(
       props.raffleIndexMicroservice,
       props.raffleNewMicroservice,
-      props.signInMicroservice,
       props.domain,
+      props.userPool,
     );
   }
 
   private createApiGateway(
     raffleIndexMicroservice: IFunction,
     raffleNewMicroservice: IFunction,
-    signInMicroservice: IFunction,
     domain: DomainName,
+    userPool: UserPool,
   ) {
     const apigw = new LambdaRestApi(this, 'RaffleApi', {
       restApiName: 'Raffle Hub Service',
@@ -45,6 +48,10 @@ export class RaffleHubApiGateway extends Construct {
         allowHeaders: Cors.DEFAULT_HEADERS,
         allowCredentials: true,
       },
+    });
+
+    const endpointAuthorizer = new CognitoUserPoolsAuthorizer(this, 'NewRaffleAuthorizer', {
+      cognitoUserPools: [userPool],
     });
 
     const createRaffleModel = new Model(this, 'CreateRaffleValidator', {
@@ -75,6 +82,8 @@ export class RaffleHubApiGateway extends Construct {
     });
     raffle.addMethod('GET', new LambdaIntegration(raffleIndexMicroservice));
     raffle.addMethod('POST', new LambdaIntegration(raffleNewMicroservice), {
+      authorizer: endpointAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
       requestValidator: new RequestValidator(this, 'CreateRaffleBodyValidator', {
         restApi: apigw,
         requestValidatorName: 'CreateRaffleBodyValidator',
@@ -82,39 +91,6 @@ export class RaffleHubApiGateway extends Construct {
       }),
       requestModels: {
         'application/json': createRaffleModel,
-      },
-    });
-
-    const signInModel = new Model(this, 'SigninValidator', {
-      restApi: apigw,
-      contentType: 'application/json',
-      description: 'Validates the request body for signing in',
-      modelName: 'SigninValidator',
-      schema: {
-        type: JsonSchemaType.OBJECT,
-        required: ['code'],
-        properties: {
-          code: { type: JsonSchemaType.STRING, minLength: 1, maxLength: 255 },
-        },
-      },
-    });
-
-    const auth = apigw.root.addResource('auth', {
-      defaultCorsPreflightOptions: {
-        allowOrigins: ['https://www.raffle-hub.net'],
-        allowMethods: Cors.ALL_METHODS,
-        allowHeaders: Cors.DEFAULT_HEADERS,
-        allowCredentials: true,
-      },
-    });
-    auth.addMethod('POST', new LambdaIntegration(signInMicroservice), {
-      requestValidator: new RequestValidator(this, 'SigninBodyValidator', {
-        restApi: apigw,
-        requestValidatorName: 'SigninBodyValidator',
-        validateRequestBody: true,
-      }),
-      requestModels: {
-        'application/json': signInModel,
       },
     });
 
