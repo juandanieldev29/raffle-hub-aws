@@ -82,7 +82,7 @@ export class RaffleHubCognito extends Construct {
           authorizationCodeGrant: true,
         },
         callbackUrls: ['https://www.raffle-hub.net/'],
-        logoutUrls: ['https://www.raffle-hub.net/logout'],
+        logoutUrls: ['https://www.raffle-hub.net/'],
       },
     });
     const identityPool = new IdentityPool(this, 'CognitoAuthPool', {
