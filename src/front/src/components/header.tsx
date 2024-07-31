@@ -1,14 +1,12 @@
 'use client';
-import { useEffect, useState, useContext } from 'react';
-import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
+import { useEffect, useState } from 'react';
+import { Authenticator } from '@aws-amplify/ui-react';
 import Link from 'next/link';
 import classNames from 'classnames';
 
-import { UserContext } from '@/contexts/user-context';
 import Avatar from '@/components/avatar';
 
 export default function Header() {
-  const [currentUser, setCurrentUser] = useContext(UserContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
