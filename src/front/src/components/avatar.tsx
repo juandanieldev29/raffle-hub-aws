@@ -5,7 +5,7 @@ import { fetchUserAttributes } from 'aws-amplify/auth';
 import { useEffect } from 'react';
 
 export default function Avatar() {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user, signOut } = useAuthenticator((context) => [context.user]);
 
   const fetchCurrentUser = async () => {
     const user = await fetchUserAttributes();
@@ -20,7 +20,12 @@ export default function Avatar() {
 
   return (
     <>
-      <h1>{user ? user.username : 'User not logged in'}</h1>
+      <h1 className="text-slate-50 dark:text-slate-400">
+        {user ? user.username : 'User not logged in'}
+      </h1>
+      <button className="text-slate-50 dark:text-slate-400" onClick={signOut}>
+        Sign Out
+      </button>
     </>
   );
 }
