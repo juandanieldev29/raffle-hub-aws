@@ -14,7 +14,7 @@ export default function Avatar() {
 
   useEffect(() => {
     if (user) {
-      fetchCurrentUser;
+      fetchCurrentUser();
     }
   }, [user]);
 
