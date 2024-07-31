@@ -1,5 +1,6 @@
 'use client';
 
+import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { Amplify, ResourcesConfig } from 'aws-amplify';
 
@@ -25,5 +26,5 @@ const config: ResourcesConfig = {
 Amplify.configure(config);
 
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <Authenticator.Provider>{children}</Authenticator.Provider>;
 }

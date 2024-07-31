@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useState, useContext } from 'react';
+import { Authenticator } from '@aws-amplify/ui-react';
 import Link from 'next/link';
 import classNames from 'classnames';
 
 import { UserContext } from '@/contexts/user-context';
+import Avatar from '@/components/avatar';
 
 export default function Header() {
   const [currentUser, setCurrentUser] = useContext(UserContext);
@@ -71,49 +73,52 @@ export default function Header() {
   });
 
   return (
-    <header className="flex justify-between p-2 shadow-md sticky bg-slate-950 z-10">
-      <h1 className="text-3xl md:text-5xl grow text-slate-50 dark:text-slate-400">RaffleHub</h1>
-      {currentUser && <img src={currentUser.photoURL} className="w-8 h-8 my-auto rounded-full" />}
-      <div className="px-2 cursor-pointer text-slate-50 dark:text-slate-400 my-auto">
-        <i className={toggleThemeClass} onClick={toggleDarkMode} />
-      </div>
-      <div
-        className="w-8 h-8 flex flex-col justify-around z-10 cursor-pointer my-auto"
-        onClick={toggleMenu}
-      >
-        <div className={firstBarClass}></div>
-        <div className={middleBarClass}></div>
-        <div className={lastBarClass}></div>
-      </div>
-      <div className={stripContainerClass}>
-        <div className={`${stripClass} left-[0%]`} />
-        <div className={`${stripClass} left-[20%] animation-delay-100`} />
-        <div className={`${stripClass} left-[40%] animation-delay-200`} />
-        <div className={`${stripClass} left-[60%] animation-delay-300`} />
-        <div className={`${stripClass} left-[80%] animation-delay-400`} />
-        <nav className="h-5/6">
-          <ul className={navContainerClass}>
-            <li className="my-4">
-              <Link
-                href="/"
-                onClick={toggleMenu}
-                className="text-4xl transition-all font-thin text-slate-100 dark:text-slate-400 md:hover:font-normal md:hover:border-b"
-              >
-                Rifas
-              </Link>
-            </li>
-            <li className="my-4">
-              <Link
-                href="/raffle/new"
-                onClick={toggleMenu}
-                className="text-4xl transition-all font-thin text-slate-100 dark:text-slate-400 md:hover:font-normal md:hover:border-b"
-              >
-                Crear nueva rifa
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+    <Authenticator.Provider>
+      <header className="flex justify-between p-2 shadow-md sticky bg-slate-950 z-10">
+        <h1 className="text-3xl md:text-5xl grow text-slate-50 dark:text-slate-400">RaffleHub</h1>
+        {/* {currentUser && <img src={currentUser.photoURL} className="w-8 h-8 my-auto rounded-full" />} */}
+        <Avatar />
+        <div className="px-2 cursor-pointer text-slate-50 dark:text-slate-400 my-auto">
+          <i className={toggleThemeClass} onClick={toggleDarkMode} />
+        </div>
+        <div
+          className="w-8 h-8 flex flex-col justify-around z-10 cursor-pointer my-auto"
+          onClick={toggleMenu}
+        >
+          <div className={firstBarClass}></div>
+          <div className={middleBarClass}></div>
+          <div className={lastBarClass}></div>
+        </div>
+        <div className={stripContainerClass}>
+          <div className={`${stripClass} left-[0%]`} />
+          <div className={`${stripClass} left-[20%] animation-delay-100`} />
+          <div className={`${stripClass} left-[40%] animation-delay-200`} />
+          <div className={`${stripClass} left-[60%] animation-delay-300`} />
+          <div className={`${stripClass} left-[80%] animation-delay-400`} />
+          <nav className="h-5/6">
+            <ul className={navContainerClass}>
+              <li className="my-4">
+                <Link
+                  href="/"
+                  onClick={toggleMenu}
+                  className="text-4xl transition-all font-thin text-slate-100 dark:text-slate-400 md:hover:font-normal md:hover:border-b"
+                >
+                  Rifas
+                </Link>
+              </li>
+              <li className="my-4">
+                <Link
+                  href="/raffle/new"
+                  onClick={toggleMenu}
+                  className="text-4xl transition-all font-thin text-slate-100 dark:text-slate-400 md:hover:font-normal md:hover:border-b"
+                >
+                  Crear nueva rifa
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+    </Authenticator.Provider>
   );
 }
