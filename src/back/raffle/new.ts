@@ -48,6 +48,7 @@ export const handler = async (
       id,
       prize,
       quantityNumbers,
+      lastAvailableNumber: quantityNumbers - 1,
       quantitySeries,
       ticketPrice,
       description,
