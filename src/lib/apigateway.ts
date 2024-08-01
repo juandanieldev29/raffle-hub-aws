@@ -17,6 +17,7 @@ import { Construct } from 'constructs';
 interface RaffleHubApiGatewayProps {
   raffleIndexMicroservice: IFunction;
   raffleNewMicroservice: IFunction;
+  raffleShowMicroservice: IFunction;
   domain: DomainName;
   userPool: UserPool;
 }
@@ -27,6 +28,7 @@ export class RaffleHubApiGateway extends Construct {
     this.createApiGateway(
       props.raffleIndexMicroservice,
       props.raffleNewMicroservice,
+      props.raffleShowMicroservice,
       props.domain,
       props.userPool,
     );
@@ -35,6 +37,7 @@ export class RaffleHubApiGateway extends Construct {
   private createApiGateway(
     raffleIndexMicroservice: IFunction,
     raffleNewMicroservice: IFunction,
+    raffleShowMicroservice: IFunction,
     domain: DomainName,
     userPool: UserPool,
   ) {
@@ -93,6 +96,8 @@ export class RaffleHubApiGateway extends Construct {
         'application/json': createRaffleModel,
       },
     });
+    const singleRaffle = raffle.addResource('{id}');
+    singleRaffle.addMethod('GET', new LambdaIntegration(raffleShowMicroservice));
 
     new BasePathMapping(this, 'api-gw-base-path-mapping', {
       domainName: domain,
