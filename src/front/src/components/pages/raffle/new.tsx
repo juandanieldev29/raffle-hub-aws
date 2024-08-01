@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { replacer } from '@/utils';
 
 export default function RaffleNew() {
@@ -26,9 +27,16 @@ export default function RaffleNew() {
       quantitySeries,
     };
     try {
+      const session = await fetchAuthSession();
+      if (!session.tokens?.idToken) {
+        console.error('ID Token not present in the current session');
+        return;
+      }
+      const idToken = session.tokens.idToken.toString();
       const res = await fetch('https://api.raffle-hub.net/raffle', {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
         },
         credentials: 'same-origin',
         cache: 'no-store',
