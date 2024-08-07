@@ -15,15 +15,20 @@ export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
     const cognito = new RaffleHubCognito(this, 'Cognito');
-    const { raffleTable } = new RaffleHubDatabase(this, 'Database');
+    const { raffleTable, ticketTable } = new RaffleHubDatabase(this, 'Database');
 
     const { googleOAuthConfigSecret, githubTokenSecret } = new RaffleHubSecrets(this, 'Secret');
 
-    const { raffleIndexMicroservice, raffleNewMicroservice, raffleShowMicroservice } =
-      new RaffleHubMicroservices(this, 'Microservices', {
-        raffleTable: raffleTable,
-        googleOAuthConfigSecret: googleOAuthConfigSecret,
-      });
+    const {
+      raffleIndexMicroservice,
+      raffleNewMicroservice,
+      raffleShowMicroservice,
+      raffleAvailableNumbersMicroservice,
+    } = new RaffleHubMicroservices(this, 'Microservices', {
+      raffleTable: raffleTable,
+      ticketTable: ticketTable,
+      googleOAuthConfigSecret: googleOAuthConfigSecret,
+    });
 
     const { certificate } = new RaffleHubCertificate(this, 'Certificate');
 
@@ -39,6 +44,7 @@ export class AwsMicroservicesStack extends Stack {
       raffleIndexMicroservice: raffleIndexMicroservice,
       raffleNewMicroservice: raffleNewMicroservice,
       raffleShowMicroservice: raffleShowMicroservice,
+      raffleAvailableNumbersMicroservice: raffleAvailableNumbersMicroservice,
       domain: domain,
       userPool: cognito.userPool,
     });

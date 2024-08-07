@@ -18,6 +18,7 @@ interface RaffleHubApiGatewayProps {
   raffleIndexMicroservice: IFunction;
   raffleNewMicroservice: IFunction;
   raffleShowMicroservice: IFunction;
+  raffleAvailableNumbersMicroservice: IFunction;
   domain: DomainName;
   userPool: UserPool;
 }
@@ -29,6 +30,7 @@ export class RaffleHubApiGateway extends Construct {
       props.raffleIndexMicroservice,
       props.raffleNewMicroservice,
       props.raffleShowMicroservice,
+      props.raffleAvailableNumbersMicroservice,
       props.domain,
       props.userPool,
     );
@@ -38,6 +40,7 @@ export class RaffleHubApiGateway extends Construct {
     raffleIndexMicroservice: IFunction,
     raffleNewMicroservice: IFunction,
     raffleShowMicroservice: IFunction,
+    raffleAvailableNumbersMicroservice: IFunction,
     domain: DomainName,
     userPool: UserPool,
   ) {
@@ -98,6 +101,12 @@ export class RaffleHubApiGateway extends Construct {
     });
     const singleRaffle = raffle.addResource('{id}');
     singleRaffle.addMethod('GET', new LambdaIntegration(raffleShowMicroservice));
+
+    const raffleAvailableNumbers = singleRaffle.addResource('available-numbers');
+    raffleAvailableNumbers.addMethod(
+      'GET',
+      new LambdaIntegration(raffleAvailableNumbersMicroservice),
+    );
 
     new BasePathMapping(this, 'api-gw-base-path-mapping', {
       domainName: domain,
