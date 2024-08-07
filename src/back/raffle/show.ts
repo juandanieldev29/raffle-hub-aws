@@ -1,11 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { AttributeValue, GetItemCommand, GetItemCommandInput } from '@aws-sdk/client-dynamodb';
-import {
-  marshall,
-  NativeAttributeValue,
-  NativeScalarAttributeValue,
-  unmarshall,
-} from '@aws-sdk/util-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
 

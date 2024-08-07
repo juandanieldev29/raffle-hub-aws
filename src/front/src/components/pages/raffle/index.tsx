@@ -1,25 +1,22 @@
 'use client';
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import RaffleCard from '@/components/raffle/raffle-card';
 import Pagination from '@/components/pagination';
 import { IRaffle } from '@/types/raffle';
 import { RafflesPaginationResult } from '@/types/pagination';
 
 import { INITIAL_PAGE, INITIAL_PAGE_SIZE } from '@/utils/constants';
-import { UserContext } from '@/contexts/user-context';
 
 interface RaffleListProps {
   rafflesPaginated: RafflesPaginationResult;
 }
 
 export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
-  const [_, setCurrentUser] = useContext(UserContext);
-
-  const [pageSize, setPageSize] = useState(INITIAL_PAGE_SIZE);
+  const [pageSize] = useState(INITIAL_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(INITIAL_PAGE);
-  const [rafflesMetadata, setRafflesMetadata] = useState<
-    RafflesPaginationResult['metadata'] | null
-  >(rafflesPaginated.metadata);
+  const [rafflesMetadata] = useState<RafflesPaginationResult['metadata'] | null>(
+    rafflesPaginated.metadata,
+  );
   const [localRaffles, setLocalRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
   const pageInitiallyRendered = useRef(false);
 

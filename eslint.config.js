@@ -21,7 +21,7 @@ export default [
     'plugin:prettier/recommended',
   ),
   {
-    ignores: ['**/cdk.out'],
+    ignores: ['**/cdk.out', '**/.next', '**/tailwind.config.ts'],
   },
   {
     plugins: {
