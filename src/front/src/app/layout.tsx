@@ -3,7 +3,9 @@ import Script from 'next/script';
 import { Inter } from 'next/font/google';
 
 import Header from '@/components/header';
+import Spinner from '@/components/spinner';
 import UserContextProvider from '@/contexts/user-context';
+import LoadingContextProvider from '@/contexts/loading-context';
 
 import '@/app/globals.css';
 
@@ -22,10 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-slate-100 dark:bg-slate-700`}>
-        <UserContextProvider>
-          <Header />
-          {children}
-        </UserContextProvider>
+        <LoadingContextProvider>
+          <Spinner />
+          <UserContextProvider>
+            <Header />
+            {children}
+          </UserContextProvider>
+        </LoadingContextProvider>
         <Script src="https://kit.fontawesome.com/ecb1fa5ff2.js" crossOrigin="anonymous" />
       </body>
     </html>
