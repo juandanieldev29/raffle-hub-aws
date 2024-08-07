@@ -16,19 +16,25 @@ export default function Avatar() {
   const { authStatus } = useAuthenticator((context) => [context.authStatus]);
 
   const fetchCurrentUser = async () => {
-    const { email, given_name, family_name, picture } = await fetchUserAttributes();
-    if (!email || !given_name) {
-      console.error('User does not have an email or name');
-      signOut();
-      return;
+    try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
+      const { email, given_name, family_name, picture } = await fetchUserAttributes();
+      if (!email || !given_name) {
+        console.error('User does not have an email or name');
+        signOut();
+        return;
+      }
+      const name = formatName(given_name, family_name);
+      setCurrentUser({
+        id: user.userId,
+        email,
+        name,
+        photoURL: picture,
+      });
+    } catch (err) {
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
     }
-    const name = formatName(given_name, family_name);
-    setCurrentUser({
-      id: user.userId,
-      email,
-      name,
-      photoURL: picture,
-    });
   };
 
   const formatName = (givenName: string, familyName: string | undefined) => {
