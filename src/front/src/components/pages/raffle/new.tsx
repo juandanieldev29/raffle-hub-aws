@@ -1,10 +1,16 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { fetchAuthSession } from '@aws-amplify/auth';
+
 import { replacer } from '@/utils';
+import { LoadingContext } from '@/contexts/loading-context';
+import { LoadingAction } from '@/enums/loading-action';
+import { navigateToRaffleDetail, navigateToHome } from '@/app/actions';
+import { IRaffle } from '@/types/raffle';
 
 export default function RaffleNew() {
+  const { dispatch } = useContext(LoadingContext);
   const [description, setDescription] = useState<string | null>(null);
   const [prize, setPrize] = useState<number | null>(null);
   const [ticketPrice, setTicketPrice] = useState<number | null>(null);
@@ -27,6 +33,7 @@ export default function RaffleNew() {
       quantitySeries,
     };
     try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const session = await fetchAuthSession();
       if (!session.tokens?.idToken) {
         console.error('ID Token not present in the current session');
@@ -43,10 +50,17 @@ export default function RaffleNew() {
         method: 'POST',
         body: JSON.stringify(payload, replacer),
       });
-      await res.json();
+      const raffle: IRaffle = await res.json();
+      await navigateToRaffleDetail(raffle.id);
     } catch (err) {
       console.log(err);
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
     }
+  };
+
+  const cancel = async (): Promise<void> => {
+    await navigateToHome();
   };
 
   useEffect(() => {
@@ -191,6 +205,7 @@ export default function RaffleNew() {
           <button
             type="button"
             className="p-2 mt-4 transition-transform rounded md:hover:scale-105 bg-yellow-300 dark:bg-blue-900 text-slate-900 dark:text-slate-200"
+            onClick={cancel}
           >
             Cancel
           </button>
