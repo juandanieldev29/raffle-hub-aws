@@ -10,7 +10,12 @@ interface PaginationProps {
   activePage: number;
 }
 
-const Pagination = ({ totalResuls, pageSize = 10, setPage, activePage }: PaginationProps) => {
+export default function Pagination({
+  totalResuls,
+  pageSize = 10,
+  setPage,
+  activePage,
+}: PaginationProps) {
   const [pages, setPages] = useState<Array<number>>([]);
 
   useEffect(() => {
@@ -91,6 +96,4 @@ const Pagination = ({ totalResuls, pageSize = 10, setPage, activePage }: Paginat
       </div>
     </div>
   );
-};
-
-export default Pagination;
+}

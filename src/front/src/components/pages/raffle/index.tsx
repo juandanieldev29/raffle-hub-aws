@@ -29,8 +29,6 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     );
     const data = await res.json();
     setLocalRaffles(data);
-    // setRafflesMetadata(data.metadata);
-    // setLocalRaffles(data.raffles);
   };
 
   useEffect(() => {
