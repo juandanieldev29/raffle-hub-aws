@@ -17,7 +17,7 @@ export class AwsMicroservicesStack extends Stack {
     const cognito = new RaffleHubCognito(this, 'Cognito');
     const { raffleTable, ticketTable } = new RaffleHubDatabase(this, 'Database');
 
-    const { googleOAuthConfigSecret, githubTokenSecret } = new RaffleHubSecrets(this, 'Secret');
+    const { githubTokenSecret } = new RaffleHubSecrets(this, 'Secret');
 
     const {
       raffleIndexMicroservice,
@@ -27,7 +27,6 @@ export class AwsMicroservicesStack extends Stack {
     } = new RaffleHubMicroservices(this, 'Microservices', {
       raffleTable: raffleTable,
       ticketTable: ticketTable,
-      googleOAuthConfigSecret: googleOAuthConfigSecret,
     });
 
     const { certificate } = new RaffleHubCertificate(this, 'Certificate');

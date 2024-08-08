@@ -49,7 +49,7 @@ export default function RaffleCard({
       <p className="text-sm font-extralight md:col-start-3 font-medium">{raffle.owner.name}</p>
       {includeLinkToDetails && (
         <Link href={`/raffle/${raffle.id}`}>
-          <button className="p-2 mt-4 transition-transform rounded md:hover:scale-105 bg-blue-700 dark:bg-blue-900 text-slate-50 dark:text-slate-200">
+          <button className="p-2 mt-4 transition-transform rounded transition-colors bg-blue-700 hover:bg-blue-900 dark:hover:bg-blue-800 dark:bg-blue-900 text-slate-50 dark:text-slate-200">
             Ver detalles
           </button>
         </Link>

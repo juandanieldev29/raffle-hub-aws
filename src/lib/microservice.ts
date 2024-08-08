@@ -2,14 +2,12 @@ import { Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { join } from 'path';
 
 interface RaffleHubMicroservicesProps {
   raffleTable: ITable;
   ticketTable: ITable;
-  googleOAuthConfigSecret: ISecret;
 }
 
 export class RaffleHubMicroservices extends Construct {

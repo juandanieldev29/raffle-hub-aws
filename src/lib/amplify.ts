@@ -46,6 +46,8 @@ export class RaffleHubAmplifyHostingStack extends Stack {
         NEXT_PUBLIC_USER_POOL_CLIENT_ID: userPoolClientId,
         NEXT_PUBLIC_IDENTITY_POOL_ID: identityPoolId,
         NEXT_PUBLIC_USER_POOL_DOMAIN_URL: userPoolDomainUrl,
+        NEXT_PUBLIC_STRIPE_PUBLIC_KEY:
+          'pk_test_51PLuDe2N0fiS7hVtr7iDwK8NTJryJUHorhdbEVzwspr4dLhD6xE5USymlcEvpfRFIPDttg37txO2S32ZT8cuODvu00Z46vMLQS',
       },
       platform: Platform.WEB_COMPUTE,
       buildSpec: BuildSpec.fromObjectToYaml({
