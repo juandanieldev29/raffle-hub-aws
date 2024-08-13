@@ -17,7 +17,7 @@ export default function RaffleCard({
   return (
     <div
       className={classNames(
-        'w-11/12 mx-auto bg-slate-50 dark:bg-slate-900 p-4 mb-4 rounded-2xl transition-transform grid md:grid-cols-3 md:grid-rows-6 md:gap-x-8 gap-2 shadow-lg',
+        'w-11/12 mx-auto bg-slate-50 dark:bg-slate-900 p-4 mb-4 rounded-2xl transition-transform grid md:grid-cols-3 grid-rows-6 md:gap-x-8 gap-2 shadow-lg',
         {
           'md:hover:scale-[1.01]': !disableAnimations,
         },
@@ -25,7 +25,7 @@ export default function RaffleCard({
     >
       <h2
         title={raffle.description}
-        className="title text-3xl line-clamp-3 text-wrap md:col-span-2 md:row-span-3 font-semibold"
+        className="title text-2xl md:text-3xl line-clamp-3 text-wrap md:col-span-2 row-span-3 font-semibold"
       >
         {raffle.description}
       </h2>
@@ -48,8 +48,11 @@ export default function RaffleCard({
       <p className="md:col-start-3 font-semibold">Creado por</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium">{raffle.owner.name}</p>
       {includeLinkToDetails && (
-        <Link href={`/raffle/${raffle.id}`}>
-          <button className="p-2 mt-4 transition-transform rounded transition-colors bg-blue-700 hover:bg-blue-900 dark:hover:bg-blue-800 dark:bg-blue-900 text-slate-50 dark:text-slate-200">
+        <Link
+          href={`/raffle/${raffle.id}`}
+          className="md:col-start-1 md:row-start-9 md:row-span-2 md:self-end"
+        >
+          <button className="p-2 transition-transform rounded transition-colors bg-blue-700 hover:bg-blue-900 dark:hover:bg-blue-800 dark:bg-blue-900 text-slate-50 dark:text-slate-200">
             Ver detalles
           </button>
         </Link>
