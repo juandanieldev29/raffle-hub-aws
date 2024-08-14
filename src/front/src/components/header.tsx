@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import Link from 'next/link';

@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import classNames from 'classnames';
 import { IRaffle } from '@/types/raffle';
@@ -14,6 +17,16 @@ export default function RaffleCard({
   includeLinkToDetails = false,
   disableAnimations = true,
 }: RaffleCardProps) {
+  const [ticketPrice, setTicketPrice] = useState<string | null>(null);
+  const [prize, setPrize] = useState<string | null>(null);
+  const [createdAt, setCreatedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTicketPrice(formatNumber(raffle.ticketPrice));
+    setPrize(formatNumber(raffle.prize));
+    setCreatedAt(formatDate(raffle.createdAt));
+  }, [raffle]);
+
   return (
     <div
       className={classNames(
@@ -31,11 +44,11 @@ export default function RaffleCard({
       </h2>
       <p className="md:col-start-3 font-semibold">Precio del número</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium" suppressHydrationWarning>
-        {formatNumber(raffle.ticketPrice)}
+        {ticketPrice}
       </p>
       <p className="md:col-start-3 font-semibold">Premio</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium" suppressHydrationWarning>
-        {formatNumber(raffle.prize)}
+        {prize}
       </p>
       <p className="md:col-start-3 font-semibold">Números disponibles</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium">
@@ -43,7 +56,7 @@ export default function RaffleCard({
       </p>
       <p className="md:col-start-3 font-semibold">Fecha de creación</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium" suppressHydrationWarning>
-        {formatDate(raffle.createdAt)}
+        {createdAt}
       </p>
       <p className="md:col-start-3 font-semibold">Creado por</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium">{raffle.owner.name}</p>

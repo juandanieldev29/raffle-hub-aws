@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState, useRef } from 'react';
 import RaffleCard from '@/components/raffle/raffle-card';
 import Pagination from '@/components/pagination';
