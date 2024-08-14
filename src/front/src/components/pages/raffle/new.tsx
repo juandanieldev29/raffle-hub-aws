@@ -1,4 +1,5 @@
 'use client';
+
 import { useContext, useEffect, useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { fetchAuthSession } from '@aws-amplify/auth';
