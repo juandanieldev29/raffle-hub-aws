@@ -67,9 +67,5 @@ export default function Avatar() {
     return null;
   }
 
-  return (
-    <>
-      <img src={currentUser.photoURL} className="w-8 h-8 my-auto rounded-full" />
-    </>
-  );
+  return <img src={currentUser.photoURL} className="w-8 h-8 my-auto rounded-full mx-2" />;
 }

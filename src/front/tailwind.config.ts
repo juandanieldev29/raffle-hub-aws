@@ -18,10 +18,15 @@ const config: Config = {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
       },
       animation: {
         slideIn: 'slideIn 1s forwards',
         shimmer: 'shimmer 1.5s infinite',
+        spin: 'spin .75s linear infinite',
       },
     },
   },
