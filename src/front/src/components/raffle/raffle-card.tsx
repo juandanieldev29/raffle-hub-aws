@@ -17,7 +17,7 @@ export default function RaffleCard({
   return (
     <div
       className={classNames(
-        'w-11/12 mx-auto bg-slate-50 dark:bg-slate-900 p-4 mb-4 rounded-2xl transition-transform grid md:grid-cols-3 grid-rows-6 md:gap-x-8 gap-2 shadow-lg',
+        'w-11/12 mx-auto secondary-background-color p-4 mb-4 rounded-2xl transition-transform grid md:grid-cols-3 grid-rows-6 md:gap-x-8 gap-2 shadow-lg',
         {
           'md:hover:scale-[1.01]': !disableAnimations,
         },
@@ -52,7 +52,7 @@ export default function RaffleCard({
           href={`/raffle/${raffle.id}`}
           className="md:col-start-1 md:row-start-9 md:row-span-2 md:self-end"
         >
-          <button className="p-2 transition-transform rounded transition-colors bg-blue-700 hover:bg-blue-900 dark:hover:bg-blue-800 dark:bg-blue-900 text-slate-50 dark:text-slate-200">
+          <button className="p-2 transition-transform rounded transition-colors primary-button-colors">
             Ver detalles
           </button>
         </Link>

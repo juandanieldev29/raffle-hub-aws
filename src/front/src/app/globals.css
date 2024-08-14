@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .skeleton-animation {
+    @apply bg-[length:200%_100%] animate-shimmer bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700;
+  }
+  .default-background-color {
+    @apply bg-slate-100 dark:bg-slate-700;
+  }
+  .default-color-text {
+    @apply text-slate-700 dark:text-slate-200;
+  }
+  .secondary-background-color {
+    @apply bg-slate-50 dark:bg-slate-900;
+  }
+  .primary-button-colors {
+    @apply bg-blue-700 hover:bg-blue-900 dark:hover:bg-blue-800 dark:bg-blue-900 text-slate-50 dark:text-slate-200;
+  }
+  .secondary-button-colors {
+    @apply bg-white text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
+  }
+}
+
 .spinner {
   display: flex;
   justify-content: center;
@@ -27,20 +48,4 @@
 @keyframes spinner-border {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-.skeleton-image, .skeleton-line {
-  background: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Shimmer Animation */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
 }

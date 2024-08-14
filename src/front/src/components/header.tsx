@@ -73,7 +73,7 @@ export default function Header() {
   return (
     <Authenticator.Provider>
       <header className="flex justify-between p-2 shadow-md sticky bg-slate-950 z-10">
-        <h1 className="text-3xl md:text-5xl grow text-slate-50 dark:text-slate-400">RaffleHub</h1>
+        <h1 className="text-3xl md:text-5xl grow text-slate-50">RaffleHub</h1>
         <Avatar />
         <div className="px-2 cursor-pointer text-slate-50 dark:text-slate-400 my-auto">
           <i className={toggleThemeClass} onClick={toggleDarkMode} />

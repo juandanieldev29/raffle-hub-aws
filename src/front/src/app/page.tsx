@@ -14,7 +14,7 @@ export default async function Home() {
   const rafflesPaginated = await res.json();
 
   return (
-    <main className="mt-8 text-slate-700 dark:text-slate-200">
+    <main className="mt-8">
       <RaffleList
         rafflesPaginated={{
           raffles: rafflesPaginated,
