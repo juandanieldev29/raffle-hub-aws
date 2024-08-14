@@ -20,7 +20,7 @@ export default async function RaffleShowPage({ params }: { params: { raffleId: s
   ]);
 
   return (
-    <main className="mt-8 text-slate-700 dark:text-slate-200">
+    <main className="mt-8">
       <RaffleDetail raffle={raffle} availableNumbers={raffleAvailableNumbers} />
     </main>
   );

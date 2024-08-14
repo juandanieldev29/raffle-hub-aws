@@ -204,14 +204,14 @@ export default function RaffleNew() {
         <div className="mt-6 flex items-center justify-end gap-x-6">
           <button
             type="button"
-            className="rounded-md px-3 py-2 text-sm bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            className="rounded-md px-3 py-2 text-sm shadow-sm secondary-button-colors"
             onClick={cancel}
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="rounded-md px-3 py-2 text-sm shadow-sm transition-colors bg-blue-700 hover:bg-blue-900 dark:hover:bg-blue-800 dark:bg-blue-900 text-slate-50 dark:text-slate-200"
+            className="rounded-md px-3 py-2 text-sm shadow-sm transition-colors primary-button-colors"
           >
             Guardar
           </button>

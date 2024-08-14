@@ -21,7 +21,7 @@ export default function PaymentModal({ onClose, title }: ModalProps) {
       />
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto ">
         <div className="flex min-h-full items-center justify-center p-4 text-center">
-          <div className="relative transform rounded-lg bg-slate-50 dark:bg-slate-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+          <div className="relative transform rounded-lg secondary-background-color text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
             <div className="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -34,7 +34,7 @@ export default function PaymentModal({ onClose, title }: ModalProps) {
             <div className="px-4 py-3 flex justify-around md:justify-end">
               <button
                 type="button"
-                className="md:mr-4 rounded-md px-3 py-2 text-sm bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="md:mr-4 rounded-md px-3 py-2 text-sm shadow-sm secondary-button-colors"
                 onClick={cancel}
               >
                 Cancelar
@@ -47,7 +47,7 @@ export default function PaymentModal({ onClose, title }: ModalProps) {
               >
                 <button
                   type="button"
-                  className="rounded-md px-3 py-2 text-sm shadow-sm bg-blue-700 hover:bg-blue-900 dark:hover:bg-blue-800 dark:bg-blue-900 text-slate-50 dark:text-slate-200"
+                  className="rounded-md px-3 py-2 text-sm shadow-sm primary-button-colors"
                 >
                   Confirmar
                 </button>

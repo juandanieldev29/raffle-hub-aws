@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-100 dark:bg-slate-700`}>
+      <body className={`${inter.className} default-background-color default-color-text`}>
         <LoadingContextProvider>
           <Spinner />
           <UserContextProvider>

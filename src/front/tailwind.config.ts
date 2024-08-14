@@ -14,9 +14,14 @@ const config: Config = {
           '0%': { transform: 'translateY(-100%)' },
           '100%': { transform: 'translateY(0%)' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
       },
       animation: {
         slideIn: 'slideIn 1s forwards',
+        shimmer: 'shimmer 1.5s infinite',
       },
     },
   },
