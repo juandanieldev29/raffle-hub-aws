@@ -1,22 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import RaffleCard from '@/components/raffle/raffle-card';
 import { IRaffle } from '@/types/raffle';
 import { RafflesPaginationResult } from '@/types/pagination';
 
 import { INITIAL_LIMIT } from '@/utils/constants';
+import { LoadingContext } from '@/contexts/loading-context';
+import { LoadingAction } from '@/enums/loading-action';
 
 interface RaffleListProps {
   rafflesPaginated: RafflesPaginationResult;
 }
 
 export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
+  const { dispatch } = useContext(LoadingContext);
   const [limit] = useState(INITIAL_LIMIT);
   const [previousExclusiveStartKey, setPreviousExclusiveStartKey] =
     useState<RafflesPaginationResult['lastEvaluatedKey']>(null);
   const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
   const [raffles, setRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
+  const [displayPaginationControls, setDisplayPaginationControls] = useState(false);
 
   const prepareURLParams = (
     urlSearchParams: URLSearchParams,
@@ -35,6 +39,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
 
     try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const res = await fetch(`https://api.raffle-hub.net/raffle?${urlSearchParams.toString()}`, {
         cache: 'no-store',
       });
@@ -46,6 +51,8 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
     }
   };
 
@@ -56,6 +63,10 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   const fetchPreviousPageRaffles = async () => {
     fetchRaffles(previousExclusiveStartKey);
   };
+
+  useEffect(() => {
+    setDisplayPaginationControls(Boolean(exclusiveStartKey) || Boolean(previousExclusiveStartKey));
+  }, [exclusiveStartKey, previousExclusiveStartKey]);
 
   return (
     <>
@@ -69,7 +80,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
           />
         );
       })}
-      {exclusiveStartKey && (
+      {displayPaginationControls && (
         <>
           <button
             className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
