@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Inter } from 'next/font/google';
-import { Suspense } from 'react';
 
 import Header from '@/components/header';
 import Spinner from '@/components/spinner';
@@ -26,9 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} default-background-color default-color-text`}>
         <LoadingContextProvider>
-          <Suspense fallback={null}>
-            <Spinner />
-          </Suspense>
+          <Spinner />
           <UserContextProvider>
             <Header />
             {children}

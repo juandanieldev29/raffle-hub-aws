@@ -1,24 +1,10 @@
 'use client';
 
-import { useContext, useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useContext } from 'react';
 import { LoadingContext } from '@/contexts/loading-context';
-import { LoadingAction } from '@/enums/loading-action';
 
 export default function Spinner() {
-  const { state, dispatch } = useContext(LoadingContext);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const handleStart = () => dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
-    const handleStop = () => dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
-    handleStop();
-
-    return () => {
-      handleStart();
-    };
-  }, [pathname, searchParams]);
+  const { state } = useContext(LoadingContext);
 
   if (state.httpRequestsCount <= 0) return null;
 
