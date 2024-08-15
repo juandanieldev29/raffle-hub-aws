@@ -10,7 +10,7 @@ type LoadingAction =
   | { type: 'INCREASE_HTTP_REQUEST_COUNT' }
   | { type: 'DECREASE_HTTP_REQUEST_COUNT' };
 
-const initialState: LoadingState = { httpRequestsCount: -1 };
+const initialState: LoadingState = { httpRequestsCount: 0 };
 
 const loadingReducer = (state: LoadingState, action: LoadingAction): LoadingState => {
   switch (action.type) {
