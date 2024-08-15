@@ -67,7 +67,7 @@ export const handler = async (
       body: JSON.stringify(raffle),
       headers: {
         'Access-Control-Allow-Credentials': true,
-        'Access-Control-Allow-Origin': 'https://www.raffle-hub.net',
+        'Access-Control-Allow-Origin': 'https://raffle-hub.net',
         'Access-Control-Allow-Methods': '*',
         'Access-Control-Allow-Headers': '*',
       },

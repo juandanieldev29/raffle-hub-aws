@@ -81,8 +81,8 @@ export class RaffleHubCognito extends Construct {
         flows: {
           authorizationCodeGrant: true,
         },
-        callbackUrls: ['https://www.raffle-hub.net/'],
-        logoutUrls: ['https://www.raffle-hub.net/'],
+        callbackUrls: ['https://raffle-hub.net/'],
+        logoutUrls: ['https://raffle-hub.net/'],
       },
     });
     const identityPool = new IdentityPool(this, 'CognitoAuthPool', {

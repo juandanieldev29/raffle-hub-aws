@@ -49,7 +49,7 @@ export class RaffleHubApiGateway extends Construct {
       handler: raffleIndexMicroservice,
       proxy: false,
       defaultCorsPreflightOptions: {
-        allowOrigins: ['https://www.raffle-hub.net'],
+        allowOrigins: ['https://raffle-hub.net'],
         allowMethods: Cors.ALL_METHODS,
         allowHeaders: Cors.DEFAULT_HEADERS,
         allowCredentials: true,
@@ -80,7 +80,7 @@ export class RaffleHubApiGateway extends Construct {
 
     const raffle = apigw.root.addResource('raffle', {
       defaultCorsPreflightOptions: {
-        allowOrigins: ['https://www.raffle-hub.net'],
+        allowOrigins: ['https://raffle-hub.net'],
         allowMethods: Cors.ALL_METHODS,
         allowHeaders: Cors.DEFAULT_HEADERS,
         allowCredentials: true,
