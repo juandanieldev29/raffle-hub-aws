@@ -1,6 +1,11 @@
 import { Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { App, GitHubSourceCodeProvider, Platform } from '@aws-cdk/aws-amplify-alpha';
+import {
+  App,
+  GitHubSourceCodeProvider,
+  Platform,
+  RedirectStatus,
+} from '@aws-cdk/aws-amplify-alpha';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 
@@ -32,6 +37,13 @@ export class RaffleHubAmplifyHostingStack extends Stack {
     userPoolDomainUrl: string,
   ) {
     const amplifyApp = new App(this, 'AmplifyApp', {
+      customRules: [
+        {
+          source: 'https://www.raffle-hub.net',
+          target: 'https://raffle-hub.net',
+          status: RedirectStatus.REWRITE,
+        },
+      ],
       appName: 'raffle-hub',
       sourceCodeProvider: new GitHubSourceCodeProvider({
         owner: 'juandanieldev29',
