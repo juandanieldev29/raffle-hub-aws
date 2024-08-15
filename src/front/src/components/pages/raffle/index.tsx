@@ -84,6 +84,10 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   };
 
   useEffect(() => {
+    setPaginationHistory([rafflesPaginated.lastEvaluatedKey]);
+  }, [rafflesPaginated.lastEvaluatedKey]);
+
+  useEffect(() => {
     setDisplayPaginationControls(Boolean(exclusiveStartKey) || Boolean(paginationHistory.length));
   }, [exclusiveStartKey, paginationHistory]);
 
