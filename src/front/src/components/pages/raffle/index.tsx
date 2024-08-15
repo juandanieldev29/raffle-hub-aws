@@ -1,48 +1,65 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useState } from 'react';
 import RaffleCard from '@/components/raffle/raffle-card';
-import Pagination from '@/components/pagination';
 import { IRaffle } from '@/types/raffle';
 import { RafflesPaginationResult } from '@/types/pagination';
 
-import { INITIAL_PAGE, INITIAL_PAGE_SIZE } from '@/utils/constants';
+import { INITIAL_LIMIT } from '@/utils/constants';
 
 interface RaffleListProps {
   rafflesPaginated: RafflesPaginationResult;
 }
 
 export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
-  const [pageSize] = useState(INITIAL_PAGE_SIZE);
-  const [currentPage, setCurrentPage] = useState(INITIAL_PAGE);
-  const [rafflesMetadata] = useState<RafflesPaginationResult['metadata'] | null>(
-    rafflesPaginated.metadata,
-  );
-  const [localRaffles, setLocalRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
-  const pageInitiallyRendered = useRef(false);
+  const [limit] = useState(INITIAL_LIMIT);
+  const [previousExclusiveStartKey, setPreviousExclusiveStartKey] =
+    useState<RafflesPaginationResult['lastEvaluatedKey']>(null);
+  const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
+  const [raffles, setRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
 
-  const fetchRaffles = async () => {
-    const res = await fetch(
-      `https://api.raffle-hub.net/raffle?page=${currentPage}&pageSize=${pageSize}`,
-      {
-        cache: 'no-store',
-      },
-    );
-    const data = await res.json();
-    setLocalRaffles(data);
+  const prepareURLParams = (
+    urlSearchParams: URLSearchParams,
+    key: string,
+    value: string | number | null | undefined,
+  ) => {
+    const newURLSearchParams = urlSearchParams;
+    if (value === undefined || value === null || value === '') return newURLSearchParams;
+    newURLSearchParams.set(key, value.toString());
+    return newURLSearchParams;
   };
 
-  useEffect(() => {
-    if (pageInitiallyRendered.current) {
-      fetchRaffles();
-      return;
+  const fetchRaffles = async (exclusiveStartKey: RafflesPaginationResult['lastEvaluatedKey']) => {
+    let urlSearchParams = new URLSearchParams();
+    urlSearchParams = prepareURLParams(urlSearchParams, 'limit', limit);
+    urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
+
+    try {
+      const res = await fetch(`https://api.raffle-hub.net/raffle?${urlSearchParams.toString()}`, {
+        cache: 'no-store',
+      });
+      const { raffles, lastEvaluatedKey }: RafflesPaginationResult = await res.json();
+      if (raffles.length) {
+        setPreviousExclusiveStartKey(exclusiveStartKey);
+        setExclusiveStartKey(lastEvaluatedKey);
+        setRaffles(raffles);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    pageInitiallyRendered.current = true;
-  }, [currentPage, pageSize]);
+  };
+
+  const fetchNextPageRaffles = async () => {
+    fetchRaffles(exclusiveStartKey);
+  };
+
+  const fetchPreviousPageRaffles = async () => {
+    fetchRaffles(previousExclusiveStartKey);
+  };
 
   return (
     <>
-      {localRaffles.map((raffle) => {
+      {raffles.map((raffle) => {
         return (
           <RaffleCard
             key={raffle.id}
@@ -52,13 +69,48 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
           />
         );
       })}
-      {rafflesMetadata && (
-        <Pagination
-          totalResuls={rafflesMetadata?.count}
-          pageSize={pageSize}
-          setPage={setCurrentPage}
-          activePage={currentPage}
-        />
+      {exclusiveStartKey && (
+        <>
+          <button
+            className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
+            // disabled={previousExclusiveStartKey === null}
+            onClick={fetchPreviousPageRaffles}
+          >
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+              data-slot="icon"
+            >
+              <path
+                fillRule="evenodd"
+                d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
+            disabled={exclusiveStartKey === null}
+            onClick={fetchNextPageRaffles}
+          >
+            <span className="sr-only">Next</span>
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+              data-slot="icon"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </>
       )}
     </>
   );

@@ -1,8 +1,6 @@
 import { IRaffle } from '@/types/raffle';
 
 export interface RafflesPaginationResult {
-  metadata: {
-    count: number;
-  };
+  lastEvaluatedKey: { id: string } | null;
   raffles: IRaffle[];
 }
