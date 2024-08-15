@@ -16,12 +16,12 @@ interface RaffleListProps {
 export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   const { dispatch } = useContext(LoadingContext);
   const [limit] = useState(INITIAL_LIMIT);
-  const [previousExclusiveStartKey, setPreviousExclusiveStartKey] =
-    useState<RafflesPaginationResult['lastEvaluatedKey']>(null);
   const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
   const [raffles, setRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
   const [displayPaginationControls, setDisplayPaginationControls] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [paginationHistory, setPaginationHistory] = useState<
+    Array<RafflesPaginationResult['lastEvaluatedKey']>
+  >([]);
 
   const prepareURLParams = (
     urlSearchParams: URLSearchParams,
@@ -38,14 +38,9 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     exclusiveStartKey: RafflesPaginationResult['lastEvaluatedKey'],
     previousPage = false,
   ) => {
-    const goBackToInitialPage = shouldGoBackToInitialPage() && previousPage;
     let urlSearchParams = new URLSearchParams();
     urlSearchParams = prepareURLParams(urlSearchParams, 'limit', limit);
-    urlSearchParams = prepareURLParams(
-      urlSearchParams,
-      'exclusiveStartKey',
-      goBackToInitialPage ? null : exclusiveStartKey?.id,
-    );
+    urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
 
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
@@ -54,9 +49,11 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
       });
       const { raffles, lastEvaluatedKey }: RafflesPaginationResult = await res.json();
       if (raffles.length) {
-        setPreviousExclusiveStartKey(exclusiveStartKey);
         setExclusiveStartKey(lastEvaluatedKey);
         setRaffles(raffles);
+      }
+      if (lastEvaluatedKey && !previousPage) {
+        setPaginationHistory([...paginationHistory, lastEvaluatedKey]);
       }
     } catch (err) {
       console.log(err);
@@ -65,23 +62,30 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     }
   };
 
-  const shouldGoBackToInitialPage = () => {
-    return currentPage <= 2;
-  };
-
   const fetchNextPageRaffles = async () => {
     fetchRaffles(exclusiveStartKey);
-    setCurrentPage(currentPage + 1);
+  };
+
+  const getPreviousPaginationHistory = (): RafflesPaginationResult['lastEvaluatedKey'] | null => {
+    let history = [...paginationHistory];
+    if (history.length <= 1) {
+      history = [];
+      setPaginationHistory(history);
+      return null;
+    }
+    const previousExclusiveStartKey = history.pop();
+    setPaginationHistory(history);
+    return previousExclusiveStartKey ?? null;
   };
 
   const fetchPreviousPageRaffles = async () => {
+    const previousExclusiveStartKey = getPreviousPaginationHistory();
     fetchRaffles(previousExclusiveStartKey, true);
-    setCurrentPage(currentPage - 1);
   };
 
   useEffect(() => {
-    setDisplayPaginationControls(Boolean(exclusiveStartKey) || Boolean(previousExclusiveStartKey));
-  }, [exclusiveStartKey, previousExclusiveStartKey]);
+    setDisplayPaginationControls(Boolean(exclusiveStartKey) || Boolean(paginationHistory.length));
+  }, [exclusiveStartKey, paginationHistory]);
 
   return (
     <>
@@ -99,7 +103,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
         <>
           <button
             className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
-            // disabled={previousExclusiveStartKey === null}
+            disabled={!Boolean(paginationHistory.length)}
             onClick={fetchPreviousPageRaffles}
           >
             <svg
