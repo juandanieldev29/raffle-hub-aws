@@ -18,7 +18,6 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   const [limit] = useState(INITIAL_LIMIT);
   const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
   const [raffles, setRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
-  const [displayPaginationControls, setDisplayPaginationControls] = useState(false);
   const [paginationHistory, setPaginationHistory] = useState<
     Array<RafflesPaginationResult['lastEvaluatedKey']>
   >([]);
@@ -41,7 +40,6 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     let urlSearchParams = new URLSearchParams();
     urlSearchParams = prepareURLParams(urlSearchParams, 'limit', limit);
     urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
-
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const res = await fetch(`https://api.raffle-hub.net/raffle?${urlSearchParams.toString()}`, {
@@ -52,7 +50,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
         setExclusiveStartKey(lastEvaluatedKey);
         setRaffles(raffles);
       }
-      if (lastEvaluatedKey && !previousPage) {
+      if (!previousPage) {
         setPaginationHistory([...paginationHistory, lastEvaluatedKey]);
       }
     } catch (err) {
@@ -87,10 +85,6 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     setPaginationHistory([rafflesPaginated.lastEvaluatedKey]);
   }, [rafflesPaginated.lastEvaluatedKey]);
 
-  useEffect(() => {
-    setDisplayPaginationControls(Boolean(exclusiveStartKey) || Boolean(paginationHistory.length));
-  }, [exclusiveStartKey, paginationHistory]);
-
   return (
     <>
       {raffles.map((raffle) => {
@@ -103,49 +97,44 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
           />
         );
       })}
-      {displayPaginationControls && (
-        <>
-          <button
-            className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
-            disabled={!Boolean(paginationHistory.length)}
-            onClick={fetchPreviousPageRaffles}
-          >
-            <svg
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-              data-slot="icon"
-            >
-              <path
-                fillRule="evenodd"
-                d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-          <button
-            className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
-            disabled={exclusiveStartKey === null}
-            onClick={fetchNextPageRaffles}
-          >
-            <span className="sr-only">Next</span>
-            <svg
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-              data-slot="icon"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        </>
-      )}
+      <button
+        className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
+        disabled={Boolean(paginationHistory.length <= 1)}
+        onClick={fetchPreviousPageRaffles}
+      >
+        <svg
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+          data-slot="icon"
+        >
+          <path
+            fillRule="evenodd"
+            d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+      <button
+        className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
+        disabled={exclusiveStartKey === null}
+        onClick={fetchNextPageRaffles}
+      >
+        <svg
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+          data-slot="icon"
+        >
+          <path
+            fillRule="evenodd"
+            d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
     </>
   );
 }
