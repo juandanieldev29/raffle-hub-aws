@@ -34,8 +34,11 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     return newURLSearchParams;
   };
 
-  const fetchRaffles = async (exclusiveStartKey: RafflesPaginationResult['lastEvaluatedKey']) => {
-    const goBackToInitialPage = shouldGoBackToInitialPage();
+  const fetchRaffles = async (
+    exclusiveStartKey: RafflesPaginationResult['lastEvaluatedKey'],
+    previousPage = false,
+  ) => {
+    const goBackToInitialPage = shouldGoBackToInitialPage() && previousPage;
     let urlSearchParams = new URLSearchParams();
     urlSearchParams = prepareURLParams(urlSearchParams, 'limit', limit);
     urlSearchParams = prepareURLParams(
@@ -72,7 +75,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   };
 
   const fetchPreviousPageRaffles = async () => {
-    fetchRaffles(previousExclusiveStartKey);
+    fetchRaffles(previousExclusiveStartKey, true);
     setCurrentPage(currentPage - 1);
   };
 
