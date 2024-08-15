@@ -21,6 +21,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
   const [raffles, setRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
   const [displayPaginationControls, setDisplayPaginationControls] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const prepareURLParams = (
     urlSearchParams: URLSearchParams,
@@ -34,9 +35,14 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   };
 
   const fetchRaffles = async (exclusiveStartKey: RafflesPaginationResult['lastEvaluatedKey']) => {
+    const goBackToInitialPage = shouldGoBackToInitialPage();
     let urlSearchParams = new URLSearchParams();
     urlSearchParams = prepareURLParams(urlSearchParams, 'limit', limit);
-    urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
+    urlSearchParams = prepareURLParams(
+      urlSearchParams,
+      'exclusiveStartKey',
+      goBackToInitialPage ? null : exclusiveStartKey?.id,
+    );
 
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
@@ -56,12 +62,18 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
     }
   };
 
+  const shouldGoBackToInitialPage = () => {
+    return currentPage <= 2;
+  };
+
   const fetchNextPageRaffles = async () => {
     fetchRaffles(exclusiveStartKey);
+    setCurrentPage(currentPage + 1);
   };
 
   const fetchPreviousPageRaffles = async () => {
     fetchRaffles(previousExclusiveStartKey);
+    setCurrentPage(currentPage - 1);
   };
 
   useEffect(() => {
