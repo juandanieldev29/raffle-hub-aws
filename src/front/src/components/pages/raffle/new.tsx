@@ -3,6 +3,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { fetchAuthSession } from '@aws-amplify/auth';
+import { toast } from 'react-toastify';
 
 import { replacer } from '@/utils';
 import { LoadingContext } from '@/contexts/loading-context';
@@ -37,7 +38,10 @@ export default function RaffleNew() {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const session = await fetchAuthSession();
       if (!session.tokens?.idToken) {
-        console.error('ID Token not present in the current session');
+        toast.error('You must be logged in to create a raffle', {
+          position: 'top-center',
+          theme: 'colored',
+        });
         return;
       }
       const idToken = session.tokens.idToken.toString();
@@ -54,7 +58,10 @@ export default function RaffleNew() {
       const raffle: IRaffle = await res.json();
       await navigateToRaffleDetail(raffle.id);
     } catch (err) {
-      console.log(err);
+      toast.error('Could not fetch raffles', {
+        position: 'top-center',
+        theme: 'colored',
+      });
     } finally {
       dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
     }
