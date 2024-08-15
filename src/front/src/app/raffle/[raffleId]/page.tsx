@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 
 import RaffleDetail from '@/components/pages/raffle/show';
+import { IRaffle } from '@/types/raffle';
 
 export default async function RaffleShowPage({ params }: { params: { raffleId: string } }) {
   const { raffleId } = params;
@@ -14,7 +15,7 @@ export default async function RaffleShowPage({ params }: { params: { raffleId: s
       cache: 'no-store',
     }),
   ]);
-  const [raffle, raffleAvailableNumbers] = await Promise.all([
+  const [raffle, raffleAvailableNumbers]: [IRaffle, Array<number>] = await Promise.all([
     raffleRes.json(),
     raffleAvailableNumbersRes.json(),
   ]);

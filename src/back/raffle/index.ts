@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { ScanCommand, ScanCommandInput } from '@aws-sdk/client-dynamodb';
-import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
 
@@ -10,15 +10,20 @@ const MAX_PAGINATION_LIMIT = 25;
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const limitQueryString = event.queryStringParameters?.limit;
+    const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
     const limit = getPaginationLimit(limitQueryString);
     const params: ScanCommandInput = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
       Limit: limit,
+      ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
     };
-    const { Items = [] } = await ddbClient.send(new ScanCommand(params));
+    const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
     return {
       statusCode: 200,
-      body: JSON.stringify(Items.map((item) => unmarshall(item))),
+      body: JSON.stringify({
+        raffles: Items.map((item) => unmarshall(item)),
+        lastEvaluatedKey: LastEvaluatedKey ? unmarshall(LastEvaluatedKey) : null,
+      }),
       headers: {
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Allow-Origin': 'https://www.raffle-hub.net',

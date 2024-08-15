@@ -1,26 +1,19 @@
 import { headers } from 'next/headers';
 
 import RaffleList from '@/components/pages/raffle';
-import { INITIAL_PAGE, INITIAL_PAGE_SIZE } from '@/utils/constants';
+import { INITIAL_LIMIT } from '@/utils/constants';
+import { RafflesPaginationResult } from '@/types/pagination';
 
 export default async function Home() {
-  const res = await fetch(
-    `https://api.raffle-hub.net/raffle?page=${INITIAL_PAGE}&pageSize=${INITIAL_PAGE_SIZE}`,
-    {
-      headers: headers(),
-      cache: 'no-store',
-    },
-  );
-  const rafflesPaginated = await res.json();
+  const res = await fetch(`https://api.raffle-hub.net/raffle?limit=${INITIAL_LIMIT}`, {
+    headers: headers(),
+    cache: 'no-store',
+  });
+  const rafflesPaginated: RafflesPaginationResult = await res.json();
 
   return (
     <main className="mt-8">
-      <RaffleList
-        rafflesPaginated={{
-          raffles: rafflesPaginated,
-          metadata: { count: rafflesPaginated.length },
-        }}
-      />
+      <RaffleList rafflesPaginated={rafflesPaginated} />
     </main>
   );
 }
