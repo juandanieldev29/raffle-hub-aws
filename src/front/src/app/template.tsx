@@ -3,6 +3,8 @@
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { Amplify, ResourcesConfig } from 'aws-amplify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const config: ResourcesConfig = {
   Auth: {
@@ -26,5 +28,10 @@ const config: ResourcesConfig = {
 Amplify.configure(config);
 
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <Authenticator.Provider>{children}</Authenticator.Provider>;
+  return (
+    <Authenticator.Provider>
+      <ToastContainer />
+      {children}
+    </Authenticator.Provider>
+  );
 }

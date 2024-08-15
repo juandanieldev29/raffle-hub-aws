@@ -3,6 +3,7 @@
 import { useEffect, useContext } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { fetchUserAttributes } from 'aws-amplify/auth';
+import { toast } from 'react-toastify';
 
 import { UserContext } from '@/contexts/user-context';
 import { LoadingContext } from '@/contexts/loading-context';
@@ -20,7 +21,10 @@ export default function Avatar() {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const { email, given_name, family_name, picture } = await fetchUserAttributes();
       if (!email || !given_name) {
-        console.error('User does not have an email or name');
+        toast.error('User does not have an email or name', {
+          position: 'top-center',
+          theme: 'colored',
+        });
         signOut();
         return;
       }
@@ -51,11 +55,6 @@ export default function Avatar() {
   }, [user, currentUser]);
 
   useEffect(() => {
-    console.log(state);
-  }, [state]);
-
-  useEffect(() => {
-    console.log(authStatus);
     if (authStatus === 'configuring') {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
     } else {

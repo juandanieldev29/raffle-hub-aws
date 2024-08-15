@@ -1,10 +1,11 @@
 'use client';
 
 import { useContext, useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+
 import RaffleCard from '@/components/raffle/raffle-card';
 import { IRaffle } from '@/types/raffle';
 import { RafflesPaginationResult } from '@/types/pagination';
-
 import { INITIAL_LIMIT } from '@/utils/constants';
 import { LoadingContext } from '@/contexts/loading-context';
 import { LoadingAction } from '@/enums/loading-action';
@@ -54,10 +55,22 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
         setPaginationHistory([...paginationHistory, lastEvaluatedKey]);
       }
     } catch (err) {
-      console.log(err);
+      toast.error('Could not fetch raffles', {
+        position: 'top-center',
+        theme: 'colored',
+      });
     } finally {
       dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
     }
+  };
+
+  const fetchFirstPageRaffles = async () => {
+    let history = [...paginationHistory];
+    const firstItemHistory = history.at(0);
+    if (firstItemHistory) {
+      setPaginationHistory([firstItemHistory]);
+    }
+    fetchRaffles(null, true);
   };
 
   const fetchNextPageRaffles = async () => {
@@ -97,44 +110,32 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
           />
         );
       })}
-      <button
-        className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
-        disabled={Boolean(paginationHistory.length <= 1)}
-        onClick={fetchPreviousPageRaffles}
-      >
-        <svg
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-          data-slot="icon"
+      <div className="flex justify-center mb-4">
+        <button
+          className="px-8 py-1 primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
+          disabled={Boolean(paginationHistory.length <= 1)}
+          onClick={fetchFirstPageRaffles}
+          title="First page"
         >
-          <path
-            fillRule="evenodd"
-            d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-      <button
-        className="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
-        disabled={exclusiveStartKey === null}
-        onClick={fetchNextPageRaffles}
-      >
-        <svg
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-          data-slot="icon"
+          <i className="fa-solid fa-angles-left"></i>
+        </button>
+        <button
+          className="px-8 py-1 primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
+          disabled={Boolean(paginationHistory.length <= 1)}
+          onClick={fetchPreviousPageRaffles}
+          title="Previous page"
         >
-          <path
-            fillRule="evenodd"
-            d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
+          <i className="fa-solid fa-chevron-left"></i>
+        </button>
+        <button
+          className="px-8 py-1 primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
+          disabled={exclusiveStartKey === null}
+          onClick={fetchNextPageRaffles}
+          title="Next page"
+        >
+          <i className="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
     </>
   );
 }
