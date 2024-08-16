@@ -78,38 +78,38 @@ export default function RaffleNew() {
   return (
     <Authenticator socialProviders={['google']} signUpAttributes={['email']}>
       <form
-        className="w-[95%] md:w-11/12 mx-auto shadow-lg p-4 rounded-2xl dark:bg-slate-900"
+        className="width shadow-lg padding rounded-2xl secondary-background-color"
         onSubmit={onSubmit}
       >
-        <h1 className="mb-8 text-5xl">Crear nueva rifa</h1>
-        <div className="border-b border-gray-900/10 pb-12">
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        <h1 className="text-4xl md:text-5xl">Crear nueva rifa</h1>
+        <div className="border-b border-gray-900/10 section-divider-padding margin-top">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="col-span-full">
               <label htmlFor="description" className="block font-medium leading-6 text-xl">
                 Descripción
               </label>
-              <div className="mt-2">
+              <div className="margin-top">
                 <textarea
                   id="description"
                   name="description"
                   rows={3}
-                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-1"
+                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
                   required
                   onChange={({ target }) => setDescription(target.value)}
                 ></textarea>
               </div>
-              <p className="mt-3 text-lg leading-6">
+              <p className="text-lg leading-6">
                 Agrega una descripción para que los usuarios sepan sobre el motivo de la rifa
               </p>
             </div>
           </div>
         </div>
 
-        <div className="border-b border-gray-900/10 pb-8">
-          <p className="mt-1 text-xl leading-6">
+        <div className="border-b border-gray-900/10 section-divider-padding margin-top">
+          <p className="text-xl leading-6">
             Agrega información sobre cuantos números va a tener la rifa y cual va a ser el premio
           </p>
-          <div className="relative flex gap-x-3 my-4">
+          <div className="relative flex flex-col md:flex-row gap-x-3 margin-bottom margin-top">
             <div className="flex h-6 items-center">
               <input
                 id="include-series"
@@ -141,17 +141,17 @@ export default function RaffleNew() {
               <p>La rifa va a tener mas de 100 números?</p>
             </div>
           </div>
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-5">
+          <div className="margin-top grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-5">
             <div className="sm:col-span-1 sm:col-start-1">
               <label htmlFor="prize" className="block text-base	font-medium leading-6">
                 Premio
               </label>
-              <div className="mt-2">
+              <div className="margin-top">
                 <input
                   type="number"
                   name="prize"
                   id="prize"
-                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-1"
+                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
                   required
                   onChange={({ target }) => setPrize(Number.parseInt(target.value, 10))}
                 />
@@ -161,12 +161,12 @@ export default function RaffleNew() {
               <label htmlFor="ticketPrice" className="block text-base font-medium leading-6">
                 Precio del número
               </label>
-              <div className="mt-2">
+              <div className="margin-top">
                 <input
                   type="number"
                   name="ticketPrice"
                   id="ticketPrice"
-                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-1"
+                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
                   required
                   onChange={({ target }) => setTicketPrice(Number.parseInt(target.value, 10))}
                 />
@@ -177,12 +177,12 @@ export default function RaffleNew() {
               <label htmlFor="quantityNumbers" className="block text-base font-medium leading-6">
                 Cantidad de números
               </label>
-              <div className="mt-2">
+              <div className="margin-top">
                 <input
                   type="number"
                   name="quantityNumbers"
                   id="quantityNumbers"
-                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-1"
+                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
                   placeholder="100"
                   disabled={!overwriteQuantityNumbers}
                   onChange={({ target }) => setQuantityNumbers(Number.parseInt(target.value, 10))}
@@ -195,13 +195,14 @@ export default function RaffleNew() {
                 <label htmlFor="quantitySeries" className="block text-base font-medium leading-6">
                   Cantidad de series
                 </label>
-                <div className="mt-2">
+                <div className="margin-top">
                   <input
                     type="number"
                     name="quantitySeries"
                     id="quantitySeries"
-                    className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-1"
+                    className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
                     placeholder="1000"
+                    required
                     onChange={({ target }) => setQuantitySeries(Number.parseInt(target.value, 10))}
                   />
                 </div>
@@ -209,17 +210,17 @@ export default function RaffleNew() {
             )}
           </div>
         </div>
-        <div className="mt-6 flex items-center justify-end gap-x-6">
+        <div className="margin-top flex items-center justify-end gap-x-6">
           <button
             type="button"
-            className="rounded-md px-3 py-2 text-sm shadow-sm secondary-button-colors"
+            className="rounded-md button-padding text-sm shadow-sm secondary-button-colors"
             onClick={cancel}
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="rounded-md px-3 py-2 text-sm shadow-sm transition-colors primary-button-colors"
+            className="rounded-md button-padding text-sm shadow-sm transition-colors primary-button-colors"
           >
             Guardar
           </button>

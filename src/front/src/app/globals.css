@@ -21,4 +21,25 @@
   .secondary-button-colors {
     @apply bg-white text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
   }
+  .width {
+    @apply w-[95%] md:w-9/12 mx-auto;
+  }
+  .margin-top {
+    @apply mt-4 md:mt-6;
+  }
+  .margin-bottom {
+    @apply mb-4 md:mb-6;
+  }
+  .section-divider-padding {
+    @apply pb-6 md:pb-8;
+  }
+  .button-padding {
+    @apply px-4 py-2;
+  }
+  .small-padding {
+    @apply p-2;
+  }
+  .padding {
+    @apply p-4;
+  }
 }

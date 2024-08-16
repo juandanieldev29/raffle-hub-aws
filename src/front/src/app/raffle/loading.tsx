@@ -1,5 +1,9 @@
 import RaffleDetail from '@/components/skeleton/raffle-detail';
 
 export default function Loading() {
-  return <RaffleDetail />;
+  return (
+    <div className="margin-top margin-bottom">
+      <RaffleDetail />
+    </div>
+  );
 }

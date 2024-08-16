@@ -12,7 +12,7 @@ export default async function Home() {
   const rafflesPaginated: RafflesPaginationResult = await res.json();
 
   return (
-    <main className="mt-8">
+    <main className="margin-top margin-bottom">
       <RaffleList rafflesPaginated={rafflesPaginated} />
     </main>
   );
