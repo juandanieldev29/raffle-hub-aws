@@ -73,10 +73,10 @@ export default function Header() {
 
   return (
     <Authenticator.Provider>
-      <header className="flex justify-between p-2 shadow-md sticky bg-slate-950 z-10">
+      <header className="flex justify-between small-padding shadow-md sticky bg-slate-950 z-10">
         <h1 className="text-3xl md:text-5xl grow text-slate-50">RaffleHub</h1>
         <Avatar />
-        <div className="px-2 cursor-pointer text-slate-50 dark:text-slate-400 my-auto">
+        <div className="small-padding cursor-pointer text-slate-50 dark:text-slate-400 my-auto">
           <i className={toggleThemeClass} onClick={toggleDarkMode} />
         </div>
         <div
@@ -95,7 +95,7 @@ export default function Header() {
           <div className={`${stripClass} left-[80%] animation-delay-400`} />
           <nav className="h-5/6">
             <ul className={navContainerClass}>
-              <li className="my-4">
+              <li className="margin-bottom">
                 <Link
                   href="/"
                   onClick={toggleMenu}
@@ -104,7 +104,7 @@ export default function Header() {
                   Rifas
                 </Link>
               </li>
-              <li className="my-4">
+              <li className="margin-bottom">
                 <Link
                   href="/raffle/new"
                   onClick={toggleMenu}

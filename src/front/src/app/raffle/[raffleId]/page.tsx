@@ -21,7 +21,7 @@ export default async function RaffleShowPage({ params }: { params: { raffleId: s
   ]);
 
   return (
-    <main className="mt-8">
+    <main className="margin-top margin-bottom">
       <RaffleDetail raffle={raffle} availableNumbers={raffleAvailableNumbers} />
     </main>
   );

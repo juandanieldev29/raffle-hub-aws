@@ -37,14 +37,12 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
       {openModal && (
         <PaymentModal title={`Desea comprar el número ${selectedNumber}?`} onClose={setOpenModal} />
       )}
-      <h1 className="w-[95%] md:w-11/12 mx-auto mb-8 text-4xl md:text-5xl">
-        Información acerca de la rifa
-      </h1>
+      <h1 className="width margin-bottom text-4xl md:text-5xl">Información acerca de la rifa</h1>
       <RaffleCard raffle={raffle} />
-      <h2 className="w-[95%] md:w-11/12 mx-auto mb-8 text-2xl md:text-3xl font-medium">
+      <h2 className="width margin-bottom text-2xl md:text-3xl font-medium">
         Números disponibles para compra
       </h2>
-      <div className="w-[95%] md:w-11/12 mx-auto md:p-4 mb-4 rounded-2xl flex justify-center secondary-background-color shadow-lg">
+      <div className="width md:padding rounded-2xl flex justify-center secondary-background-color shadow-lg">
         <div className="grid grid-cols-10 grid-rows-10 w-full md:w-fit place-items-center relative">
           {range(0, raffle.lastAvailableNumber, 1).map((x) => {
             const isNumberBought = !availableNumbers.includes(x);

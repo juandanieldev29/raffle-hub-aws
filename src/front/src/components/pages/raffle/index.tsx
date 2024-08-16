@@ -110,9 +110,9 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
           />
         );
       })}
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-center">
         <button
-          className="px-8 py-1 primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
+          className="button-padding primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
           disabled={Boolean(paginationHistory.length <= 1)}
           onClick={fetchFirstPageRaffles}
           title="First page"
@@ -120,7 +120,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
           <i className="fa-solid fa-angles-left"></i>
         </button>
         <button
-          className="px-8 py-1 primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
+          className="button-padding primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
           disabled={Boolean(paginationHistory.length <= 1)}
           onClick={fetchPreviousPageRaffles}
           title="Previous page"
@@ -128,7 +128,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
           <i className="fa-solid fa-chevron-left"></i>
         </button>
         <button
-          className="px-8 py-1 primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
+          className="button-padding primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
           disabled={exclusiveStartKey === null}
           onClick={fetchNextPageRaffles}
           title="Next page"
