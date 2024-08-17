@@ -64,7 +64,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
           </div>
         </div>
       </div>
-      {selectedNumbers.length && (
+      {Boolean(selectedNumbers.length) && (
         <>
           <p className="width">
             Cantidad de número seleccionados:{' '}
