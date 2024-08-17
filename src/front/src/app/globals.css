@@ -30,6 +30,12 @@
   .margin-bottom {
     @apply mb-4 md:mb-6;
   }
+  .small-margin-right {
+    @apply mr-2;
+  }
+  .small-margin-bottom {
+    @apply mb-2;
+  }
   .section-divider-padding {
     @apply pb-6 md:pb-8;
   }
