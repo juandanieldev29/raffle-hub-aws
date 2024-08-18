@@ -22,7 +22,7 @@
     @apply bg-white text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
   }
   .width {
-    @apply w-[95%] md:w-9/12 mx-auto;
+    @apply w-[95%] lg:w-9/12 mx-auto;
   }
   .margin-top {
     @apply mt-4 md:mt-6;
@@ -35,6 +35,9 @@
   }
   .small-margin-bottom {
     @apply mb-2;
+  }
+  .small-margin-top {
+    @apply mt-2;
   }
   .section-divider-padding {
     @apply pb-6 md:pb-8;

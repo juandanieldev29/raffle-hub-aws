@@ -5,9 +5,10 @@ import { Dispatch, SetStateAction } from 'react';
 interface ModalProps {
   onClose: Dispatch<SetStateAction<boolean>>;
   title: string;
+  message: string;
 }
 
-export default function Modal({ onClose, title }: ModalProps) {
+export default function Modal({ onClose, title, message }: ModalProps) {
   const cancel = () => {
     onClose(false);
   };
@@ -17,36 +18,27 @@ export default function Modal({ onClose, title }: ModalProps) {
       <div
         className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
         aria-hidden="true"
-      ></div>
-
+      />
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <div className="relative transform overflow-hidden rounded-md bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-            <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-              <div className="sm:flex sm:items-start">
-                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                  <h3 className="text-base font-semibold leading-6 text-gray-900" id="modal-title">
-                    {title}
-                  </h3>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500"></p>
-                  </div>
-                </div>
-              </div>
+        <div className="flex min-h-full items-center justify-center">
+          <div className="relative transform rounded-md secondary-background-color shadow-xl transition-all small-padding w-11/12 md:w-fit max-w-md">
+            <h3 className="text-lg font-semibold text-center">{title}</h3>
+            <div className="small-margin-top">
+              <p className="text-sm">{message}</p>
             </div>
-            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <div className="margin-top flex items-center justify-end gap-x-4">
               <button
                 type="button"
-                className="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm sm:ml-3 sm:w-auto bg-blue-700 dark:bg-blue-900 text-slate-50 dark:text-slate-200"
-              >
-                Confirmar
-              </button>
-              <button
-                type="button"
-                className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                className="rounded-md button-padding text-sm shadow-sm secondary-button-colors"
                 onClick={cancel}
               >
                 Cancelar
+              </button>
+              <button
+                type="submit"
+                className="rounded-md button-padding text-sm shadow-sm transition-colors primary-button-colors"
+              >
+                Confirmar
               </button>
             </div>
           </div>
