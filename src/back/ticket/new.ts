@@ -16,6 +16,7 @@ import { IRaffle } from '../types';
 
 interface NewTicketItem {
   number: number;
+  paymentId: string;
 }
 
 interface NewTicketBody extends Array<NewTicketItem> {}
@@ -134,9 +135,8 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
 };
 
 const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
-  const numbersToBuy = body.map(({ number }) => number);
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
-    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: numbersToBuy.map((number) => {
+    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId }) => {
       return {
         PutRequest: {
           Item: marshall({
@@ -144,6 +144,9 @@ const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
             number,
             raffle: {
               id: raffle.id,
+            },
+            payment: {
+              id: paymentId,
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

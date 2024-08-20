@@ -9,3 +9,7 @@ export async function navigateToRaffleDetail(id: string) {
 export async function navigateToHome() {
   redirect('/');
 }
+
+export async function navigateTo(path: string) {
+  redirect(path);
+}

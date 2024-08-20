@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { toast } from 'react-toastify';
 
+import { navigateTo } from '@/app/actions';
 import RaffleCard from '@/components/raffle/raffle-card';
-import { IRaffle } from '@/types/raffle';
+import Modal from '@/components/modal';
 import AvailableNumbers from '@/components/raffle/available-numbers';
 import { formatNumber } from '@/utils';
-import Modal from '@/components/modal';
+import { LoadingContext } from '@/contexts/loading-context';
+import { LoadingAction } from '@/enums/loading-action';
+import { IRaffle, IPayment } from '@/types';
 
 type RaffleShowProps = {
   raffle: IRaffle;
@@ -14,6 +18,7 @@ type RaffleShowProps = {
 };
 
 export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps) {
+  const { dispatch } = useContext(LoadingContext);
   const [displayModal, setDisplayModal] = useState(false);
   const [selectedNumbers, setSelectedNumbers] = useState<Array<number>>([]);
   const [priceToPay, setPriceToPay] = useState(0);
@@ -48,6 +53,73 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     setDisplayModal(false);
   };
 
+  const generatePaymentLink = async () => {
+    const payload = selectedNumbers.map((selectedNumber) => {
+      return {
+        number: selectedNumber,
+        ticketPrice: raffle.ticketPrice,
+      };
+    });
+    try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
+      const res = await fetch(`https://api.raffle-hub.net/payment`, {
+        cache: 'no-store',
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const payment: IPayment = await res.json();
+      return payment;
+    } catch (err) {
+      toast.error('Could not generate payment', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+      throw err;
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
+    }
+  };
+
+  const generateTicket = async (paymentId: string) => {
+    const payload = selectedNumbers.map((selectedNumber) => {
+      return {
+        number: selectedNumber,
+        paymentId,
+      };
+    });
+    try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
+      const res = await fetch(`https://api.raffle-hub.net/ticket/${raffle.id}`, {
+        cache: 'no-store',
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const payment: IRaffle = await res.json();
+      return payment;
+    } catch (err) {
+      toast.error('Could not generate ticket', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+      throw err;
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
+    }
+  };
+
+  const confirmPurchase = async () => {
+    try {
+      const payment = await generatePaymentLink();
+      await generateTicket(payment.id);
+      navigateTo(payment.url);
+    } catch (err) {
+      toast.error('Could not complete purchase', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+    }
+  };
+
   useEffect(() => {
     const price = calculatePriceToPay();
     setPriceToPay(price);
@@ -60,6 +132,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
           title={`Confirmar compra`}
           message={`Estás a punto de comprar los números ${selectedNumbers.join(', ')} y pagar un total de ${formatNumber(priceToPay)}`}
           onClose={closeModal}
+          onConfirm={confirmPurchase}
         />
       )}
       <h1 className="width margin-bottom text-4xl md:text-5xl">Información acerca de la rifa</h1>

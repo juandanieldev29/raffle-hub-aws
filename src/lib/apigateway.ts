@@ -20,6 +20,7 @@ interface RaffleHubApiGatewayProps {
   raffleShowMicroservice: IFunction;
   raffleAvailableNumbersMicroservice: IFunction;
   ticketNewMicroservice: IFunction;
+  paymentNewMicroservice: IFunction;
   domain: DomainName;
   userPool: UserPool;
 }
@@ -33,9 +34,83 @@ export class RaffleHubApiGateway extends Construct {
       props.raffleShowMicroservice,
       props.raffleAvailableNumbersMicroservice,
       props.ticketNewMicroservice,
+      props.paymentNewMicroservice,
       props.domain,
       props.userPool,
     );
+  }
+
+  private createModelValidators(apiGateway: LambdaRestApi) {
+    const createRaffleModel = new Model(this, 'CreateRaffleValidator', {
+      restApi: apiGateway,
+      contentType: 'application/json',
+      description: 'Validates the request body for creating a new raffle',
+      modelName: 'CreateRaffleValidator',
+      schema: {
+        type: JsonSchemaType.OBJECT,
+        required: ['prize', 'description', 'ticketPrice'],
+        properties: {
+          prize: { type: JsonSchemaType.INTEGER, minimum: 1 },
+          ticketPrice: { type: JsonSchemaType.INTEGER, minimum: 1 },
+          description: { type: JsonSchemaType.STRING, minLength: 1, maxLength: 255 },
+          quantityNumbers: { type: JsonSchemaType.INTEGER, minimum: 1, default: 100 },
+          quantitySeries: { type: JsonSchemaType.INTEGER, minimum: 1, default: 1000 },
+        },
+      },
+    });
+
+    const createTicketModel = new Model(this, 'CreateTicketValidator', {
+      restApi: apiGateway,
+      contentType: 'application/json',
+      description: 'Validates the request body for creating a new ticket',
+      modelName: 'CreateTicketValidator',
+      schema: {
+        type: JsonSchemaType.ARRAY,
+        minItems: 1,
+        items: {
+          properties: {
+            number: {
+              type: JsonSchemaType.INTEGER,
+              minimum: 0,
+            },
+            paymentId: {
+              type: JsonSchemaType.STRING,
+              minLength: 1,
+            },
+          },
+        },
+        required: ['number', 'paymentId'],
+        additionalProperties: false,
+      },
+    });
+
+    const createPaymentModel = new Model(this, 'CreatePaymentValidator', {
+      restApi: apiGateway,
+      contentType: 'application/json',
+      description: 'Validates the request body for creating a new payment',
+      modelName: 'CreatePaymentValidator',
+      schema: {
+        type: JsonSchemaType.ARRAY,
+        minItems: 1,
+        items: {
+          properties: {
+            number: {
+              type: JsonSchemaType.INTEGER,
+              minimum: 0,
+            },
+            ticketPrice: {
+              type: JsonSchemaType.NUMBER,
+              minimum: 0,
+              exclusiveMinimum: true,
+            },
+          },
+        },
+        required: ['number', 'ticketPrice'],
+        additionalProperties: false,
+      },
+    });
+
+    return { createRaffleModel, createTicketModel, createPaymentModel };
   }
 
   private createApiGateway(
@@ -44,6 +119,7 @@ export class RaffleHubApiGateway extends Construct {
     raffleShowMicroservice: IFunction,
     raffleAvailableNumbersMicroservice: IFunction,
     ticketNewMicroservice: IFunction,
+    paymentNewMicroservice: IFunction,
     domain: DomainName,
     userPool: UserPool,
   ) {
@@ -63,23 +139,8 @@ export class RaffleHubApiGateway extends Construct {
       cognitoUserPools: [userPool],
     });
 
-    const createRaffleModel = new Model(this, 'CreateRaffleValidator', {
-      restApi: apigw,
-      contentType: 'application/json',
-      description: 'Validates the request body for creating a new raffle',
-      modelName: 'CreateRaffleValidator',
-      schema: {
-        type: JsonSchemaType.OBJECT,
-        required: ['prize', 'description', 'ticketPrice'],
-        properties: {
-          prize: { type: JsonSchemaType.INTEGER, minimum: 1 },
-          ticketPrice: { type: JsonSchemaType.INTEGER, minimum: 1 },
-          description: { type: JsonSchemaType.STRING, minLength: 1, maxLength: 255 },
-          quantityNumbers: { type: JsonSchemaType.INTEGER, minimum: 1, default: 100 },
-          quantitySeries: { type: JsonSchemaType.INTEGER, minimum: 1, default: 1000 },
-        },
-      },
-    });
+    const { createRaffleModel, createTicketModel, createPaymentModel } =
+      this.createModelValidators(apigw);
 
     const raffle = apigw.root.addResource('raffle', {
       defaultCorsPreflightOptions: {
@@ -120,7 +181,35 @@ export class RaffleHubApiGateway extends Construct {
       },
     });
     const raffleTickets = ticket.addResource('{id}');
-    raffleTickets.addMethod('POST', new LambdaIntegration(ticketNewMicroservice));
+    raffleTickets.addMethod('POST', new LambdaIntegration(ticketNewMicroservice), {
+      requestValidator: new RequestValidator(this, 'CreateTicketBodyValidator', {
+        restApi: apigw,
+        requestValidatorName: 'CreateTicketBodyValidator',
+        validateRequestBody: true,
+      }),
+      requestModels: {
+        'application/json': createTicketModel,
+      },
+    });
+
+    const payment = apigw.root.addResource('payment', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['https://raffle-hub.net'],
+        allowMethods: Cors.ALL_METHODS,
+        allowHeaders: Cors.DEFAULT_HEADERS,
+        allowCredentials: true,
+      },
+    });
+    payment.addMethod('POST', new LambdaIntegration(paymentNewMicroservice), {
+      requestValidator: new RequestValidator(this, 'CreatePaymentBodyValidator', {
+        restApi: apigw,
+        requestValidatorName: 'CreatePaymentBodyValidator',
+        validateRequestBody: true,
+      }),
+      requestModels: {
+        'application/json': createPaymentModel,
+      },
+    });
 
     new BasePathMapping(this, 'api-gw-base-path-mapping', {
       domainName: domain,

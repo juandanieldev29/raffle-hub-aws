@@ -2,12 +2,14 @@ import { Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { join } from 'path';
 
 interface RaffleHubMicroservicesProps {
   raffleTable: ITable;
   ticketTable: ITable;
+  stripeKeySecret: ISecret;
 }
 
 export class RaffleHubMicroservices extends Construct {
@@ -16,6 +18,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly raffleShowMicroservice: NodejsFunction;
   public readonly raffleAvailableNumbersMicroservice: NodejsFunction;
   public readonly ticketNewMicroservice: NodejsFunction;
+  public readonly paymentNewMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
     super(scope, id);
@@ -27,6 +30,7 @@ export class RaffleHubMicroservices extends Construct {
       props.ticketTable,
     );
     this.ticketNewMicroservice = this.createNewTicketFunction(props.raffleTable, props.ticketTable);
+    this.paymentNewMicroservice = this.createNewPaymentFunction(props.stripeKeySecret);
   }
 
   private createRaffleIndexFunction(raffleTable: ITable): NodejsFunction {
@@ -134,6 +138,22 @@ export class RaffleHubMicroservices extends Construct {
 
     raffleTable.grantReadWriteData(lambdaFunction);
     ticketTable.grantReadWriteData(lambdaFunction);
+
+    return lambdaFunction;
+  }
+
+  private createNewPaymentFunction(stripeKeySecret: ISecret): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      runtime: Runtime.NODEJS_20_X,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'PaymentNewLambdaFunction', {
+      entry: join(__dirname, `/../back/payment/new.ts`),
+      ...nodeJsFunctionProps,
+    });
+    stripeKeySecret.grantRead(lambdaFunction);
 
     return lambdaFunction;
   }

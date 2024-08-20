@@ -1,10 +1,12 @@
 {
-  "name": "@src/ticket",
+  "name": "@src/payment",
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.55.0",
-    "@aws-sdk/util-dynamodb": "^3.55.0"
+    "@aws-sdk/client-secrets-manager": "^3.632.0",
+    "@aws-sdk/util-dynamodb": "^3.55.0",
+    "stripe": "^16.8.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.141"
