@@ -82,35 +82,32 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
             </div>
           </div>
         </div>
-        {Boolean(selectedNumbers.length) && (
-          <>
-            <p>
-              Cantidad de número seleccionados:
-              <span className="font-bold text-sm"> {selectedNumbers.length}</span>
-            </p>
-            <p className="small-margin-bottom">
-              Total a pagar:<span className="font-bold text-sm"> {formatNumber(priceToPay)}</span>
-            </p>
-            <button
-              onClick={openModal}
-              className="button-padding transition-transform rounded-md transition-colors primary-button-colors small-margin-bottom"
-            >
-              Proceder a pago
-            </button>
-            <div className="flex flex-wrap">
-              {selectedNumbers.map((x) => {
-                return (
-                  <span
-                    key={x}
-                    className="secondary-background-color w-8 h-8 flex items-center justify-center rounded-full border relative small-margin-right small-margin-bottom"
-                  >
-                    {x}
-                  </span>
-                );
-              })}
-            </div>
-          </>
-        )}
+        <p>
+          Cantidad de número seleccionados:
+          <span className="font-bold text-sm"> {selectedNumbers.length}</span>
+        </p>
+        <p className="small-margin-bottom">
+          Total a pagar:<span className="font-bold text-sm"> {formatNumber(priceToPay)}</span>
+        </p>
+        <button
+          onClick={openModal}
+          className="button-padding transition-transform rounded-md transition-colors primary-button-colors small-margin-bottom enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
+          disabled={!selectedNumbers.length}
+        >
+          Proceder a pago
+        </button>
+        <div className="flex flex-wrap">
+          {selectedNumbers.map((x) => {
+            return (
+              <span
+                key={x}
+                className="secondary-background-color w-8 h-8 flex items-center justify-center rounded-full border relative small-margin-right small-margin-bottom"
+              >
+                {x}
+              </span>
+            );
+          })}
+        </div>
       </div>
       <div className="width md:padding flex justify-center secondary-background-color shadow-lg">
         <AvailableNumbers
