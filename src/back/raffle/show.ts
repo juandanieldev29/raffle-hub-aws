@@ -36,13 +36,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       TableName: process.env.DYNAMODB_TABLE_NAME,
       Key: marshall({ id }),
     };
-    const { Item }: { Item?: Record<keyof IRaffle, AttributeValue> } = await ddbClient.send(
-      new GetItemCommand(params),
-    );
+    const { Item } = await ddbClient.send(new GetItemCommand(params));
     if (!Item) {
       return {
         statusCode: 404,
-        body: '',
+        body: 'Raffle not found',
       };
     }
     return {

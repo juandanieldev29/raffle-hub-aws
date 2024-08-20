@@ -15,6 +15,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly raffleNewMicroservice: NodejsFunction;
   public readonly raffleShowMicroservice: NodejsFunction;
   public readonly raffleAvailableNumbersMicroservice: NodejsFunction;
+  public readonly ticketNewMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
     super(scope, id);
@@ -25,6 +26,7 @@ export class RaffleHubMicroservices extends Construct {
       props.raffleTable,
       props.ticketTable,
     );
+    this.ticketNewMicroservice = this.createNewTicketFunction(props.raffleTable, props.ticketTable);
   }
 
   private createRaffleIndexFunction(raffleTable: ITable): NodejsFunction {
@@ -105,6 +107,28 @@ export class RaffleHubMicroservices extends Construct {
     };
     const lambdaFunction = new NodejsFunction(this, 'RaffleAvailableNumbersLambdaFunction', {
       entry: join(__dirname, `/../back/raffle/available-numbers.ts`),
+      ...nodeJsFunctionProps,
+    });
+
+    raffleTable.grantReadWriteData(lambdaFunction);
+    ticketTable.grantReadWriteData(lambdaFunction);
+
+    return lambdaFunction;
+  }
+
+  private createNewTicketFunction(raffleTable: ITable, ticketTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        RAFFLE_DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'TicketNewLambdaFunction', {
+      entry: join(__dirname, `/../back/ticket/new.ts`),
       ...nodeJsFunctionProps,
     });
 

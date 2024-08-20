@@ -19,6 +19,7 @@ interface RaffleHubApiGatewayProps {
   raffleNewMicroservice: IFunction;
   raffleShowMicroservice: IFunction;
   raffleAvailableNumbersMicroservice: IFunction;
+  ticketNewMicroservice: IFunction;
   domain: DomainName;
   userPool: UserPool;
 }
@@ -31,6 +32,7 @@ export class RaffleHubApiGateway extends Construct {
       props.raffleNewMicroservice,
       props.raffleShowMicroservice,
       props.raffleAvailableNumbersMicroservice,
+      props.ticketNewMicroservice,
       props.domain,
       props.userPool,
     );
@@ -41,6 +43,7 @@ export class RaffleHubApiGateway extends Construct {
     raffleNewMicroservice: IFunction,
     raffleShowMicroservice: IFunction,
     raffleAvailableNumbersMicroservice: IFunction,
+    ticketNewMicroservice: IFunction,
     domain: DomainName,
     userPool: UserPool,
   ) {
@@ -107,6 +110,17 @@ export class RaffleHubApiGateway extends Construct {
       'GET',
       new LambdaIntegration(raffleAvailableNumbersMicroservice),
     );
+
+    const ticket = apigw.root.addResource('ticket', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['https://raffle-hub.net'],
+        allowMethods: Cors.ALL_METHODS,
+        allowHeaders: Cors.DEFAULT_HEADERS,
+        allowCredentials: true,
+      },
+    });
+    const raffleTickets = ticket.addResource('{id}');
+    raffleTickets.addMethod('POST', new LambdaIntegration(ticketNewMicroservice));
 
     new BasePathMapping(this, 'api-gw-base-path-mapping', {
       domainName: domain,

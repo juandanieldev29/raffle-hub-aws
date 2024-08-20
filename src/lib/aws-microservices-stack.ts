@@ -24,6 +24,7 @@ export class AwsMicroservicesStack extends Stack {
       raffleNewMicroservice,
       raffleShowMicroservice,
       raffleAvailableNumbersMicroservice,
+      ticketNewMicroservice,
     } = new RaffleHubMicroservices(this, 'Microservices', {
       raffleTable: raffleTable,
       ticketTable: ticketTable,
@@ -44,6 +45,7 @@ export class AwsMicroservicesStack extends Stack {
       raffleNewMicroservice: raffleNewMicroservice,
       raffleShowMicroservice: raffleShowMicroservice,
       raffleAvailableNumbersMicroservice: raffleAvailableNumbersMicroservice,
+      ticketNewMicroservice: ticketNewMicroservice,
       domain: domain,
       userPool: cognito.userPool,
     });
