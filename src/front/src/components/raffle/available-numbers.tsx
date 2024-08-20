@@ -28,7 +28,7 @@ export default function AvailableNumbers({
         return (
           <button
             key={x}
-            className={`w-10 h-10 relative ${isNumberBought ? 'cursor-not-allowed' : 'cursor-pointer md:hover:dark:bg-blue-900 transition-transform duration-300'}`}
+            className={`w-10 h-10 relative disabled:cursor-not-allowed enabled:cursor-pointer md:hover:dark:bg-blue-900 md:hover:bg-slate-100 transition-transform duration-300`}
             onClick={() => selectOrUnselectNumber(x)}
             disabled={isNumberBought}
           >
