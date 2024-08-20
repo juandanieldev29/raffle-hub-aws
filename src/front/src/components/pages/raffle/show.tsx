@@ -62,7 +62,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     });
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
-      const res = await fetch(`https://api.raffle-hub.net/payment`, {
+      const res = await fetch(`https://api.raffle-hub.net/payment/${raffle.id}`, {
         cache: 'no-store',
         method: 'POST',
         body: JSON.stringify(payload),
