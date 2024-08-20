@@ -34,10 +34,10 @@ export default function AvailableNumbers({
           >
             <div className="border border-solid text-center relative leading-10">{x}</div>
             {isNumberBought && (
-              <div className="absolute top-1/2 left-1/2 h-[60%] w-[60%] translate-y-[-50%] translate-x-[-50%] bg-black dark:bg-slate-200 rounded-full" />
+              <div className="relative-centered bg-black dark:bg-slate-200 rounded-full" />
             )}
             {isSelected && (
-              <div className="absolute top-1/2 left-1/2 h-[60%] w-[60%] translate-y-[-50%] translate-x-[-50%] bg-green-700 dark:bg-green-500 rounded-full" />
+              <div className="relative-centered bg-green-700 dark:bg-green-500 rounded-full" />
             )}
           </button>
         );
