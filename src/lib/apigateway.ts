@@ -200,7 +200,8 @@ export class RaffleHubApiGateway extends Construct {
         allowCredentials: true,
       },
     });
-    payment.addMethod('POST', new LambdaIntegration(paymentNewMicroservice), {
+    const rafflePayments = payment.addResource('{id}');
+    rafflePayments.addMethod('POST', new LambdaIntegration(paymentNewMicroservice), {
       requestValidator: new RequestValidator(this, 'CreatePaymentBodyValidator', {
         restApi: apigw,
         requestValidatorName: 'CreatePaymentBodyValidator',

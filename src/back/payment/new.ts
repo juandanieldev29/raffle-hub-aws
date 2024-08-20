@@ -21,7 +21,14 @@ export const getSecretValue = async (secretName: string) => {
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
+    const id = event.pathParameters?.id;
     const body: NewTicketBody = JSON.parse(event.body!);
+    if (!id) {
+      return {
+        statusCode: 400,
+        body: 'You must provide a raffle id',
+      };
+    }
     if (!body.length) {
       return {
         statusCode: 400,
@@ -43,10 +50,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
     const stripeClient = new Stripe(stripeSecretKey);
-    const domain = event.headers['Host'];
-    const path = event.requestContext.path;
-    console.log(domain);
-    console.log(path);
+    const referer = event.headers['referer'];
     const session = await stripeClient.checkout.sessions.create({
       line_items: body.map(({ number, ticketPrice }) => {
         return {
@@ -61,7 +65,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         };
       }),
       mode: 'payment',
-      success_url: `https://${domain}${path}`,
+      success_url: `${referer}raffle/${id}`,
+      cancel_url: `${referer}raffle/${id}`,
     });
     return {
       statusCode: 200,
