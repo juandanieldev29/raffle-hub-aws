@@ -4,13 +4,18 @@ import { Dispatch, SetStateAction } from 'react';
 
 interface ModalProps {
   onClose: Dispatch<SetStateAction<boolean>>;
+  onConfirm: () => Promise<void>;
   title: string;
   message: string;
 }
 
-export default function Modal({ onClose, title, message }: ModalProps) {
+export default function Modal({ onClose, onConfirm, title, message }: ModalProps) {
   const cancel = () => {
     onClose(false);
+  };
+
+  const confirm = () => {
+    onConfirm();
   };
 
   return (
@@ -37,6 +42,7 @@ export default function Modal({ onClose, title, message }: ModalProps) {
               <button
                 type="submit"
                 className="rounded-md button-padding text-sm shadow-sm transition-colors primary-button-colors"
+                onClick={confirm}
               >
                 Confirmar
               </button>
