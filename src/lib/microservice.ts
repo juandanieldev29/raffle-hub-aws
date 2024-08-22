@@ -19,6 +19,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly raffleAvailableNumbersMicroservice: NodejsFunction;
   public readonly ticketNewMicroservice: NodejsFunction;
   public readonly paymentNewMicroservice: NodejsFunction;
+  public readonly ticketExpireMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
     super(scope, id);
@@ -31,6 +32,7 @@ export class RaffleHubMicroservices extends Construct {
     );
     this.ticketNewMicroservice = this.createNewTicketFunction(props.raffleTable, props.ticketTable);
     this.paymentNewMicroservice = this.createNewPaymentFunction(props.stripeKeySecret);
+    this.ticketExpireMicroservice = this.createExpireTicketFunction(props.ticketTable);
   }
 
   private createRaffleIndexFunction(raffleTable: ITable): NodejsFunction {
@@ -155,6 +157,24 @@ export class RaffleHubMicroservices extends Construct {
     });
     stripeKeySecret.grantRead(lambdaFunction);
 
+    return lambdaFunction;
+  }
+
+  private createExpireTicketFunction(ticketTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'TicketExpireLambdaFunction', {
+      entry: join(__dirname, `/../back/ticket/expire.ts`),
+      ...nodeJsFunctionProps,
+    });
+    ticketTable.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 }

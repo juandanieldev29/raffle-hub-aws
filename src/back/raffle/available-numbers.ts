@@ -8,7 +8,7 @@ import {
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
-import { IRaffle, ITicket } from '../types';
+import { IRaffle, ITicket, ITicketStatus } from '../types';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -33,12 +33,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const raffle: IRaffle = unmarshall(Item) as IRaffle;
     const scanCommandParams: ScanCommandInput = {
       TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
-      FilterExpression: 'raffle.id = :raffleId',
+      FilterExpression: 'raffle.id = :raffleId and #status <> :status',
       ExpressionAttributeNames: {
         '#number': 'number',
+        '#status': 'status',
       },
       ExpressionAttributeValues: marshall({
         ':raffleId': id,
+        ':status': ITicketStatus.Expired,
       }),
       ProjectionExpression: 'raffle, #number',
     };

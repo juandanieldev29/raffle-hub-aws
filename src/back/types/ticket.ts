@@ -1,16 +1,30 @@
 export interface ITicket {
+  id: string;
   number: number;
   raffle: {
     id: string;
     ticketPrice: number;
   };
-  createdAt: Date;
-  updatedAt: Date;
+  payment: {
+    id: string;
+  };
+  status: ITicketStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IExpireTicketPayload {
+  raffle: {
+    id: string;
+  };
+  payment: {
+    id: string;
+  };
 }
 
 export enum ITicketStatus {
   Complete = 'Complete',
-  Reserved = 'Reserved',
+  PendingPayment = 'PendingPayment',
   PendingVerification = 'PendingVerification',
-  Cancelled = 'Cancelled',
+  Expired = 'Expired',
 }
