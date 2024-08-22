@@ -9,10 +9,12 @@ import {
   WriteRequest,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { PutEventsCommand, PutEventsCommandInput } from '@aws-sdk/client-eventbridge';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ddbClient } from './ddbClient';
-import { IRaffle } from '../types';
+import { eventBridgeClient } from './eventBridgeClient';
+import { IExpireTicketPayload, IRaffle, ITicket, ITicketStatus } from '../types';
 
 interface NewTicketItem {
   number: number;
@@ -70,6 +72,27 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
     await writeTicketsInBatch(body, raffle);
+    const paymentId = body[0].paymentId;
+    const expireTicketPayload: IExpireTicketPayload = {
+      raffle: {
+        id: raffle.id,
+      },
+      payment: {
+        id: paymentId,
+      },
+    };
+    const expireTicketParams: PutEventsCommandInput = {
+      Entries: [
+        {
+          Source: 'com.rafflehub.ticket.expireTicket',
+          Detail: JSON.stringify(expireTicketPayload),
+          DetailType: 'ExpireTicket',
+          Resources: [],
+          EventBusName: 'RaffleHubEventBus',
+        },
+      ],
+    };
+    await eventBridgeClient.send(new PutEventsCommand(expireTicketParams));
     return {
       statusCode: 201,
       body: JSON.stringify(raffle),
@@ -137,20 +160,23 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
 const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
     [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId }) => {
+      const ticket: ITicket = {
+        id: uuidv4(),
+        number,
+        raffle: {
+          id: raffle.id,
+          ticketPrice: raffle.ticketPrice,
+        },
+        payment: {
+          id: paymentId,
+        },
+        status: ITicketStatus.PendingPayment,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
       return {
         PutRequest: {
-          Item: marshall({
-            id: uuidv4(),
-            number,
-            raffle: {
-              id: raffle.id,
-            },
-            payment: {
-              id: paymentId,
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }),
+          Item: marshall(ticket),
         },
       };
     }),

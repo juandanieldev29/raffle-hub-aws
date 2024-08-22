@@ -10,6 +10,8 @@ import { RaffleHubCertificate } from './certificate';
 import { RaffleHubHostedZone } from './hosted-zone';
 import { RaffleHubCognito } from './cognito';
 import { RaffleHubAmplifyHostingStack } from './amplify';
+import { RaffleHubQueue } from './queue';
+import { RaffleHubEventBus } from './event-bus';
 
 export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -26,10 +28,20 @@ export class AwsMicroservicesStack extends Stack {
       raffleAvailableNumbersMicroservice,
       ticketNewMicroservice,
       paymentNewMicroservice,
+      ticketExpireMicroservice,
     } = new RaffleHubMicroservices(this, 'Microservices', {
       raffleTable: raffleTable,
       ticketTable: ticketTable,
       stripeKeySecret: stripeKeySecret,
+    });
+
+    const { expireTicketQueue } = new RaffleHubQueue(this, 'Queue', {
+      consumer: ticketExpireMicroservice,
+    });
+
+    new RaffleHubEventBus(this, 'EventBus', {
+      publisherFuntion: ticketNewMicroservice,
+      targetQueue: expireTicketQueue,
     });
 
     const { certificate } = new RaffleHubCertificate(this, 'Certificate');
