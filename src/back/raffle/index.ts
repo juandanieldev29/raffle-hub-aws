@@ -3,6 +3,7 @@ import { ScanCommand, ScanCommandInput } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
+import { CORS_HEADERS } from '../constants';
 
 const DEFAULT_PAGINATION_LIMIT = 10;
 const MAX_PAGINATION_LIMIT = 25;

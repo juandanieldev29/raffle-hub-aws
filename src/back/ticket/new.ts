@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ddbClient } from './ddbClient';
 import { eventBridgeClient } from './eventBridgeClient';
 import { IExpireTicketPayload, IRaffle, ITicket, ITicketStatus } from '../types';
+import { CORS_HEADERS } from '../constants';
 
 interface NewTicketItem {
   number: number;
