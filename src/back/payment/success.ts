@@ -19,8 +19,10 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
   for (const message of event.Records) {
     const expireTicketEventRequest: IPaymentSuccessPayloadBody = JSON.parse(message.body);
     const messageDetail = expireTicketEventRequest.detail;
-    const ticketsId = await getTicketByRaffleAndPayment(messageDetail);
-    await setTicketsStatusToComplete(ticketsId);
+    const tickets = await getTicketByRaffleAndPayment(messageDetail);
+    if (tickets.length) {
+      await setTicketsStatusToComplete(tickets);
+    }
   }
 };
 
