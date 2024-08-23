@@ -65,18 +65,14 @@ export const handler = async (
     return {
       statusCode: 201,
       body: JSON.stringify(raffle),
-      headers: {
-        'Access-Control-Allow-Credentials': true,
-        'Access-Control-Allow-Origin': 'https://raffle-hub.net',
-        'Access-Control-Allow-Methods': '*',
-        'Access-Control-Allow-Headers': '*',
-      },
+      headers: CORS_HEADERS,
     };
   } catch (err) {
     console.log(err);
     return {
       statusCode: 500,
       body: JSON.stringify('some error happened'),
+      headers: CORS_HEADERS,
     };
   }
 };

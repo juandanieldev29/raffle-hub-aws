@@ -30,6 +30,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return {
         statusCode: 400,
         body: 'You must provide a raffle id',
+        headers: CORS_HEADERS,
       };
     }
     const params: GetItemCommandInput = {
@@ -41,23 +42,20 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return {
         statusCode: 404,
         body: 'Raffle not found',
+        headers: CORS_HEADERS,
       };
     }
     return {
       statusCode: 200,
       body: JSON.stringify(unmarshall(Item)),
-      headers: {
-        'Access-Control-Allow-Credentials': true,
-        'Access-Control-Allow-Origin': 'https://raffle-hub.net',
-        'Access-Control-Allow-Methods': '*',
-        'Access-Control-Allow-Headers': '*',
-      },
+      headers: CORS_HEADERS,
     };
   } catch (err) {
     console.log(err);
     return {
       statusCode: 500,
       body: JSON.stringify('some error happened'),
+      headers: CORS_HEADERS,
     };
   }
 };
