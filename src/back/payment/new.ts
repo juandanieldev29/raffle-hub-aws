@@ -27,12 +27,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return {
         statusCode: 400,
         body: 'You must provide a raffle id',
+        headers: CORS_HEADERS,
       };
     }
     if (!body.length) {
       return {
         statusCode: 400,
         body: 'You must provide the numbers to buy',
+        headers: CORS_HEADERS,
       };
     }
     const validNumbers = validateNumbers(body);
@@ -40,6 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return {
         statusCode: 400,
         body: `Number must be above 0`,
+        headers: CORS_HEADERS,
       };
     }
     const stripeSecretKey = await getSecretValue('StripeSecretKey');
@@ -47,6 +50,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return {
         statusCode: 500,
         body: JSON.stringify('stripe secret key not defined'),
+        headers: CORS_HEADERS,
       };
     }
     const stripeClient = new Stripe(stripeSecretKey);
@@ -71,18 +75,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return {
       statusCode: 200,
       body: JSON.stringify(session),
-      headers: {
-        'Access-Control-Allow-Credentials': true,
-        'Access-Control-Allow-Origin': 'https://raffle-hub.net',
-        'Access-Control-Allow-Methods': '*',
-        'Access-Control-Allow-Headers': '*',
-      },
+      headers: CORS_HEADERS,
     };
   } catch (err) {
     console.log(err);
     return {
       statusCode: 500,
       body: JSON.stringify('some error happened'),
+      headers: CORS_HEADERS,
     };
   }
 };
