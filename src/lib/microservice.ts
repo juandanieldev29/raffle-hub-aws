@@ -10,6 +10,7 @@ interface RaffleHubMicroservicesProps {
   raffleTable: ITable;
   ticketTable: ITable;
   stripeKeySecret: ISecret;
+  stripeWebookKeySecret: ISecret;
 }
 
 export class RaffleHubMicroservices extends Construct {
@@ -19,6 +20,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly raffleAvailableNumbersMicroservice: NodejsFunction;
   public readonly ticketNewMicroservice: NodejsFunction;
   public readonly paymentNewMicroservice: NodejsFunction;
+  public readonly paymentSuccessMicroservice: NodejsFunction;
   public readonly ticketExpireMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
@@ -32,6 +34,10 @@ export class RaffleHubMicroservices extends Construct {
     );
     this.ticketNewMicroservice = this.createNewTicketFunction(props.raffleTable, props.ticketTable);
     this.paymentNewMicroservice = this.createNewPaymentFunction(props.stripeKeySecret);
+    this.paymentSuccessMicroservice = this.createPaymentSuccessFunction(
+      props.stripeKeySecret,
+      props.stripeWebookKeySecret,
+    );
     this.ticketExpireMicroservice = this.createExpireTicketFunction(props.ticketTable);
   }
 
@@ -140,6 +146,26 @@ export class RaffleHubMicroservices extends Construct {
 
     raffleTable.grantReadWriteData(lambdaFunction);
     ticketTable.grantReadWriteData(lambdaFunction);
+
+    return lambdaFunction;
+  }
+
+  private createPaymentSuccessFunction(
+    stripeKeySecret: ISecret,
+    stripeWebookKeySecret: ISecret,
+  ): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      runtime: Runtime.NODEJS_20_X,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'PaymentSuccessLambdaFunction', {
+      entry: join(__dirname, `/../back/payment/success.ts`),
+      ...nodeJsFunctionProps,
+    });
+    stripeKeySecret.grantRead(lambdaFunction);
+    stripeWebookKeySecret.grantRead(lambdaFunction);
 
     return lambdaFunction;
   }

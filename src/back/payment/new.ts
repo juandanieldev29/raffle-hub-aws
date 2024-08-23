@@ -11,16 +11,6 @@ interface NewTicketItem {
 
 interface NewTicketBody extends Array<NewTicketItem> {}
 
-export const getSecretValue = async (secretName: string) => {
-  const client = new SecretsManagerClient();
-  const response = await client.send(
-    new GetSecretValueCommand({
-      SecretId: secretName,
-    }),
-  );
-  return response.SecretString;
-};
-
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const id = event.pathParameters?.id;
@@ -87,6 +77,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       headers: CORS_HEADERS,
     };
   }
+};
+
+const getSecretValue = async (secretName: string) => {
+  const client = new SecretsManagerClient();
+  const response = await client.send(
+    new GetSecretValueCommand({
+      SecretId: secretName,
+    }),
+  );
+  return response.SecretString;
 };
 
 const validateNumbers = (body: NewTicketBody) => {
