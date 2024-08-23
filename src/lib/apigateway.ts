@@ -21,7 +21,7 @@ interface RaffleHubApiGatewayProps {
   raffleAvailableNumbersMicroservice: IFunction;
   ticketNewMicroservice: IFunction;
   paymentNewMicroservice: IFunction;
-  paymentSuccessMicroservice: IFunction;
+  processPaymentMicroservice: IFunction;
   domain: DomainName;
   userPool: UserPool;
 }
@@ -36,7 +36,7 @@ export class RaffleHubApiGateway extends Construct {
       props.raffleAvailableNumbersMicroservice,
       props.ticketNewMicroservice,
       props.paymentNewMicroservice,
-      props.paymentSuccessMicroservice,
+      props.processPaymentMicroservice,
       props.domain,
       props.userPool,
     );
@@ -122,7 +122,7 @@ export class RaffleHubApiGateway extends Construct {
     raffleAvailableNumbersMicroservice: IFunction,
     ticketNewMicroservice: IFunction,
     paymentNewMicroservice: IFunction,
-    paymentSuccessMicroservice: IFunction,
+    processPaymentMicroservice: IFunction,
     domain: DomainName,
     userPool: UserPool,
   ) {
@@ -203,8 +203,8 @@ export class RaffleHubApiGateway extends Construct {
         allowCredentials: true,
       },
     });
-    const paymentsSuccess = payment.addResource('success');
-    paymentsSuccess.addMethod('POST', new LambdaIntegration(paymentSuccessMicroservice));
+    const processPayment = payment.addResource('process');
+    processPayment.addMethod('POST', new LambdaIntegration(processPaymentMicroservice));
 
     const rafflePayments = payment.addResource('{id}');
     rafflePayments.addMethod('POST', new LambdaIntegration(paymentNewMicroservice), {

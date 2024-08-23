@@ -20,6 +20,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly raffleAvailableNumbersMicroservice: NodejsFunction;
   public readonly ticketNewMicroservice: NodejsFunction;
   public readonly paymentNewMicroservice: NodejsFunction;
+  public readonly processPaymentMicroservice: NodejsFunction;
   public readonly paymentSuccessMicroservice: NodejsFunction;
   public readonly ticketExpireMicroservice: NodejsFunction;
 
@@ -34,10 +35,11 @@ export class RaffleHubMicroservices extends Construct {
     );
     this.ticketNewMicroservice = this.createNewTicketFunction(props.raffleTable, props.ticketTable);
     this.paymentNewMicroservice = this.createNewPaymentFunction(props.stripeKeySecret);
-    this.paymentSuccessMicroservice = this.createPaymentSuccessFunction(
+    this.processPaymentMicroservice = this.createProcessPaymentFunction(
       props.stripeKeySecret,
       props.stripeWebookKeySecret,
     );
+    this.paymentSuccessMicroservice = this.createPaymentSuccessFunction(props.ticketTable);
     this.ticketExpireMicroservice = this.createExpireTicketFunction(props.ticketTable);
   }
 
@@ -150,7 +152,7 @@ export class RaffleHubMicroservices extends Construct {
     return lambdaFunction;
   }
 
-  private createPaymentSuccessFunction(
+  private createProcessPaymentFunction(
     stripeKeySecret: ISecret,
     stripeWebookKeySecret: ISecret,
   ): NodejsFunction {
@@ -160,13 +162,31 @@ export class RaffleHubMicroservices extends Construct {
       },
       runtime: Runtime.NODEJS_20_X,
     };
-    const lambdaFunction = new NodejsFunction(this, 'PaymentSuccessLambdaFunction', {
-      entry: join(__dirname, `/../back/payment/success.ts`),
+    const lambdaFunction = new NodejsFunction(this, 'ProcessPaymentLambdaFunction', {
+      entry: join(__dirname, `/../back/payment/process.ts`),
       ...nodeJsFunctionProps,
     });
     stripeKeySecret.grantRead(lambdaFunction);
     stripeWebookKeySecret.grantRead(lambdaFunction);
 
+    return lambdaFunction;
+  }
+
+  private createPaymentSuccessFunction(ticketTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'PaymentSuccessLambdaFunction', {
+      entry: join(__dirname, `/../back/payment/success.ts`),
+      ...nodeJsFunctionProps,
+    });
+    ticketTable.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 

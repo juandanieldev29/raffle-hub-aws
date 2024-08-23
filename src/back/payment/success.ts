@@ -1,75 +1,83 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
-import Stripe from 'stripe';
+import { SQSEvent, SQSHandler } from 'aws-lambda';
+import {
+  ScanCommand,
+  ScanCommandInput,
+  BatchWriteItemCommand,
+  BatchWriteItemCommandInput,
+  WriteRequest,
+} from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
-import { CORS_HEADERS } from '../constants';
+import { ddbClient } from './ddbClient';
+import { IPaymentSuccessPayload, ITicket, ITicketStatus } from '../types';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  try {
-    const stripeSecretKey = await getSecretValue('StripeSecretKey');
-    if (!stripeSecretKey) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify('Stripe secret key not defined'),
-        headers: CORS_HEADERS,
-      };
-    }
-    const stripeWebhookSecretKey = await getSecretValue('StripeWebhookSecretKey');
-    if (!stripeWebhookSecretKey) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify('Stripe webhook secret key not defined'),
-        headers: CORS_HEADERS,
-      };
-    }
-    const stripeClient = new Stripe(stripeSecretKey);
-    if (!event.body) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify('Body is not present'),
-        headers: CORS_HEADERS,
-      };
-    }
-    const signature = event.headers['Stripe-Signature'];
-    if (!signature) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify('Signature is not present'),
-        headers: CORS_HEADERS,
-      };
-    }
-    const stripeEvent = stripeClient.webhooks.constructEvent(
-      event.body,
-      signature,
-      stripeWebhookSecretKey,
-    );
-    if (
-      stripeEvent.type === 'checkout.session.completed' ||
-      stripeEvent.type === 'checkout.session.async_payment_succeeded'
-    ) {
-      console.log('Payment successfully processed');
-    }
-    return {
-      statusCode: 200,
-      body: '',
-      headers: CORS_HEADERS,
-    };
-  } catch (err) {
-    console.log(err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify('some error happened'),
-      headers: CORS_HEADERS,
-    };
+interface IPaymentSuccessPayloadBody {
+  detail: IPaymentSuccessPayload;
+}
+
+export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
+  for (const message of event.Records) {
+    const expireTicketEventRequest: IPaymentSuccessPayloadBody = JSON.parse(message.body);
+    const messageDetail = expireTicketEventRequest.detail;
+    const ticketsId = await getTicketByRaffleAndPayment(messageDetail);
+    await setTicketsStatusToComplete(ticketsId);
   }
 };
 
-const getSecretValue = async (secretName: string) => {
-  const client = new SecretsManagerClient();
-  const response = await client.send(
-    new GetSecretValueCommand({
-      SecretId: secretName,
+const setTicketsStatusToComplete = async (tickets: Array<ITicket>) => {
+  let putRequestItems: Record<string, WriteRequest[]> | undefined = {
+    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: tickets.map(
+      ({ id, number, payment, raffle, createdAt }) => {
+        const ticket: ITicket = {
+          id,
+          number,
+          payment,
+          raffle,
+          status: ITicketStatus.Complete,
+          createdAt,
+          updatedAt: new Date().toISOString(),
+        };
+        return {
+          PutRequest: {
+            Item: marshall(ticket),
+          },
+        };
+      },
+    ),
+  };
+  do {
+    const batchItemsCommandParams: BatchWriteItemCommandInput = {
+      RequestItems: putRequestItems,
+    };
+    const batchWriteResponse = await ddbClient.send(
+      new BatchWriteItemCommand(batchItemsCommandParams),
+    );
+    putRequestItems = batchWriteResponse.UnprocessedItems;
+  } while (putRequestItems && Object.keys(putRequestItems).length != 0);
+};
+
+const getTicketByRaffleAndPayment = async (
+  paymentSuccessPayload: IPaymentSuccessPayload,
+): Promise<Array<ITicket>> => {
+  const { payment, raffle } = paymentSuccessPayload;
+  const scanCommandParams: ScanCommandInput = {
+    TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
+    FilterExpression: `raffle.id = :raffleId and payment.id = :paymentId and #status = :status`,
+    ExpressionAttributeNames: {
+      '#status': 'status',
+    },
+    ExpressionAttributeValues: marshall({
+      ':raffleId': raffle.id,
+      ':paymentId': payment.id,
+      ':status': ITicketStatus.PendingPayment,
     }),
-  );
-  return response.SecretString;
+  };
+  const { Items } = await ddbClient.send(new ScanCommand(scanCommandParams));
+  if (!Items) {
+    return [];
+  }
+  return Items.map((item) => {
+    const ticket = unmarshall(item) as ITicket;
+    return ticket;
+  });
 };

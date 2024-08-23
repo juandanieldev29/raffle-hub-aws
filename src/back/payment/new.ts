@@ -60,6 +60,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           quantity: 1,
         };
       }),
+      metadata: {
+        raffleId: id,
+      },
       mode: 'payment',
       success_url: `${referer}raffle/${id}`,
       cancel_url: `${referer}raffle/${id}`,
