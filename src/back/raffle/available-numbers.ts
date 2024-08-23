@@ -9,6 +9,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
 import { IRaffle, ITicket, ITicketStatus } from '../types';
+import { CORS_HEADERS } from '../constants';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {

@@ -2,6 +2,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import Stripe from 'stripe';
 
+import { CORS_HEADERS } from '../constants';
+
 interface NewTicketItem {
   number: number;
   ticketPrice: number;
