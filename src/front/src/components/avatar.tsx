@@ -12,7 +12,7 @@ import { LoadingAction } from '@/enums/loading-action';
 
 export default function Avatar() {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-  const { state, dispatch } = useContext(LoadingContext);
+  const { dispatch } = useContext(LoadingContext);
   const { user, signOut } = useAuthenticator((context) => [context.user]);
   const { authStatus } = useAuthenticator((context) => [context.authStatus]);
 

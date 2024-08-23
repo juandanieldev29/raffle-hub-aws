@@ -31,6 +31,7 @@ export class AwsMicroservicesStack extends Stack {
       raffleAvailableNumbersMicroservice,
       ticketNewMicroservice,
       paymentNewMicroservice,
+      processPaymentMicroservice,
       paymentSuccessMicroservice,
       ticketExpireMicroservice,
     } = new RaffleHubMicroservices(this, 'Microservices', {
@@ -40,13 +41,16 @@ export class AwsMicroservicesStack extends Stack {
       stripeWebookKeySecret: stripeWebookKeySecret,
     });
 
-    const { expireTicketQueue } = new RaffleHubQueue(this, 'Queue', {
-      consumer: ticketExpireMicroservice,
+    const { expireTicketQueue, paymentSuccessQueue } = new RaffleHubQueue(this, 'Queue', {
+      ticketExpireConsumer: ticketExpireMicroservice,
+      processPaymentConsumer: paymentSuccessMicroservice,
     });
 
     new RaffleHubEventBus(this, 'EventBus', {
-      publisherFuntion: ticketNewMicroservice,
-      targetQueue: expireTicketQueue,
+      expireTicketPublisher: ticketNewMicroservice,
+      expireTicketQueue: expireTicketQueue,
+      paymentSuccessPublisher: processPaymentMicroservice,
+      paymentSuccessQueue: paymentSuccessQueue,
     });
 
     const { certificate } = new RaffleHubCertificate(this, 'Certificate');
@@ -66,7 +70,7 @@ export class AwsMicroservicesStack extends Stack {
       raffleAvailableNumbersMicroservice: raffleAvailableNumbersMicroservice,
       ticketNewMicroservice: ticketNewMicroservice,
       paymentNewMicroservice: paymentNewMicroservice,
-      paymentSuccessMicroservice: paymentSuccessMicroservice,
+      processPaymentMicroservice: processPaymentMicroservice,
       domain: domain,
       userPool: cognito.userPool,
     });
