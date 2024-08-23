@@ -9,7 +9,6 @@ import { CORS_HEADERS } from '../constants';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    console.log(event.body);
     const stripeSecretKey = await getSecretValue('StripeSecretKey');
     if (!stripeSecretKey) {
       return {
