@@ -35,6 +35,7 @@ export default function RaffleNew() {
       ticketPrice,
       quantityNumbers,
       quantitySeries,
+      completionDate,
     };
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
