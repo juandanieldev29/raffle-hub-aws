@@ -9,6 +9,15 @@ type DatePickerProps = {
   onSelectDate: Dispatch<SetStateAction<Date>>;
 };
 
+interface SelectDate {
+  year?: number;
+  month?: number;
+  day?: number;
+  hours?: number;
+  minutes?: number;
+  selectedHourFormat: string;
+}
+
 export default function DatePicker({ onSelectDate }: DatePickerProps) {
   const [months, setMonths] = useState<Array<string>>([]);
   const [days, setDays] = useState<Array<string>>([]);
@@ -157,6 +166,36 @@ export default function DatePicker({ onSelectDate }: DatePickerProps) {
     return 0;
   };
 
+  const getHours = (hours: number | undefined, selectedHourFormat: string) => {
+    if (hours === undefined) {
+      return undefined;
+    }
+    if (selectedHourFormat === 'PM' && hours === 12) {
+      return 0;
+    }
+    if (selectedHourFormat === 'AM' && hours === 0) {
+      return 12;
+    }
+    if (selectedHourFormat === 'AM' && hours > 12) {
+      return hours - 12;
+    }
+    if (selectedHourFormat === 'PM' && hours > 12) {
+      return hours;
+    }
+    return selectedHourFormat === 'AM' ? hours : hours + 12;
+  };
+
+  const selectDate = ({ year, month, day, hours, minutes, selectedHourFormat }: SelectDate) => {
+    const selectedYear = year ?? selectedDate.getFullYear();
+    const selectedMonth = month ?? selectedDate.getMonth();
+    const selectedDay = day ?? selectedDate.getDate();
+    const selectedHours = getHours(hours ?? selectedDate.getHours(), selectedHourFormat);
+    const selectedMinutes = minutes ?? selectedDate.getMinutes();
+    setSelectedDate(
+      new Date(selectedYear, selectedMonth, selectedDay, selectedHours, selectedMinutes),
+    );
+  };
+
   useEffect(() => {
     setMonths(getMonthsForLocale('es-CR'));
   }, []);
@@ -166,9 +205,9 @@ export default function DatePicker({ onSelectDate }: DatePickerProps) {
   }, []);
 
   useEffect(() => {
-    const hour = selectedHourFormat === 'AM' ? selectedHour : selectedHour + 12;
-    setSelectedDate(new Date(selectedYear, selectedMonth, selectedDay, hour, selectedMinutes));
-  }, [selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinutes, selectedHourFormat]);
+    const date = new Date();
+    setSelectedDate(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 1, 0));
+  }, []);
 
   useEffect(() => {
     onSelectDate(selectedDate);
@@ -270,7 +309,14 @@ export default function DatePicker({ onSelectDate }: DatePickerProps) {
                   },
                 )}
                 disabled={isDateBefore(new Date(selectedYear, selectedMonth, x), new Date())}
-                onClick={() => setSelectedDay(x)}
+                onClick={() =>
+                  selectDate({
+                    year: selectedYear,
+                    month: selectedMonth,
+                    day: x,
+                    selectedHourFormat,
+                  })
+                }
               >
                 {x}
               </button>
@@ -294,7 +340,9 @@ export default function DatePicker({ onSelectDate }: DatePickerProps) {
           <div className="relative">
             <select
               className="w-12 appearance-none border rounded-md text-sm text-gray-900"
-              onChange={(x) => setSelectedHour(Number.parseInt(x.target.value))}
+              onChange={(x) =>
+                selectDate({ hours: Number.parseInt(x.target.value), selectedHourFormat })
+              }
             >
               {range(1, 12, 1).map((x) => {
                 return (
@@ -328,7 +376,9 @@ export default function DatePicker({ onSelectDate }: DatePickerProps) {
           <div className="relative">
             <select
               className="w-12 appearance-none border rounded-md text-sm text-gray-900"
-              onChange={(x) => setSelectedMinutes(Number.parseInt(x.target.value))}
+              onChange={(x) =>
+                selectDate({ minutes: Number.parseInt(x.target.value), selectedHourFormat })
+              }
             >
               {range(0, 59, 1).map((x) => {
                 return (
@@ -360,7 +410,10 @@ export default function DatePicker({ onSelectDate }: DatePickerProps) {
           <div className="relative">
             <select
               className="w-16 appearance-none border rounded-md text-sm text-gray-900"
-              onChange={(x) => setSelectedHourFormat(x.target.value)}
+              onChange={(x) => {
+                selectDate({ selectedHourFormat: x.target.value });
+                setSelectedHourFormat(x.target.value);
+              }}
             >
               <option>AM</option>
               <option>PM</option>
