@@ -1,3 +1,7 @@
+export function formatMinimumIntegerDigits(number: number) {
+  return number.toLocaleString(undefined, { minimumIntegerDigits: 2, useGrouping: false });
+}
+
 export function formatNumber(number: number) {
   const formatter = new Intl.NumberFormat();
   return formatter.format(number);
@@ -15,8 +19,11 @@ export function formatDate(dateString: string) {
   });
 }
 
-export function range(start: number, stop: number, step: number) {
-  return Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+export function range(start: number, stop: number, step: number, includeFirstItem = true) {
+  return Array.from(
+    { length: (stop - start) / step + (includeFirstItem ? 1 : 0) },
+    (_, i) => start + i * step,
+  );
 }
 
 export function replacer(_: string, value: string | null) {

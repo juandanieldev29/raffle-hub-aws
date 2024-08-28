@@ -50,13 +50,14 @@ export class RaffleHubApiGateway extends Construct {
       modelName: 'CreateRaffleValidator',
       schema: {
         type: JsonSchemaType.OBJECT,
-        required: ['prize', 'description', 'ticketPrice'],
+        required: ['prize', 'description', 'ticketPrice', 'completionDate'],
         properties: {
           prize: { type: JsonSchemaType.INTEGER, minimum: 1 },
           ticketPrice: { type: JsonSchemaType.INTEGER, minimum: 1 },
           description: { type: JsonSchemaType.STRING, minLength: 1, maxLength: 255 },
           quantityNumbers: { type: JsonSchemaType.INTEGER, minimum: 1, default: 100 },
           quantitySeries: { type: JsonSchemaType.INTEGER, minimum: 1, default: 1000 },
+          completionDate: { type: JsonSchemaType.STRING, minLength: 1, maxLength: 255 },
         },
       },
     });
