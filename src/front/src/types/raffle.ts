@@ -13,6 +13,7 @@ export interface IRaffle {
   ticketPrice: number;
   boughtTickets: number;
   lastAvailableNumber: number;
+  completionDate: string;
   createdAt: string;
   updatedAt: string;
 }

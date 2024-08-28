@@ -19,11 +19,13 @@ export default function RaffleCard({
 }: RaffleCardProps) {
   const [ticketPrice, setTicketPrice] = useState<string | null>(null);
   const [prize, setPrize] = useState<string | null>(null);
+  const [completionDate, setcompletionDate] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   useEffect(() => {
     setTicketPrice(formatNumber(raffle.ticketPrice));
     setPrize(formatNumber(raffle.prize));
+    setcompletionDate(formatDate(raffle.completionDate));
     setCreatedAt(formatDate(raffle.createdAt));
   }, [raffle]);
 
@@ -54,6 +56,10 @@ export default function RaffleCard({
       <p className="text-sm font-extralight md:col-start-3 font-medium">
         {raffle.quantityNumbers - raffle.boughtTickets}
       </p>
+      <p className="md:col-start-3 font-semibold">Fecha a realizarse la rifa</p>
+      <p className="text-sm font-extralight md:col-start-3 font-medium" suppressHydrationWarning>
+        {completionDate}
+      </p>
       <p className="md:col-start-3 font-semibold">Fecha de creación</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium" suppressHydrationWarning>
         {createdAt}
@@ -63,7 +69,7 @@ export default function RaffleCard({
       {includeLinkToDetails && (
         <Link
           href={`/raffle/${raffle.id}`}
-          className="md:col-start-1 md:row-start-9 md:row-span-2 md:self-end"
+          className="md:col-start-1 md:row-start-11 md:row-span-2 md:self-end"
         >
           <button className="button-padding transition-transform rounded-md transition-colors primary-button-colors">
             Ver detalles
