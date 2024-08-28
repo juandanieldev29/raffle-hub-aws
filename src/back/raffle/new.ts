@@ -12,6 +12,7 @@ interface CreateRaffleBody {
   quantitySeries: number;
   ticketPrice: number;
   description: string;
+  completionDate: string;
 }
 
 interface CognitoUserSession {
@@ -43,7 +44,21 @@ export const handler = async (
       photoURL: userSession.picture,
     };
     const body: CreateRaffleBody = JSON.parse(event.body!);
-    const { prize, quantityNumbers = 100, quantitySeries = null, ticketPrice, description } = body;
+    const {
+      prize,
+      quantityNumbers = 100,
+      quantitySeries = null,
+      ticketPrice,
+      description,
+      completionDate,
+    } = body;
+    if (new Date(completionDate).toString() === 'Invalid Date') {
+      return {
+        statusCode: 400,
+        body: 'Invalid Date',
+        headers: CORS_HEADERS,
+      };
+    }
     const id = uuidv4();
     const raffle = {
       id,
@@ -54,6 +69,7 @@ export const handler = async (
       ticketPrice,
       description,
       boughtTickets: 0,
+      completionDate,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       owner,

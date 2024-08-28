@@ -21,7 +21,7 @@ export default function Avatar() {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const { email, given_name, family_name, picture } = await fetchUserAttributes();
       if (!email || !given_name) {
-        toast.error('User does not have an email or name', {
+        toast.error('El usuario no tiene correo o nombre', {
           position: 'top-center',
           theme: 'colored',
         });

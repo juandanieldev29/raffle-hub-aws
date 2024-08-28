@@ -55,7 +55,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
         setPaginationHistory([...paginationHistory, lastEvaluatedKey]);
       }
     } catch (err) {
-      toast.error('Could not fetch raffles', {
+      toast.error('Ha ocurrido un error', {
         position: 'top-center',
         theme: 'colored',
       });
