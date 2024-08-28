@@ -70,7 +70,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
       const payment: IPayment = await res.json();
       return payment;
     } catch (err) {
-      toast.error('Could not generate payment', {
+      toast.error('No se pudo generar el link del pago', {
         position: 'top-center',
         theme: 'colored',
       });
@@ -97,7 +97,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
       const payment: IRaffle = await res.json();
       return payment;
     } catch (err) {
-      toast.error('Could not generate ticket', {
+      toast.error('No se pudo generar el tiquete', {
         position: 'top-center',
         theme: 'colored',
       });
@@ -113,7 +113,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
       await generateTicket(payment.id);
       navigateTo(payment.url);
     } catch (err) {
-      toast.error('Could not complete purchase', {
+      toast.error('Ha ocurrido un error', {
         position: 'top-center',
         theme: 'colored',
       });

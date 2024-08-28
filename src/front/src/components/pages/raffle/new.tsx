@@ -40,7 +40,7 @@ export default function RaffleNew() {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const session = await fetchAuthSession();
       if (!session.tokens?.idToken) {
-        toast.error('You must be logged in to create a raffle', {
+        toast.error('Debes iniciar sesion para crear una rifa', {
           position: 'top-center',
           theme: 'colored',
         });
@@ -60,7 +60,7 @@ export default function RaffleNew() {
       const raffle: IRaffle = await res.json();
       await navigateToRaffleDetail(raffle.id);
     } catch (err) {
-      toast.error('Could not fetch raffles', {
+      toast.error('Ha ocurrido un error', {
         position: 'top-center',
         theme: 'colored',
       });
