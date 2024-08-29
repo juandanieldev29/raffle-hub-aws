@@ -14,12 +14,22 @@ export interface IPayment {
   } | null;
   total: number | null;
   status: IPaymentStatus;
+  url: string | null;
   createdAt: string;
   updatedAt: string;
   expiresAt: number;
 }
 
 export interface IProcessPaymentPayload {
+  raffle: {
+    id: string;
+  };
+  payment: {
+    id: string;
+  };
+}
+
+export interface IPendingPaymentPayload {
   raffle: {
     id: string;
   };
