@@ -105,12 +105,10 @@ const verifyToken = async (
   }
   const verifier = CognitoJwtVerifier.create({
     userPoolId: process.env.USER_POOL_ID,
-    tokenUse: 'access',
+    tokenUse: 'id',
     clientId: process.env.USER_POOL_CLIENT_ID,
   });
   try {
-    console.log(process.env.USER_POOL_ID);
-    console.log(authorizationHeader);
     const token = extractToken(authorizationHeader);
     const payload = await verifier.verify(token);
     return { id: payload.sub };
