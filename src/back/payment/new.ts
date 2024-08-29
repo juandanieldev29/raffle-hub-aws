@@ -109,10 +109,13 @@ const verifyToken = async (
     clientId: process.env.USER_POOL_CLIENT_ID,
   });
   try {
+    console.log(process.env.USER_POOL_ID);
+    console.log(authorizationHeader);
     const token = extractToken(authorizationHeader);
     const payload = await verifier.verify(token);
     return { id: payload.sub };
-  } catch {
+  } catch (err) {
+    console.log(err);
     console.log('Access token not valid');
   }
   return null;
