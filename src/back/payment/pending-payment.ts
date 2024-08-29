@@ -16,8 +16,8 @@ interface IPendingPaymentPayloadBody {
 
 export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
   for (const message of event.Records) {
-    const expireTicketEventRequest: IPendingPaymentPayloadBody = JSON.parse(message.body);
-    const messageDetail = expireTicketEventRequest.detail;
+    const pendingPaymentEventRequest: IPendingPaymentPayloadBody = JSON.parse(message.body);
+    const messageDetail = pendingPaymentEventRequest.detail;
     const payment = await getPaymentById(messageDetail);
     if (payment) {
       await setPaymentStatusToPendingPayment(payment);
@@ -47,9 +47,9 @@ const setPaymentStatusToPendingPayment = async (payment: IPayment) => {
 };
 
 const getPaymentById = async (
-  expireTicketPayload: IPendingPaymentPayload,
+  pendingPaymentPayload: IPendingPaymentPayload,
 ): Promise<IPayment | null> => {
-  const { payment: payloadPayment } = expireTicketPayload;
+  const { payment: payloadPayment } = pendingPaymentPayload;
   const scanCommandParams: GetItemCommandInput = {
     TableName: process.env.DYNAMODB_TABLE_NAME,
     Key: marshall({ id: payloadPayment.id }),
