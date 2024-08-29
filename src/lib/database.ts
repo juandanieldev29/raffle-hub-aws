@@ -5,11 +5,13 @@ import { Construct } from 'constructs';
 export class RaffleHubDatabase extends Construct {
   public readonly raffleTable: ITable;
   public readonly ticketTable: ITable;
+  public readonly paymentTable: ITable;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
     this.raffleTable = this.createRaffleTable();
     this.ticketTable = this.createTicketTable();
+    this.paymentTable = this.createPaymentTable();
   }
 
   private createRaffleTable(): ITable {
@@ -32,6 +34,19 @@ export class RaffleHubDatabase extends Construct {
         type: AttributeType.STRING,
       },
       tableName: 'ticket',
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+    });
+    return ticketTable;
+  }
+
+  private createPaymentTable(): ITable {
+    const ticketTable = new Table(this, 'PaymentDatabaseTable', {
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      tableName: 'payment',
       removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
     });

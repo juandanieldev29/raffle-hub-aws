@@ -3,17 +3,23 @@ export interface IPayment {
   raffle: {
     id: string;
   };
+  currency: string | null;
   buyer: {
-    name: string;
+    id: string;
+  } | null;
+  customerDetails: {
+    country: string;
     email: string;
+    name: string;
   } | null;
   total: number | null;
   status: IPaymentStatus;
   createdAt: string;
   updatedAt: string;
+  expiresAt: number;
 }
 
-export interface IPaymentSuccessPayload {
+export interface IProcessPaymentPayload {
   raffle: {
     id: string;
   };

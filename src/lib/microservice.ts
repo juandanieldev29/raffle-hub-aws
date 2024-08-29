@@ -7,10 +7,13 @@ import { Construct } from 'constructs';
 import { join } from 'path';
 
 interface RaffleHubMicroservicesProps {
-  raffleTable: ITable;
-  ticketTable: ITable;
-  stripeKeySecret: ISecret;
-  stripeWebookKeySecret: ISecret;
+  readonly raffleTable: ITable;
+  readonly ticketTable: ITable;
+  readonly paymentTable: ITable;
+  readonly stripeKeySecret: ISecret;
+  readonly stripeWebookKeySecret: ISecret;
+  readonly userPoolId: string;
+  readonly userPoolClientId: string;
 }
 
 export class RaffleHubMicroservices extends Construct {
@@ -34,7 +37,12 @@ export class RaffleHubMicroservices extends Construct {
       props.ticketTable,
     );
     this.ticketNewMicroservice = this.createNewTicketFunction(props.raffleTable, props.ticketTable);
-    this.paymentNewMicroservice = this.createNewPaymentFunction(props.stripeKeySecret);
+    this.paymentNewMicroservice = this.createNewPaymentFunction(
+      props.paymentTable,
+      props.stripeKeySecret,
+      props.userPoolId,
+      props.userPoolClientId,
+    );
     this.processPaymentMicroservice = this.createProcessPaymentFunction(
       props.stripeKeySecret,
       props.stripeWebookKeySecret,
@@ -190,10 +198,20 @@ export class RaffleHubMicroservices extends Construct {
     return lambdaFunction;
   }
 
-  private createNewPaymentFunction(stripeKeySecret: ISecret): NodejsFunction {
+  private createNewPaymentFunction(
+    paymentTable: ITable,
+    stripeKeySecret: ISecret,
+    userPoolId: string,
+    userPoolClientId: string,
+  ): NodejsFunction {
     const nodeJsFunctionProps: NodejsFunctionProps = {
       bundling: {
         externalModules: ['aws-sdk'],
+      },
+      environment: {
+        DYNAMODB_TABLE_NAME: paymentTable.tableName,
+        USER_POOL_ID: userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClientId,
       },
       runtime: Runtime.NODEJS_20_X,
     };
@@ -201,6 +219,7 @@ export class RaffleHubMicroservices extends Construct {
       entry: join(__dirname, `/../back/payment/new.ts`),
       ...nodeJsFunctionProps,
     });
+    paymentTable.grantReadWriteData(lambdaFunction);
     stripeKeySecret.grantRead(lambdaFunction);
 
     return lambdaFunction;

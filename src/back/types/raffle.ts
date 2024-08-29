@@ -9,10 +9,11 @@ export interface IRaffle {
   prize: number;
   description: string;
   quantityNumbers: number;
-  quantitySeries?: number;
+  quantitySeries: number | null;
   ticketPrice: number;
   boughtTickets: number;
   lastAvailableNumber: number;
+  completionDate: string;
   createdAt: string;
   updatedAt: string;
 }

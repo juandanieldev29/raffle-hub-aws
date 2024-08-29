@@ -4,7 +4,7 @@ import { PutEventsCommand, PutEventsCommandInput } from '@aws-sdk/client-eventbr
 import Stripe from 'stripe';
 
 import { eventBridgeClient } from './eventBridgeClient';
-import { IPaymentSuccessPayload } from '../types';
+import { IProcessPaymentPayload } from '../types';
 import { CORS_HEADERS } from '../constants';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -59,7 +59,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           headers: CORS_HEADERS,
         };
       }
-      const paymentSuccessPayload: IPaymentSuccessPayload = {
+      const processPaymentPayload: IProcessPaymentPayload = {
         raffle: {
           id: raffleId,
         },
@@ -71,7 +71,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         Entries: [
           {
             Source: 'com.rafflehub.payment.success',
-            Detail: JSON.stringify(paymentSuccessPayload),
+            Detail: JSON.stringify(processPaymentPayload),
             DetailType: 'PaymentSuccess',
             Resources: [],
             EventBusName: 'RaffleHubEventBus',
@@ -82,7 +82,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     return {
       statusCode: 200,
-      body: '',
+      body: 'Payment processed',
       headers: CORS_HEADERS,
     };
   } catch (err) {
