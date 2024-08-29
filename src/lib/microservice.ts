@@ -86,6 +86,8 @@ export class RaffleHubMicroservices extends Construct {
         DYNAMODB_TABLE_NAME: raffleTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'RaffleNewLambdaFunction', {
       entry: join(__dirname, `/../back/raffle/new.ts`),
@@ -106,6 +108,8 @@ export class RaffleHubMicroservices extends Construct {
         DYNAMODB_TABLE_NAME: raffleTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'RaffleShowLambdaFunction', {
       entry: join(__dirname, `/../back/raffle/show.ts`),
@@ -130,6 +134,8 @@ export class RaffleHubMicroservices extends Construct {
         TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'RaffleAvailableNumbersLambdaFunction', {
       entry: join(__dirname, `/../back/raffle/available-numbers.ts`),
@@ -152,6 +158,8 @@ export class RaffleHubMicroservices extends Construct {
         TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'TicketNewLambdaFunction', {
       entry: join(__dirname, `/../back/ticket/new.ts`),
@@ -173,6 +181,8 @@ export class RaffleHubMicroservices extends Construct {
         DYNAMODB_TABLE_NAME: ticketTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'TicketCompleteLambdaFunction', {
       entry: join(__dirname, `/../back/ticket/complete.ts`),
@@ -193,6 +203,8 @@ export class RaffleHubMicroservices extends Construct {
         externalModules: ['aws-sdk'],
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'ProcessPaymentLambdaFunction', {
       entry: join(__dirname, `/../back/payment/process.ts`),
@@ -213,6 +225,8 @@ export class RaffleHubMicroservices extends Construct {
         DYNAMODB_TABLE_NAME: paymentTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'PaymentSuccessLambdaFunction', {
       entry: join(__dirname, `/../back/payment/success.ts`),
@@ -231,6 +245,8 @@ export class RaffleHubMicroservices extends Construct {
         DYNAMODB_TABLE_NAME: paymentTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'PendingPaymentLambdaFunction', {
       entry: join(__dirname, `/../back/payment/pending.ts`),
@@ -256,6 +272,8 @@ export class RaffleHubMicroservices extends Construct {
         USER_POOL_CLIENT_ID: userPoolClientId,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'PaymentNewLambdaFunction', {
       entry: join(__dirname, `/../back/payment/new.ts`),
@@ -276,6 +294,8 @@ export class RaffleHubMicroservices extends Construct {
         TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
     };
     const lambdaFunction = new NodejsFunction(this, 'TicketExpireLambdaFunction', {
       entry: join(__dirname, `/../back/ticket/expire.ts`),
