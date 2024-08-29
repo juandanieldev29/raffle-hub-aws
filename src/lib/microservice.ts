@@ -22,6 +22,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly raffleShowMicroservice: NodejsFunction;
   public readonly raffleAvailableNumbersMicroservice: NodejsFunction;
   public readonly ticketNewMicroservice: NodejsFunction;
+  public readonly ticketCompleteMicroservice: NodejsFunction;
   public readonly paymentNewMicroservice: NodejsFunction;
   public readonly processPaymentMicroservice: NodejsFunction;
   public readonly paymentSuccessMicroservice: NodejsFunction;
@@ -38,6 +39,7 @@ export class RaffleHubMicroservices extends Construct {
       props.ticketTable,
     );
     this.ticketNewMicroservice = this.createNewTicketFunction(props.raffleTable, props.ticketTable);
+    this.ticketCompleteMicroservice = this.createTicketCompleteFunction(props.ticketTable);
     this.paymentNewMicroservice = this.createNewPaymentFunction(
       props.paymentTable,
       props.stripeKeySecret,
@@ -162,6 +164,26 @@ export class RaffleHubMicroservices extends Construct {
     return lambdaFunction;
   }
 
+  private createTicketCompleteFunction(ticketTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        DYNAMODB_TABLE_NAME: ticketTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'TicketCompleteLambdaFunction', {
+      entry: join(__dirname, `/../back/ticket/complete.ts`),
+      ...nodeJsFunctionProps,
+    });
+
+    ticketTable.grantReadWriteData(lambdaFunction);
+
+    return lambdaFunction;
+  }
+
   private createProcessPaymentFunction(
     stripeKeySecret: ISecret,
     stripeWebookKeySecret: ISecret,
@@ -211,7 +233,7 @@ export class RaffleHubMicroservices extends Construct {
       runtime: Runtime.NODEJS_20_X,
     };
     const lambdaFunction = new NodejsFunction(this, 'PendingPaymentLambdaFunction', {
-      entry: join(__dirname, `/../back/payment/pending-payment.ts`),
+      entry: join(__dirname, `/../back/payment/pending.ts`),
       ...nodeJsFunctionProps,
     });
     paymentTable.grantReadWriteData(lambdaFunction);

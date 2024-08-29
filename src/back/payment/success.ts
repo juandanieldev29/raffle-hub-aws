@@ -1,85 +1,66 @@
 import { SQSEvent, SQSHandler } from 'aws-lambda';
 import {
-  ScanCommand,
-  ScanCommandInput,
-  BatchWriteItemCommand,
-  BatchWriteItemCommandInput,
-  WriteRequest,
+  GetItemCommand,
+  GetItemCommandInput,
+  PutItemCommand,
+  PutItemCommandInput,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
-import { IProcessPaymentPayload, ITicket, ITicketStatus } from '../types';
+import { IPayment, IPaymentStatus, IPaymentSuccessPayload } from '../types';
 
-interface IProcessPaymentPayloadBody {
-  detail: IProcessPaymentPayload;
+interface IPaymentSuccessPayloadBody {
+  detail: IPaymentSuccessPayload;
 }
 
 export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
   for (const message of event.Records) {
-    const expireTicketEventRequest: IProcessPaymentPayloadBody = JSON.parse(message.body);
+    const expireTicketEventRequest: IPaymentSuccessPayloadBody = JSON.parse(message.body);
     const messageDetail = expireTicketEventRequest.detail;
-    const tickets = await getTicketByRaffleAndPayment(messageDetail);
-    if (tickets.length) {
-      await setTicketsStatusToComplete(tickets);
+    const payment = await getPaymentById(messageDetail);
+    if (payment && payment.status !== IPaymentStatus.Complete) {
+      await setPaymentStatusToComplete(payment, messageDetail);
     }
   }
 };
 
-const setTicketsStatusToComplete = async (tickets: Array<ITicket>) => {
-  let putRequestItems: Record<string, WriteRequest[]> | undefined = {
-    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: tickets.map(
-      ({ id, number, payment, raffle, createdAt }) => {
-        const ticket: ITicket = {
-          id,
-          number,
-          payment,
-          raffle,
-          status: ITicketStatus.Complete,
-          createdAt,
-          updatedAt: new Date().toISOString(),
-        };
-        return {
-          PutRequest: {
-            Item: marshall(ticket),
-          },
-        };
-      },
-    ),
+const setPaymentStatusToComplete = async (
+  payment: IPayment,
+  paymentSuccessPayload: IPaymentSuccessPayload,
+) => {
+  const pendingPayment: IPayment = {
+    id: payment.id,
+    raffle: payment.raffle,
+    currency: payment.currency,
+    buyer: payment.buyer,
+    customerDetails: paymentSuccessPayload.customerDetails,
+    total: paymentSuccessPayload.total,
+    status: IPaymentStatus.Complete,
+    url: payment.url,
+    createdAt: payment.createdAt,
+    updatedAt: new Date().toISOString(),
+    expiresAt: payment.expiresAt,
   };
-  do {
-    const batchItemsCommandParams: BatchWriteItemCommandInput = {
-      RequestItems: putRequestItems,
-    };
-    const batchWriteResponse = await ddbClient.send(
-      new BatchWriteItemCommand(batchItemsCommandParams),
-    );
-    putRequestItems = batchWriteResponse.UnprocessedItems;
-  } while (putRequestItems && Object.keys(putRequestItems).length != 0);
+  const params: PutItemCommandInput = {
+    TableName: process.env.DYNAMODB_TABLE_NAME,
+    Item: marshall(pendingPayment),
+  };
+  await ddbClient.send(new PutItemCommand(params));
 };
 
-const getTicketByRaffleAndPayment = async (
-  paymentSuccessPayload: IProcessPaymentPayload,
-): Promise<Array<ITicket>> => {
-  const { payment, raffle } = paymentSuccessPayload;
-  const scanCommandParams: ScanCommandInput = {
-    TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
-    FilterExpression: `raffle.id = :raffleId and payment.id = :paymentId and #status = :status`,
-    ExpressionAttributeNames: {
-      '#status': 'status',
-    },
-    ExpressionAttributeValues: marshall({
-      ':raffleId': raffle.id,
-      ':paymentId': payment.id,
-      ':status': ITicketStatus.PendingPayment,
-    }),
+const getPaymentById = async (
+  paymentSuccessPayload: IPaymentSuccessPayload,
+): Promise<IPayment | null> => {
+  const { payment: payloadPayment } = paymentSuccessPayload;
+  const scanCommandParams: GetItemCommandInput = {
+    TableName: process.env.DYNAMODB_TABLE_NAME,
+    Key: marshall({ id: payloadPayment.id }),
   };
-  const { Items } = await ddbClient.send(new ScanCommand(scanCommandParams));
-  if (!Items) {
-    return [];
+  const { Item } = await ddbClient.send(new GetItemCommand(scanCommandParams));
+  if (!Item) {
+    return null;
   }
-  return Items.map((item) => {
-    const ticket = unmarshall(item) as ITicket;
-    return ticket;
-  });
+  const payment: IPayment = unmarshall(Item) as IPayment;
+  return payment;
 };
