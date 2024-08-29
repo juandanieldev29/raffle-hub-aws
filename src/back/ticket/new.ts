@@ -14,7 +14,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ddbClient } from './ddbClient';
 import { eventBridgeClient } from './eventBridgeClient';
-import { IExpireTicketPayload, IRaffle, ITicket, ITicketStatus } from '../types';
+import {
+  IExpireTicketPayload,
+  IPendingPaymentPayload,
+  IRaffle,
+  ITicket,
+  ITicketStatus,
+} from '../types';
 import { CORS_HEADERS } from '../constants';
 
 interface NewTicketItem {
@@ -80,26 +86,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     await writeTicketsInBatch(body, raffle);
     const paymentId = body[0].paymentId;
-    const expireTicketPayload: IExpireTicketPayload = {
-      raffle: {
-        id: raffle.id,
-      },
-      payment: {
-        id: paymentId,
-      },
-    };
-    const expireTicketParams: PutEventsCommandInput = {
-      Entries: [
-        {
-          Source: 'com.rafflehub.ticket.expireTicket',
-          Detail: JSON.stringify(expireTicketPayload),
-          DetailType: 'ExpireTicket',
-          Resources: [],
-          EventBusName: 'RaffleHubEventBus',
-        },
-      ],
-    };
-    await eventBridgeClient.send(new PutEventsCommand(expireTicketParams));
+    await Promise.all([
+      await publishExpireTicketEvent(raffle.id, paymentId),
+      await publishPendingPaymentEvent(raffle.id, paymentId),
+    ]);
     return {
       statusCode: 201,
       body: JSON.stringify(raffle),
@@ -113,6 +103,52 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       headers: CORS_HEADERS,
     };
   }
+};
+
+const publishExpireTicketEvent = async (raffleId: string, paymentId: string) => {
+  const expireTicketPayload: IExpireTicketPayload = {
+    raffle: {
+      id: raffleId,
+    },
+    payment: {
+      id: paymentId,
+    },
+  };
+  const expireTicketParams: PutEventsCommandInput = {
+    Entries: [
+      {
+        Source: 'com.rafflehub.ticket.expireTicket',
+        Detail: JSON.stringify(expireTicketPayload),
+        DetailType: 'ExpireTicket',
+        Resources: [],
+        EventBusName: 'RaffleHubEventBus',
+      },
+    ],
+  };
+  await eventBridgeClient.send(new PutEventsCommand(expireTicketParams));
+};
+
+const publishPendingPaymentEvent = async (raffleId: string, paymentId: string) => {
+  const pendingPaymentPayload: IPendingPaymentPayload = {
+    raffle: {
+      id: raffleId,
+    },
+    payment: {
+      id: paymentId,
+    },
+  };
+  const pendingPaymentParams: PutEventsCommandInput = {
+    Entries: [
+      {
+        Source: 'com.rafflehub.payment.pending',
+        Detail: JSON.stringify(pendingPaymentPayload),
+        DetailType: 'PendingPayment',
+        Resources: [],
+        EventBusName: 'RaffleHubEventBus',
+      },
+    ],
+  };
+  await eventBridgeClient.send(new PutEventsCommand(pendingPaymentParams));
 };
 
 const getUniqueNumbers = (numbers: Array<number>) => {
@@ -145,12 +181,14 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
   const numbersRangeQueryKeys = Object.keys(formatNumbersFilter(numbersToBuy));
   const scanCommandParams: ScanCommandInput = {
     TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
-    FilterExpression: `raffle.id = :raffleId and #number in (${numbersRangeQueryKeys.join(',')})`,
+    FilterExpression: `raffle.id = :raffleId and #status <> :status and #number in (${numbersRangeQueryKeys.join(',')})`,
     ExpressionAttributeNames: {
+      '#status': 'status',
       '#number': 'number',
     },
     ExpressionAttributeValues: marshall({
       ':raffleId': id,
+      ':status': ITicketStatus.Expired,
       ...numbersRangeQuery,
     }),
     ProjectionExpression: 'raffle, #number',

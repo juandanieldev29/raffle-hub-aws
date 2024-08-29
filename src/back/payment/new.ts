@@ -135,6 +135,7 @@ const createPayment = async (
     customerDetails: null,
     total: null,
     status: IPaymentStatus.Created,
+    url: session.url,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     expiresAt: session.expires_at,

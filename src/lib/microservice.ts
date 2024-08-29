@@ -25,6 +25,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly paymentNewMicroservice: NodejsFunction;
   public readonly processPaymentMicroservice: NodejsFunction;
   public readonly paymentSuccessMicroservice: NodejsFunction;
+  public readonly pendingPaymentMicroservice: NodejsFunction;
   public readonly ticketExpireMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
@@ -48,6 +49,7 @@ export class RaffleHubMicroservices extends Construct {
       props.stripeWebookKeySecret,
     );
     this.paymentSuccessMicroservice = this.createPaymentSuccessFunction(props.ticketTable);
+    this.pendingPaymentMicroservice = this.createPendingPaymentFunction(props.paymentTable);
     this.ticketExpireMicroservice = this.createExpireTicketFunction(props.ticketTable);
   }
 
@@ -195,6 +197,24 @@ export class RaffleHubMicroservices extends Construct {
       ...nodeJsFunctionProps,
     });
     ticketTable.grantReadWriteData(lambdaFunction);
+    return lambdaFunction;
+  }
+
+  private createPendingPaymentFunction(paymentTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        DYNAMODB_TABLE_NAME: paymentTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'PendingPaymentLambdaFunction', {
+      entry: join(__dirname, `/../back/payment/pending-payment.ts`),
+      ...nodeJsFunctionProps,
+    });
+    paymentTable.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 

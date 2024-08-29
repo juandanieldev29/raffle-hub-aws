@@ -9,6 +9,8 @@ interface RaffleHubEventBusProps {
   expireTicketQueue: IQueue;
   paymentSuccessPublisher: IFunction;
   paymentSuccessQueue: IQueue;
+  pendingPaymentPublisher: IFunction;
+  pendingPaymentQueue: IQueue;
 }
 
 export class RaffleHubEventBus extends Construct {
@@ -26,6 +28,11 @@ export class RaffleHubEventBus extends Construct {
       this.eventBus,
       props.paymentSuccessPublisher,
       props.paymentSuccessQueue,
+    );
+    this.createPendingPaymentRule(
+      this.eventBus,
+      props.pendingPaymentPublisher,
+      props.pendingPaymentQueue,
     );
   }
 
@@ -73,5 +80,24 @@ export class RaffleHubEventBus extends Construct {
     });
     paymentSuccessfulRule.addTarget(new SqsQueue(paymentSuccessQueue));
     eventBus.grantPutEventsTo(paymentSuccessPublisher);
+  }
+
+  private createPendingPaymentRule(
+    eventBus: EventBus,
+    pendingPaymentPublisher: IFunction,
+    pendingPaymentQueue: IQueue,
+  ) {
+    const pendingPaymentRule = new Rule(this, 'PendingPayment', {
+      eventBus: eventBus,
+      enabled: true,
+      description: 'When tickets get assigned a payment id',
+      eventPattern: {
+        source: ['com.rafflehub.payment.pending'],
+        detailType: ['PendingPayment'],
+      },
+      ruleName: 'PendingPaymentRule',
+    });
+    pendingPaymentRule.addTarget(new SqsQueue(pendingPaymentQueue));
+    eventBus.grantPutEventsTo(pendingPaymentPublisher);
   }
 }
