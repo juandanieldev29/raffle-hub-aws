@@ -26,7 +26,7 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
 };
 
 const setPaymentStatusToPendingPayment = async (payment: IPayment) => {
-  const pendingPayment = {
+  const pendingPayment: IPayment = {
     id: payment.id,
     raffle: payment.raffle,
     currency: payment.currency,

@@ -4,7 +4,7 @@ import { PutEventsCommand, PutEventsCommandInput } from '@aws-sdk/client-eventbr
 import Stripe from 'stripe';
 
 import { eventBridgeClient } from './eventBridgeClient';
-import { IProcessPaymentPayload } from '../types';
+import { IPaymentSuccessPayload } from '../types';
 import { CORS_HEADERS } from '../constants';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -59,19 +59,28 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           headers: CORS_HEADERS,
         };
       }
-      const processPaymentPayload: IProcessPaymentPayload = {
+      const customerDetails = stripeEvent.data.object.customer_details;
+      const paymentSuccessPayload: IPaymentSuccessPayload = {
         raffle: {
           id: raffleId,
         },
         payment: {
           id: paymentId,
         },
+        customerDetails: customerDetails
+          ? {
+              country: customerDetails.address?.country ?? null,
+              email: customerDetails.email,
+              name: customerDetails.name,
+            }
+          : null,
+        total: stripeEvent.data.object.amount_total,
       };
       const expireTicketParams: PutEventsCommandInput = {
         Entries: [
           {
             Source: 'com.rafflehub.payment.success',
-            Detail: JSON.stringify(processPaymentPayload),
+            Detail: JSON.stringify(paymentSuccessPayload),
             DetailType: 'PaymentSuccess',
             Resources: [],
             EventBusName: 'RaffleHubEventBus',

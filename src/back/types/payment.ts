@@ -8,9 +8,9 @@ export interface IPayment {
     id: string;
   } | null;
   customerDetails: {
-    country: string;
-    email: string;
-    name: string;
+    country: string | null;
+    email: string | null;
+    name: string | null;
   } | null;
   total: number | null;
   status: IPaymentStatus;
@@ -18,15 +18,6 @@ export interface IPayment {
   createdAt: string;
   updatedAt: string;
   expiresAt: number;
-}
-
-export interface IProcessPaymentPayload {
-  raffle: {
-    id: string;
-  };
-  payment: {
-    id: string;
-  };
 }
 
 export interface IPendingPaymentPayload {
@@ -38,19 +29,23 @@ export interface IPendingPaymentPayload {
   };
 }
 
-export interface IPaymentSuccess {
-  id: string;
-  buyer: {
-    name: string;
-    email: string;
+export interface IPaymentSuccessPayload {
+  raffle: {
+    id: string;
+  };
+  payment: {
+    id: string;
+  };
+  customerDetails: {
+    country: string | null;
+    email: string | null;
+    name: string | null;
   } | null;
   total: number | null;
-  status: IPaymentStatus;
-  updatedAt: string;
 }
 
 export enum IPaymentStatus {
-  Paid = 'Paid',
+  Complete = 'Complete',
   PendingPayment = 'PendingPayment',
   Created = 'Created',
 }

@@ -22,6 +22,15 @@ export interface IExpireTicketPayload {
   };
 }
 
+export interface ICompleteTicketPayload {
+  raffle: {
+    id: string;
+  };
+  payment: {
+    id: string;
+  };
+}
+
 export enum ITicketStatus {
   Complete = 'Complete',
   PendingPayment = 'PendingPayment',

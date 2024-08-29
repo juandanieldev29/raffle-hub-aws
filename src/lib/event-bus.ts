@@ -7,6 +7,7 @@ import { Construct } from 'constructs';
 interface RaffleHubEventBusProps {
   expireTicketPublisher: IFunction;
   expireTicketQueue: IQueue;
+  ticketCompleteQueue: IQueue;
   paymentSuccessPublisher: IFunction;
   paymentSuccessQueue: IQueue;
   pendingPaymentPublisher: IFunction;
@@ -28,6 +29,7 @@ export class RaffleHubEventBus extends Construct {
       this.eventBus,
       props.paymentSuccessPublisher,
       props.paymentSuccessQueue,
+      props.ticketCompleteQueue,
     );
     this.createPendingPaymentRule(
       this.eventBus,
@@ -67,6 +69,7 @@ export class RaffleHubEventBus extends Construct {
     eventBus: EventBus,
     paymentSuccessPublisher: IFunction,
     paymentSuccessQueue: IQueue,
+    ticketCompleteQueue: IQueue,
   ) {
     const paymentSuccessfulRule = new Rule(this, 'PaymentSuccessful', {
       eventBus: eventBus,
@@ -79,6 +82,7 @@ export class RaffleHubEventBus extends Construct {
       ruleName: 'PaymentSuccessRule',
     });
     paymentSuccessfulRule.addTarget(new SqsQueue(paymentSuccessQueue));
+    paymentSuccessfulRule.addTarget(new SqsQueue(ticketCompleteQueue));
     eventBus.grantPutEventsTo(paymentSuccessPublisher);
   }
 
