@@ -210,7 +210,7 @@ export class RaffleHubMicroservices extends Construct {
         externalModules: ['aws-sdk'],
       },
       environment: {
-        TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
+        DYNAMODB_TABLE_NAME: ticketTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
     };
