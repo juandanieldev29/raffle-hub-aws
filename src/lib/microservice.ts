@@ -50,7 +50,7 @@ export class RaffleHubMicroservices extends Construct {
       props.stripeKeySecret,
       props.stripeWebookKeySecret,
     );
-    this.paymentSuccessMicroservice = this.createPaymentSuccessFunction(props.ticketTable);
+    this.paymentSuccessMicroservice = this.createPaymentSuccessFunction(props.paymentTable);
     this.pendingPaymentMicroservice = this.createPendingPaymentFunction(props.paymentTable);
     this.ticketExpireMicroservice = this.createExpireTicketFunction(props.ticketTable);
   }
@@ -204,13 +204,13 @@ export class RaffleHubMicroservices extends Construct {
     return lambdaFunction;
   }
 
-  private createPaymentSuccessFunction(ticketTable: ITable): NodejsFunction {
+  private createPaymentSuccessFunction(paymentTable: ITable): NodejsFunction {
     const nodeJsFunctionProps: NodejsFunctionProps = {
       bundling: {
         externalModules: ['aws-sdk'],
       },
       environment: {
-        DYNAMODB_TABLE_NAME: ticketTable.tableName,
+        DYNAMODB_TABLE_NAME: paymentTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
     };
@@ -218,7 +218,7 @@ export class RaffleHubMicroservices extends Construct {
       entry: join(__dirname, `/../back/payment/success.ts`),
       ...nodeJsFunctionProps,
     });
-    ticketTable.grantReadWriteData(lambdaFunction);
+    paymentTable.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 
