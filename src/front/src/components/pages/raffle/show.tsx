@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { toast } from 'react-toastify';
 
 import { navigateTo } from '@/app/actions';
@@ -53,7 +54,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     setDisplayModal(false);
   };
 
-  const generatePaymentLink = async () => {
+  const generatePaymentLink = async (idToken?: string) => {
     const payload = selectedNumbers.map((selectedNumber) => {
       return {
         number: selectedNumber,
@@ -63,6 +64,11 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const res = await fetch(`https://api.raffle-hub.net/payment/${raffle.id}`, {
+        headers: idToken
+          ? {
+              Authorization: `Bearer ${idToken}`,
+            }
+          : undefined,
         cache: 'no-store',
         method: 'POST',
         body: JSON.stringify(payload),
@@ -107,9 +113,26 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     }
   };
 
+  const fetchSession = async () => {
+    try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
+      const session = await fetchAuthSession();
+      return session.tokens?.idToken?.toString();
+    } catch (err) {
+      toast.error('No se pudo obtener la sesión del usuario', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+      throw err;
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
+    }
+  };
+
   const confirmPurchase = async () => {
     try {
-      const payment = await generatePaymentLink();
+      const idToken = await fetchSession();
+      const payment = await generatePaymentLink(idToken);
       await generateTicket(payment.id);
       navigateTo(payment.url);
     } catch (err) {

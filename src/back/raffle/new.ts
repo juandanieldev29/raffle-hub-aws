@@ -4,6 +4,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ddbClient } from './ddbClient';
+import { IRaffle } from '../types';
 import { CORS_HEADERS } from '../constants';
 
 interface CreateRaffleBody {
@@ -60,7 +61,7 @@ export const handler = async (
       };
     }
     const id = uuidv4();
-    const raffle = {
+    const raffle: IRaffle = {
       id,
       prize,
       quantityNumbers,

@@ -41,7 +41,7 @@ export default function RaffleNew() {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const session = await fetchAuthSession();
       if (!session.tokens?.idToken) {
-        toast.error('Debes iniciar sesion para crear una rifa', {
+        toast.error('Debes iniciar sesión para crear una rifa', {
           position: 'top-center',
           theme: 'colored',
         });

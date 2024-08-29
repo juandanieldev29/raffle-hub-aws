@@ -17,7 +17,7 @@ export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
     const cognito = new RaffleHubCognito(this, 'Cognito');
-    const { raffleTable, ticketTable } = new RaffleHubDatabase(this, 'Database');
+    const { raffleTable, ticketTable, paymentTable } = new RaffleHubDatabase(this, 'Database');
 
     const { githubTokenSecret, stripeKeySecret, stripeWebookKeySecret } = new RaffleHubSecrets(
       this,
@@ -37,8 +37,11 @@ export class AwsMicroservicesStack extends Stack {
     } = new RaffleHubMicroservices(this, 'Microservices', {
       raffleTable: raffleTable,
       ticketTable: ticketTable,
+      paymentTable: paymentTable,
       stripeKeySecret: stripeKeySecret,
       stripeWebookKeySecret: stripeWebookKeySecret,
+      userPoolId: cognito.userPool.userPoolId,
+      userPoolClientId: cognito.userPoolClient.userPoolClientId,
     });
 
     const { expireTicketQueue, paymentSuccessQueue } = new RaffleHubQueue(this, 'Queue', {
