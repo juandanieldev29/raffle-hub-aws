@@ -75,7 +75,7 @@ export class RaffleHubAmplifyHostingStack extends Stack {
                 },
                 build: {
                   commands: [
-                    'env | grep -e USER_POOL_ID -e USER_POOL_CLIENT_ID -e IDENTITY_POOL_ID -e USER_POOL_DOMAIN_URL >> .env.production',
+                    'env | grep -e USER_POOL_ID -e USER_POOL_CLIENT_ID -e IDENTITY_POOL_ID -e USER_POOL_DOMAIN_URL >> .env',
                     'npm run build',
                   ],
                 },
