@@ -58,6 +58,10 @@ export class RaffleHubAmplifyHostingStack extends Stack {
         NEXT_PUBLIC_USER_POOL_CLIENT_ID: userPoolClientId,
         NEXT_PUBLIC_IDENTITY_POOL_ID: identityPoolId,
         NEXT_PUBLIC_USER_POOL_DOMAIN_URL: userPoolDomainUrl,
+        USER_POOL_ID: userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClientId,
+        IDENTITY_POOL_ID: identityPoolId,
+        USER_POOL_DOMAIN_URL: userPoolDomainUrl,
       },
       platform: Platform.WEB_COMPUTE,
       buildSpec: BuildSpec.fromObjectToYaml({
@@ -70,7 +74,10 @@ export class RaffleHubAmplifyHostingStack extends Stack {
                   commands: ['npm ci --cache .npm --prefer-offline'],
                 },
                 build: {
-                  commands: ['npm run build'],
+                  commands: [
+                    'env | grep -e USER_POOL_ID -e USER_POOL_CLIENT_ID -e IDENTITY_POOL_ID -e USER_POOL_DOMAIN_URL >> .env.production',
+                    'npm run build',
+                  ],
                 },
               },
               artifacts: {

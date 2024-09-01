@@ -106,6 +106,15 @@ export default function Header() {
               </li>
               <li className="margin-bottom">
                 <Link
+                  href="/raffle"
+                  onClick={toggleMenu}
+                  className="text-4xl transition-all font-thin text-slate-100 dark:text-slate-400 md:hover:font-normal md:hover:border-b"
+                >
+                  Mis rifas
+                </Link>
+              </li>
+              <li className="margin-bottom">
+                <Link
                   href="/raffle/new"
                   onClick={toggleMenu}
                   className="text-4xl transition-all font-thin text-slate-100 dark:text-slate-400 md:hover:font-normal md:hover:border-b"

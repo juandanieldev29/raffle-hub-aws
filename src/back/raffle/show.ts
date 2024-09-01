@@ -5,25 +5,6 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { ddbClient } from './ddbClient';
 import { CORS_HEADERS } from '../constants';
 
-export interface IRaffle {
-  id: string;
-  owner: {
-    id: string;
-    email: string;
-    name: string;
-    photoURL?: string;
-  };
-  prize: number;
-  description: string;
-  quantityNumbers: number;
-  quantitySeries?: number;
-  ticketPrice: number;
-  boughtTickets: number;
-  lastAvailableNumber: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const id = event.pathParameters?.id;
