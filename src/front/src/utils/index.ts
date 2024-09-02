@@ -32,3 +32,8 @@ export function replacer(_: string, value: string | null) {
   }
   return value;
 }
+
+export function differenceInDays(firstDate: Date, secondDate: Date) {
+  const differenceInDays = secondDate.getTime() - firstDate.getTime();
+  return Math.round(differenceInDays / (1000 * 3600 * 24));
+}
