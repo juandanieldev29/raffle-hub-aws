@@ -44,9 +44,12 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
     urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
-      const res = await fetch(`https://api.raffle-hub.net/raffle?${urlSearchParams.toString()}`, {
-        cache: 'no-store',
-      });
+      const res = await fetch(
+        `https://api.raffle-hub.net/raffle/owned?${urlSearchParams.toString()}`,
+        {
+          cache: 'no-store',
+        },
+      );
       const { raffles, lastEvaluatedKey }: RafflesPaginationResult = await res.json();
       if (raffles.length) {
         setExclusiveStartKey(lastEvaluatedKey);

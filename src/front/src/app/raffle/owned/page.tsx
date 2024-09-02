@@ -17,9 +17,13 @@ export default async function OwnedRaffle() {
     lastEvaluatedKey: null,
   };
 
-  if (session.userSub) {
+  if (session.tokens?.idToken) {
     const res = await fetch(`https://api.raffle-hub.net/raffle/owned?limit=${INITIAL_LIMIT}`, {
-      headers: headers(),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.tokens.idToken}`,
+        ...headers(),
+      },
       cache: 'no-store',
     });
     rafflesPaginated = await res.json();

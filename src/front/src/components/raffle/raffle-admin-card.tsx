@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 
 import { IRaffle } from '@/types/raffle';
-import { formatNumber, formatDate, differenceInDays } from '@/utils';
+import { differenceInDays } from '@/utils';
 
 import 'chart.js/auto';
 
