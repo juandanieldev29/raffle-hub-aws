@@ -18,6 +18,7 @@ interface RaffleHubApiGatewayProps {
   raffleIndexMicroservice: IFunction;
   raffleNewMicroservice: IFunction;
   raffleShowMicroservice: IFunction;
+  raffleOwnedMicroservice: IFunction;
   raffleAvailableNumbersMicroservice: IFunction;
   ticketNewMicroservice: IFunction;
   paymentNewMicroservice: IFunction;
@@ -33,6 +34,7 @@ export class RaffleHubApiGateway extends Construct {
       props.raffleIndexMicroservice,
       props.raffleNewMicroservice,
       props.raffleShowMicroservice,
+      props.raffleOwnedMicroservice,
       props.raffleAvailableNumbersMicroservice,
       props.ticketNewMicroservice,
       props.paymentNewMicroservice,
@@ -120,6 +122,7 @@ export class RaffleHubApiGateway extends Construct {
     raffleIndexMicroservice: IFunction,
     raffleNewMicroservice: IFunction,
     raffleShowMicroservice: IFunction,
+    raffleOwnedMicroservice: IFunction,
     raffleAvailableNumbersMicroservice: IFunction,
     ticketNewMicroservice: IFunction,
     paymentNewMicroservice: IFunction,
@@ -169,6 +172,12 @@ export class RaffleHubApiGateway extends Construct {
     });
     const singleRaffle = raffle.addResource('{id}');
     singleRaffle.addMethod('GET', new LambdaIntegration(raffleShowMicroservice));
+
+    const ownedRaffle = raffle.addResource('owned');
+    ownedRaffle.addMethod('GET', new LambdaIntegration(raffleOwnedMicroservice), {
+      authorizer: endpointAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     const raffleAvailableNumbers = singleRaffle.addResource('available-numbers');
     raffleAvailableNumbers.addMethod(

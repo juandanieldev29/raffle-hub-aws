@@ -1,18 +1,38 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyWithCognitoAuthorizerEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { ScanCommand, ScanCommandInput } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
 import { CORS_HEADERS, DEFAULT_PAGINATION_LIMIT, MAX_PAGINATION_LIMIT } from '../constants';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+interface CognitoUserSession {
+  sub: string;
+  email: string;
+  given_name: string;
+  family_name?: string;
+  picture?: string;
+}
+
+export const handler = async (
+  event: APIGatewayProxyWithCognitoAuthorizerEvent,
+): Promise<APIGatewayProxyResult> => {
   try {
+    const userSession: CognitoUserSession = event.requestContext.authorizer.claims as {
+      [x in keyof CognitoUserSession]: string;
+    };
     const limitQueryString = event.queryStringParameters?.limit;
     const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
     const limit = getPaginationLimit(limitQueryString);
     const params: ScanCommandInput = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
       Limit: limit,
+      FilterExpression: `#owner.id = :ownerId`,
+      ExpressionAttributeNames: {
+        '#owner': 'owner',
+      },
+      ExpressionAttributeValues: marshall({
+        ':ownerId': userSession.sub,
+      }),
       ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
     };
     const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));

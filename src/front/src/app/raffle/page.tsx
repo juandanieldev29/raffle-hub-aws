@@ -14,8 +14,6 @@ export default async function MyRaffle() {
     return (
       <>
         <h1>Hola {session.userSub}</h1>
-        <p>User pool id: {process.env.USER_POOL_ID}</p>
-        <p>User pool client id: {process.env.USER_POOL_CLIENT_ID}</p>
       </>
     );
   } catch (error) {
