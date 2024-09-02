@@ -18,15 +18,19 @@ export default async function OwnedRaffle() {
   };
 
   if (session.tokens?.idToken) {
-    const res = await fetch(`https://api.raffle-hub.net/raffle/owned?limit=${INITIAL_LIMIT}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.tokens.idToken}`,
-        ...headers(),
-      },
-      cache: 'no-store',
-    });
-    rafflesPaginated = await res.json();
+    try {
+      const res = await fetch(`https://api.raffle-hub.net/raffle/owned?limit=${INITIAL_LIMIT}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.tokens.idToken}`,
+          ...headers(),
+        },
+        cache: 'no-store',
+      });
+      rafflesPaginated = await res.json();
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
