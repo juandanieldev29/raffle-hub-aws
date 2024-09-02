@@ -2,6 +2,7 @@
 
 import { useContext, useState, useEffect } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { toast } from 'react-toastify';
 
 import RaffleAdminCard from '@/components/raffle/raffle-admin-card';
@@ -10,6 +11,7 @@ import { RafflesPaginationResult } from '@/types/pagination';
 import { INITIAL_LIMIT } from '@/utils/constants';
 import { LoadingContext } from '@/contexts/loading-context';
 import { LoadingAction } from '@/enums/loading-action';
+import { AuthSession } from 'aws-amplify/auth';
 
 interface RaffleOwnedProps {
   rafflesPaginated: RafflesPaginationResult;
@@ -23,6 +25,7 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
   const [paginationHistory, setPaginationHistory] = useState<
     Array<RafflesPaginationResult['lastEvaluatedKey']>
   >([]);
+  const [session, setSession] = useState<AuthSession | null>(null);
 
   const prepareURLParams = (
     urlSearchParams: URLSearchParams,
@@ -47,6 +50,11 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
       const res = await fetch(
         `https://api.raffle-hub.net/raffle/owned?${urlSearchParams.toString()}`,
         {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.tokens?.idToken}`,
+          },
+          credentials: 'same-origin',
           cache: 'no-store',
         },
       );
@@ -98,9 +106,28 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
     fetchRaffles(previousExclusiveStartKey, true);
   };
 
+  const retrieveAndSetSession = async () => {
+    try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
+      const session = await fetchAuthSession();
+      setSession(session);
+    } catch (err) {
+      toast.error('No se pudo obtener la sesión del usuario', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
+    }
+  };
+
   useEffect(() => {
     setPaginationHistory([rafflesPaginated.lastEvaluatedKey]);
   }, [rafflesPaginated.lastEvaluatedKey]);
+
+  useEffect(() => {
+    retrieveAndSetSession();
+  }, []);
 
   return (
     <Authenticator socialProviders={['google']} signUpAttributes={['email']}>
