@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { fetchAuthSession } from 'aws-amplify/auth/server';
 
 import RaffleOwned from '@/components/pages/raffle/owned';
@@ -23,7 +23,6 @@ export default async function OwnedRaffle() {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.tokens.idToken}`,
-          ...headers(),
         },
         cache: 'no-store',
       });
