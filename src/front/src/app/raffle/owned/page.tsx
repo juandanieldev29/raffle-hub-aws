@@ -7,34 +7,30 @@ import { INITIAL_LIMIT } from '@/utils/constants';
 import { RafflesPaginationResult } from '@/types/pagination';
 
 export default async function OwnedRaffle() {
-  try {
-    const session = await runWithAmplifyServerContext({
-      nextServerContext: { cookies },
-      operation: (contextSpec) => fetchAuthSession(contextSpec),
+  const session = await runWithAmplifyServerContext({
+    nextServerContext: { cookies },
+    operation: (contextSpec) => fetchAuthSession(contextSpec),
+  });
+
+  let rafflesPaginated: RafflesPaginationResult = {
+    raffles: [],
+    lastEvaluatedKey: null,
+  };
+
+  if (session.tokens?.idToken) {
+    const res = await fetch(`https://api.raffle-hub.net/raffle/owned?limit=${INITIAL_LIMIT}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.tokens.idToken}`,
+      },
+      cache: 'no-store',
     });
-
-    let rafflesPaginated: RafflesPaginationResult = {
-      raffles: [],
-      lastEvaluatedKey: null,
-    };
-
-    if (session.tokens?.idToken) {
-      const res = await fetch(`https://api.raffle-hub.net/raffle/owned?limit=${INITIAL_LIMIT}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-        cache: 'no-store',
-      });
-      rafflesPaginated = await res.json();
-    }
-
-    return (
-      <main className="margin-top margin-bottom">
-        <RaffleOwned rafflesPaginated={rafflesPaginated} />
-      </main>
-    );
-  } catch (err: any) {
-    return <p>Something went wrong {err.toString()}</p>;
+    rafflesPaginated = await res.json();
   }
+
+  return (
+    <main className="margin-top margin-bottom">
+      <RaffleOwned rafflesPaginated={rafflesPaginated} />
+    </main>
+  );
 }
