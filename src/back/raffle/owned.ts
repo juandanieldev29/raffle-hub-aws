@@ -4,6 +4,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
 import { CORS_HEADERS, DEFAULT_PAGINATION_LIMIT, MAX_PAGINATION_LIMIT } from '../constants';
+import { IRaffle } from '../types';
 
 interface CognitoUserSession {
   sub: string;
@@ -23,24 +24,16 @@ export const handler = async (
     const limitQueryString = event.queryStringParameters?.limit;
     const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
     const limit = getPaginationLimit(limitQueryString);
-    const params: ScanCommandInput = {
-      TableName: process.env.DYNAMODB_TABLE_NAME,
-      Limit: limit,
-      FilterExpression: `#owner.id = :ownerId`,
-      ExpressionAttributeNames: {
-        '#owner': 'owner',
-      },
-      ExpressionAttributeValues: marshall({
-        ':ownerId': userSession.sub,
-      }),
-      ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
-    };
-    const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
+    const { raffles, lastEvaluatedKey } = await fetchItems(
+      limit,
+      userSession.sub,
+      exclusiveStartKey,
+    );
     return {
       statusCode: 200,
       body: JSON.stringify({
-        raffles: Items.map((item) => unmarshall(item)),
-        lastEvaluatedKey: LastEvaluatedKey ? unmarshall(LastEvaluatedKey) : null,
+        raffles,
+        lastEvaluatedKey: lastEvaluatedKey ? { id: lastEvaluatedKey } : null,
       }),
       headers: CORS_HEADERS,
     };
@@ -52,6 +45,44 @@ export const handler = async (
       headers: CORS_HEADERS,
     };
   }
+};
+
+const fetchItems = async (
+  limit: number,
+  ownedId: string,
+  initialExclusiveStartKey: string | undefined,
+) => {
+  let exclusiveStartKey: string | null = initialExclusiveStartKey ? initialExclusiveStartKey : null;
+  let raffles: IRaffle[] = [];
+  do {
+    const params: ScanCommandInput = {
+      TableName: process.env.DYNAMODB_TABLE_NAME,
+      Limit: limit,
+      FilterExpression: `#owner.id = :ownerId`,
+      ExpressionAttributeNames: {
+        '#owner': 'owner',
+      },
+      ExpressionAttributeValues: marshall({
+        ':ownerId': ownedId,
+      }),
+      ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
+    };
+    const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
+    const items = Items.map((item) => {
+      const raffle = unmarshall(item) as IRaffle;
+      return raffle;
+    });
+    raffles = [...raffles, ...items];
+    const lastEvaluatedKey = LastEvaluatedKey
+      ? (unmarshall(LastEvaluatedKey) as { id: string })
+      : null;
+    exclusiveStartKey = lastEvaluatedKey ? lastEvaluatedKey.id : null;
+  } while (exclusiveStartKey !== null && raffles.length < limit);
+  const upperLimitItemId = raffles.at(limit - 1)?.id;
+  const lastEvaluatedKey =
+    raffles.length > limit && upperLimitItemId ? upperLimitItemId : exclusiveStartKey;
+  const rafflesUpperLimit = Math.min(raffles.length, limit);
+  return { raffles: raffles.slice(0, rafflesUpperLimit), lastEvaluatedKey };
 };
 
 const getPaginationLimit = (queryString: string | undefined): number => {
