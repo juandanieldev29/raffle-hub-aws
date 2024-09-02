@@ -25,7 +25,7 @@ const config: ResourcesConfig = {
   },
 };
 
-Amplify.configure(config);
+Amplify.configure(config, { ssr: true });
 
 export default function Template({ children }: { children: React.ReactNode }) {
   return (
