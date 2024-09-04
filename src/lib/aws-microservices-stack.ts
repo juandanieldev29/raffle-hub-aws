@@ -12,13 +12,17 @@ import { RaffleHubCognito } from './cognito';
 import { RaffleHubAmplifyHostingStack } from './amplify';
 import { RaffleHubQueue } from './queue';
 import { RaffleHubEventBus } from './event-bus';
+import { RaffleHubStorage } from './storage';
 
 export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
-    const cognito = new RaffleHubCognito(this, 'Cognito');
-    const { raffleTable, ticketTable, paymentTable } = new RaffleHubDatabase(this, 'Database');
 
+    const { raffleImageBucket } = new RaffleHubStorage(this, 'Storage');
+    const cognito = new RaffleHubCognito(this, 'Cognito', {
+      raffleImageBucket: raffleImageBucket,
+    });
+    const { raffleTable, ticketTable, paymentTable } = new RaffleHubDatabase(this, 'Database');
     const { githubTokenSecret, stripeKeySecret, stripeWebookKeySecret } = new RaffleHubSecrets(
       this,
       'Secret',
@@ -93,6 +97,7 @@ export class AwsMicroservicesStack extends Stack {
       userPoolClientId: cognito.userPoolClient.userPoolClientId,
       identityPoolId: cognito.identityPool.identityPoolId,
       userPoolDomainUrl: `${cognito.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`,
+      raffleImageBucketName: raffleImageBucket.bucketName,
     });
 
     new CfnOutput(this, 'region', { value: this.region });

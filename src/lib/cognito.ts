@@ -1,5 +1,6 @@
 import {
   IdentityPool,
+  IdentityPoolRoleAttachment,
   UserPoolAuthenticationProvider,
 } from '@aws-cdk/aws-cognito-identitypool-alpha';
 import { RemovalPolicy } from 'aws-cdk-lib';
@@ -12,8 +13,14 @@ import {
   UserPoolIdentityProviderGoogle,
   VerificationEmailStyle,
 } from 'aws-cdk-lib/aws-cognito';
+import { FederatedPrincipal, Role } from 'aws-cdk-lib/aws-iam';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
+
+interface RaffleHubCognitoProps {
+  raffleImageBucket: Bucket;
+}
 
 export class RaffleHubCognito extends Construct {
   public readonly userPool: UserPool;
@@ -21,16 +28,18 @@ export class RaffleHubCognito extends Construct {
   public readonly identityPool: IdentityPool;
   public readonly userPoolDomain: UserPoolDomain;
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: RaffleHubCognitoProps) {
     super(scope, id);
-    const { userPool, userPoolClient, identityPool, userPoolDomain } = this.createCognitoAuth();
+    const { userPool, userPoolClient, identityPool, userPoolDomain } = this.createCognitoAuth(
+      props.raffleImageBucket,
+    );
     this.userPool = userPool;
     this.userPoolClient = userPoolClient;
     this.identityPool = identityPool;
     this.userPoolDomain = userPoolDomain;
   }
 
-  private createCognitoAuth() {
+  private createCognitoAuth(raffleImageBucket: Bucket) {
     const userPool = new UserPool(this, 'CognitoAuth', {
       userPoolName: 'RaffleHubUserPool',
       selfSignUpEnabled: true,
@@ -97,6 +106,8 @@ export class RaffleHubCognito extends Construct {
         ],
       },
     });
+    raffleImageBucket.grantReadWrite(identityPool.authenticatedRole);
+    raffleImageBucket.grantReadWrite(identityPool.unauthenticatedRole);
     return { userPool, userPoolClient, identityPool, userPoolDomain };
   }
 }

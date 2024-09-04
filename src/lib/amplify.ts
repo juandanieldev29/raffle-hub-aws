@@ -15,6 +15,7 @@ interface HostingStackProps {
   readonly userPoolClientId: string;
   readonly identityPoolId: string;
   readonly userPoolDomainUrl: string;
+  readonly raffleImageBucketName: string;
 }
 
 export class RaffleHubAmplifyHostingStack extends Stack {
@@ -26,6 +27,7 @@ export class RaffleHubAmplifyHostingStack extends Stack {
       props.userPoolClientId,
       props.identityPoolId,
       props.userPoolDomainUrl,
+      props.raffleImageBucketName,
     );
   }
 
@@ -35,6 +37,7 @@ export class RaffleHubAmplifyHostingStack extends Stack {
     userPoolClientId: string,
     identityPoolId: string,
     userPoolDomainUrl: string,
+    raffleImageBucketName: string,
   ) {
     const amplifyApp = new App(this, 'AmplifyApp', {
       customRules: [
@@ -58,6 +61,8 @@ export class RaffleHubAmplifyHostingStack extends Stack {
         NEXT_PUBLIC_USER_POOL_CLIENT_ID: userPoolClientId,
         NEXT_PUBLIC_IDENTITY_POOL_ID: identityPoolId,
         NEXT_PUBLIC_USER_POOL_DOMAIN_URL: userPoolDomainUrl,
+        NEXT_PUBLIC_BUCKET_NAME: raffleImageBucketName,
+        NEXT_PUBLIC_BUCKET_REGION: this.region,
         USER_POOL_ID: userPoolId,
         USER_POOL_CLIENT_ID: userPoolClientId,
         IDENTITY_POOL_ID: identityPoolId,
