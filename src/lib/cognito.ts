@@ -106,41 +106,8 @@ export class RaffleHubCognito extends Construct {
         ],
       },
     });
-    const authenticatedRole = new Role(this, 'CognitoAuthenticatedRole', {
-      assumedBy: new FederatedPrincipal(
-        'cognito-identity.amazonaws.com',
-        {
-          StringEquals: {
-            'cognito-identity.amazonaws.com:aud': identityPool.identityPoolId,
-          },
-          'ForAnyValue:StringLike': {
-            'cognito-identity.amazonaws.com:amr': 'authenticated',
-          },
-        },
-        'sts:AssumeRoleWithWebIdentity',
-      ),
-    });
-    const unauthenticatedRole = new Role(this, 'CognitoUnauthenticatedRole', {
-      assumedBy: new FederatedPrincipal(
-        'cognito-identity.amazonaws.com',
-        {
-          StringEquals: {
-            'cognito-identity.amazonaws.com:aud': identityPool.identityPoolId,
-          },
-          'ForAnyValue:StringLike': {
-            'cognito-identity.amazonaws.com:amr': 'unauthenticated',
-          },
-        },
-        'sts:AssumeRoleWithWebIdentity',
-      ),
-    });
-    raffleImageBucket.grantReadWrite(authenticatedRole);
-    raffleImageBucket.grantReadWrite(unauthenticatedRole);
-    new IdentityPoolRoleAttachment(this, 'UnauthenticatedRoleAttachment', {
-      identityPool: identityPool,
-      authenticatedRole: authenticatedRole,
-      unauthenticatedRole: unauthenticatedRole,
-    });
+    raffleImageBucket.grantReadWrite(identityPool.authenticatedRole);
+    raffleImageBucket.grantReadWrite(identityPool.unauthenticatedRole);
     return { userPool, userPoolClient, identityPool, userPoolDomain };
   }
 }
