@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useContext } from 'react';
 import { fetchAuthSession } from '@aws-amplify/auth';
+import { StorageManager } from '@aws-amplify/ui-react-storage';
 import { toast } from 'react-toastify';
 
 import { navigateTo } from '@/app/actions';
@@ -160,6 +161,14 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
       )}
       <h1 className="width margin-bottom text-4xl md:text-5xl">Información acerca de la rifa</h1>
       <RaffleCard raffle={raffle} />
+      <div className="width margin-bottom">
+        <StorageManager
+          acceptedFileTypes={['image/*']}
+          path="public/"
+          maxFileCount={1}
+          isResumable
+        />
+      </div>
       <h2 className="width margin-bottom text-2xl md:text-3xl font-medium">
         Números disponibles para compra
       </h2>

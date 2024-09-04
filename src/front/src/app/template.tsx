@@ -23,6 +23,12 @@ const config: ResourcesConfig = {
       },
     },
   },
+  Storage: {
+    S3: {
+      bucket: process.env.NEXT_PUBLIC_BUCKET_NAME,
+      region: process.env.NEXT_PUBLIC_BUCKET_REGION,
+    },
+  },
 };
 
 Amplify.configure(config, { ssr: true });
