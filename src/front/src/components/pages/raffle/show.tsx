@@ -169,6 +169,9 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
           maxFileCount={1}
           isResumable
           maxFileSize={5242880}
+          onUploadError={(e) => {
+            console.log(e);
+          }}
         />
       </div>
       <h2 className="width margin-bottom text-2xl md:text-3xl font-medium">
