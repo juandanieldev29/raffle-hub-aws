@@ -21,6 +21,7 @@ const config: ResourcesConfig = {
           responseType: 'code',
         },
       },
+      allowGuestAccess: true,
     },
   },
   Storage: {
