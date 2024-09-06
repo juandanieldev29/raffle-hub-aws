@@ -107,7 +107,7 @@ export class RaffleHubCognito extends Construct {
       },
     });
     raffleImageBucket.grantReadWrite(identityPool.authenticatedRole);
-    raffleImageBucket.grantReadWrite(identityPool.unauthenticatedRole);
+    raffleImageBucket.grantPut(identityPool.unauthenticatedRole);
     return { userPool, userPoolClient, identityPool, userPoolDomain };
   }
 }
