@@ -1,5 +1,3 @@
-import { headers } from 'next/headers';
-
 import RaffleDetail from '@/components/pages/raffle/show';
 import { IRaffle } from '@/types/raffle';
 
@@ -14,11 +12,9 @@ export default async function RaffleShowPage({
   const { ownerId } = searchParams;
   const [raffleRes, raffleAvailableNumbersRes] = await Promise.all([
     fetch(`https://api.raffle-hub.net/raffle/${raffleId}?ownerId=${ownerId}`, {
-      headers: headers(),
       cache: 'no-store',
     }),
     fetch(`https://api.raffle-hub.net/raffle/${raffleId}/available-numbers?ownerId=${ownerId}`, {
-      headers: headers(),
       cache: 'no-store',
     }),
   ]);

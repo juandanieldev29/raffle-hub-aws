@@ -95,10 +95,6 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   };
 
   useEffect(() => {
-    fetchRaffles(null);
-  }, []);
-
-  useEffect(() => {
     setPaginationHistory([rafflesPaginated.lastEvaluatedKey]);
   }, [rafflesPaginated.lastEvaluatedKey]);
 
