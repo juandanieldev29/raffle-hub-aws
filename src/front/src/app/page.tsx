@@ -18,6 +18,6 @@ export default async function Home() {
       </main>
     );
   } catch (err: any) {
-    <p>An error happened {err.message}</p>;
+    return <p>An error happened {err.message}</p>;
   }
 }
