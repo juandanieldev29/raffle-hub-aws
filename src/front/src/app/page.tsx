@@ -6,15 +6,15 @@ import { RafflesPaginationResult } from '@/types/pagination';
 
 export default async function Home() {
   try {
-    const res = await fetch(`https://api.raffle-hub.net/raffle?limit=${INITIAL_LIMIT}`, {
-      headers: headers(),
-      cache: 'no-store',
-    });
-    const rafflesPaginated: RafflesPaginationResult = await res.json();
+    // const res = await fetch(`https://api.raffle-hub.net/raffle?limit=${INITIAL_LIMIT}`, {
+    //   headers: headers(),
+    //   cache: 'no-store',
+    // });
+    // const rafflesPaginated: RafflesPaginationResult = await res.json();
 
     return (
       <main className="margin-top margin-bottom">
-        <RaffleList rafflesPaginated={rafflesPaginated} />
+        <RaffleList rafflesPaginated={{ raffles: [], lastEvaluatedKey: null }} />
       </main>
     );
   } catch (err: any) {
