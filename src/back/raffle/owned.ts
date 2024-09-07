@@ -1,5 +1,5 @@
 import { APIGatewayProxyWithCognitoAuthorizerEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { ScanCommand, ScanCommandInput } from '@aws-sdk/client-dynamodb';
+import { QueryCommand, QueryCommandInput } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
@@ -49,40 +49,27 @@ export const handler = async (
 
 const fetchItems = async (
   limit: number,
-  ownedId: string,
-  initialExclusiveStartKey: string | undefined,
+  ownerId: string,
+  exclusiveStartKey: string | undefined,
 ) => {
-  let exclusiveStartKey: string | null = initialExclusiveStartKey ? initialExclusiveStartKey : null;
-  let raffles: IRaffle[] = [];
-  do {
-    const params: ScanCommandInput = {
-      TableName: process.env.DYNAMODB_TABLE_NAME,
-      Limit: limit,
-      FilterExpression: `#owner.id = :ownerId`,
-      ExpressionAttributeNames: {
-        '#owner': 'owner',
-      },
-      ExpressionAttributeValues: marshall({
-        ':ownerId': ownedId,
-      }),
-      ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
-    };
-    const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
-    const items = Items.map((item) => {
-      const raffle = unmarshall(item) as IRaffle;
-      return raffle;
-    });
-    raffles = [...raffles, ...items];
-    const lastEvaluatedKey = LastEvaluatedKey
-      ? (unmarshall(LastEvaluatedKey) as { id: string })
-      : null;
-    exclusiveStartKey = lastEvaluatedKey ? lastEvaluatedKey.id : null;
-  } while (exclusiveStartKey !== null && raffles.length < limit);
-  const upperLimitItemId = raffles.at(limit - 1)?.id;
-  const lastEvaluatedKey =
-    raffles.length > limit && upperLimitItemId ? upperLimitItemId : exclusiveStartKey;
-  const rafflesUpperLimit = Math.min(raffles.length, limit);
-  return { raffles: raffles.slice(0, rafflesUpperLimit), lastEvaluatedKey };
+  const params: QueryCommandInput = {
+    TableName: process.env.DYNAMODB_TABLE_NAME,
+    Limit: limit,
+    KeyConditionExpression: `ownerId = :ownerId`,
+    ExpressionAttributeValues: marshall({
+      ':ownerId': ownerId,
+    }),
+    ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
+  };
+  const { Items = [], LastEvaluatedKey } = await ddbClient.send(new QueryCommand(params));
+  const items = Items.map((item) => {
+    const raffle = unmarshall(item) as IRaffle;
+    return raffle;
+  });
+  const lastEvaluatedKey = LastEvaluatedKey
+    ? (unmarshall(LastEvaluatedKey) as { id: string })
+    : null;
+  return { raffles: items, lastEvaluatedKey };
 };
 
 const getPaginationLimit = (queryString: string | undefined): number => {

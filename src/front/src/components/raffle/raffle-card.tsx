@@ -68,7 +68,7 @@ export default function RaffleCard({
       <p className="text-sm font-extralight md:col-start-3 font-medium">{raffle.owner.name}</p>
       {includeLinkToDetails && (
         <Link
-          href={`/raffle/${raffle.id}`}
+          href={`/raffle/${raffle.id}?ownerId=${raffle.ownerId}`}
           className="md:col-start-1 md:row-start-11 md:row-span-2 md:self-end"
         >
           <button className="button-padding transition-transform rounded-md transition-colors primary-button-colors">

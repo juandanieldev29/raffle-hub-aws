@@ -51,6 +51,9 @@
   .padding {
     @apply p-4;
   }
+  .gap {
+    @apply gap-4;
+  }
   .small-gap {
     @apply gap-2;
   }

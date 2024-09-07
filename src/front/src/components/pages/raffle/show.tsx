@@ -21,7 +21,8 @@ type RaffleShowProps = {
 
 export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps) {
   const { dispatch } = useContext(LoadingContext);
-  const [displayModal, setDisplayModal] = useState(false);
+  const [displayCardPaymentModal, setDisplayCardPaymentModal] = useState(false);
+  const [displaySinpeModal, setDisplaySinpeModal] = useState(false);
   const [selectedNumbers, setSelectedNumbers] = useState<Array<number>>([]);
   const [priceToPay, setPriceToPay] = useState(0);
 
@@ -47,12 +48,20 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     }, 0);
   };
 
-  const openModal = () => {
-    setDisplayModal(true);
+  const openCardPaymentModal = () => {
+    setDisplayCardPaymentModal(true);
   };
 
-  const closeModal = () => {
-    setDisplayModal(false);
+  const closeCardPaymentModal = () => {
+    setDisplayCardPaymentModal(false);
+  };
+
+  const openSinpePaymentModal = () => {
+    setDisplaySinpeModal(true);
+  };
+
+  const closeSinpePaymentModal = () => {
+    setDisplaySinpeModal(false);
   };
 
   const generatePaymentLink = async (idToken?: string) => {
@@ -151,12 +160,22 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
 
   return (
     <>
-      {displayModal && (
+      {displayCardPaymentModal && (
         <Modal
-          title={`Confirmar compra`}
+          title={`Confirmar compra con tarjeta`}
           message={`Estás a punto de comprar los números ${selectedNumbers.join(', ')} y pagar un total de ${formatNumber(priceToPay)}`}
-          onClose={closeModal}
+          onClose={closeCardPaymentModal}
           onConfirm={confirmPurchase}
+        />
+      )}
+      {displaySinpeModal && (
+        <Modal
+          title={`Confirmar compra con SINPE móvil`}
+          message={`Estás a punto de comprar los números ${selectedNumbers.join(', ')} y pagar un total de ${formatNumber(priceToPay)}`}
+          boldMessage={`Es importante que adjuntes una imagen con la transferencia SINPE, asi el dueño de la rifa podrá verificar el pago`}
+          onClose={closeSinpePaymentModal}
+          onConfirm={confirmPurchase}
+          shouldConfirmRead
         />
       )}
       <h1 className="width margin-bottom text-4xl md:text-5xl">Información acerca de la rifa</h1>
@@ -199,13 +218,22 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
         <p className="small-margin-bottom">
           Total a pagar:<span className="font-bold text-sm"> {formatNumber(priceToPay)}</span>
         </p>
-        <button
-          onClick={openModal}
-          className="button-padding transition-transform rounded-md transition-colors primary-button-colors small-margin-bottom enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
-          disabled={!selectedNumbers.length}
-        >
-          Proceder a pago
-        </button>
+        <div className="flex gap small-margin-bottom">
+          <button
+            onClick={openCardPaymentModal}
+            className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
+            disabled={!selectedNumbers.length}
+          >
+            Pago con tarjeta
+          </button>
+          <button
+            onClick={openSinpePaymentModal}
+            className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
+            disabled={!selectedNumbers.length}
+          >
+            Pago con SINPE móvil
+          </button>
+        </div>
         <div className="flex flex-wrap">
           {selectedNumbers.map((x) => {
             return (

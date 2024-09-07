@@ -62,6 +62,7 @@ export const handler = async (
     }
     const id = uuidv4();
     const raffle: IRaffle = {
+      ownerId: owner.id,
       id,
       prize,
       quantityNumbers,

@@ -1,15 +1,26 @@
 'use client';
 
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface ModalProps {
   onClose: Dispatch<SetStateAction<boolean>>;
   onConfirm: () => Promise<void>;
   title: string;
   message: string;
+  boldMessage?: string;
+  shouldConfirmRead?: boolean;
 }
 
-export default function Modal({ onClose, onConfirm, title, message }: ModalProps) {
+export default function Modal({
+  onClose,
+  onConfirm,
+  title,
+  message,
+  boldMessage,
+  shouldConfirmRead,
+}: ModalProps) {
+  const [confirmRead, setConfirmRead] = useState(true);
+
   const cancel = () => {
     onClose(false);
   };
@@ -17,6 +28,16 @@ export default function Modal({ onClose, onConfirm, title, message }: ModalProps
   const confirm = () => {
     onConfirm();
   };
+
+  const toggleConfirmRead = () => {
+    setConfirmRead(!confirmRead);
+  };
+
+  useEffect(() => {
+    if (shouldConfirmRead) {
+      setConfirmRead(false);
+    }
+  }, [shouldConfirmRead]);
 
   return (
     <div className="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -31,6 +52,21 @@ export default function Modal({ onClose, onConfirm, title, message }: ModalProps
             <div className="small-margin-top">
               <p className="text-sm">{message}</p>
             </div>
+            {boldMessage && (
+              <div className="small-margin-top">
+                <p className="text-sm font-bold">{boldMessage}</p>
+              </div>
+            )}
+            {shouldConfirmRead && (
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  onChange={toggleConfirmRead}
+                  className="small-margin-right small-margin-top h-4 w-4"
+                />
+                <label className="small-margin-top">Confirmo que he leído</label>
+              </div>
+            )}
             <div className="margin-top flex items-center justify-end gap-x-4">
               <button
                 type="button"
@@ -41,8 +77,9 @@ export default function Modal({ onClose, onConfirm, title, message }: ModalProps
               </button>
               <button
                 type="submit"
-                className="rounded-md button-padding text-sm shadow-sm transition-colors primary-button-colors"
+                className="rounded-md button-padding text-sm shadow-sm transition-colors primary-button-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={confirm}
+                disabled={!confirmRead}
               >
                 Confirmar
               </button>
