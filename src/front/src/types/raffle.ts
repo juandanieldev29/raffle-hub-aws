@@ -1,4 +1,5 @@
 export interface IRaffle {
+  ownerId: string;
   id: string;
   owner: {
     id: string;

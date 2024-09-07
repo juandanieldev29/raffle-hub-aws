@@ -8,6 +8,7 @@ import { CORS_HEADERS } from '../constants';
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const id = event.pathParameters?.id;
+    const ownerId = event.queryStringParameters?.ownerId;
     if (!id) {
       return {
         statusCode: 400,
@@ -15,9 +16,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         headers: CORS_HEADERS,
       };
     }
+    if (!ownerId) {
+      return {
+        statusCode: 400,
+        body: 'You must provide an owner id',
+        headers: CORS_HEADERS,
+      };
+    }
     const params: GetItemCommandInput = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
-      Key: marshall({ id }),
+      Key: marshall({ id, ownerId }),
     };
     const { Item } = await ddbClient.send(new GetItemCommand(params));
     if (!Item) {

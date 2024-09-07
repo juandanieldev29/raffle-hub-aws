@@ -1,5 +1,5 @@
 import { RemovalPolicy } from 'aws-cdk-lib';
-import { AttributeType, BillingMode, ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { AttributeType, Billing, ITable, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 
 export class RaffleHubDatabase extends Construct {
@@ -15,40 +15,52 @@ export class RaffleHubDatabase extends Construct {
   }
 
   private createRaffleTable(): ITable {
-    const raffleTable = new Table(this, 'RaffleDatabaseTable', {
+    const raffleTable = new TableV2(this, 'RaffleDatabaseTable', {
       partitionKey: {
+        name: 'ownerId',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
         name: 'id',
         type: AttributeType.STRING,
       },
       tableName: 'raffle',
       removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST,
+      billing: Billing.onDemand(),
     });
     return raffleTable;
   }
 
   private createTicketTable(): ITable {
-    const ticketTable = new Table(this, 'TicketDatabaseTable', {
+    const ticketTable = new TableV2(this, 'TicketDatabaseTable', {
       partitionKey: {
+        name: 'raffleId',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
         name: 'id',
         type: AttributeType.STRING,
       },
       tableName: 'ticket',
       removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST,
+      billing: Billing.onDemand(),
     });
     return ticketTable;
   }
 
   private createPaymentTable(): ITable {
-    const ticketTable = new Table(this, 'PaymentDatabaseTable', {
+    const ticketTable = new TableV2(this, 'PaymentDatabaseTable', {
       partitionKey: {
+        name: 'raffleId',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
         name: 'id',
         type: AttributeType.STRING,
       },
       tableName: 'payment',
       removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST,
+      billing: Billing.onDemand(),
     });
     return ticketTable;
   }
