@@ -25,7 +25,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     const params: GetItemCommandInput = {
       TableName: process.env.DYNAMODB_TABLE_NAME,
-      Key: marshall({ id, ownerId }),
+      Key: marshall({ ownerId, id }),
     };
     const { Item } = await ddbClient.send(new GetItemCommand(params));
     if (!Item) {

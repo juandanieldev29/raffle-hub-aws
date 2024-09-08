@@ -1,7 +1,7 @@
 import { SQSEvent, SQSHandler } from 'aws-lambda';
 import {
-  ScanCommand,
-  ScanCommandInput,
+  QueryCommand,
+  QueryCommandInput,
   BatchWriteItemCommand,
   BatchWriteItemCommandInput,
   WriteRequest,
@@ -29,8 +29,9 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
 const setTicketsStatusToExpired = async (tickets: Array<ITicket>) => {
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
     [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: tickets.map(
-      ({ id, number, payment, raffle, createdAt }) => {
+      ({ raffleId, id, number, payment, raffle, createdAt }) => {
         const ticket: ITicket = {
+          raffleId,
           id,
           number,
           payment,
@@ -62,9 +63,10 @@ const getTicketByRaffleAndPayment = async (
   expireTicketPayload: IExpireTicketPayload,
 ): Promise<Array<ITicket>> => {
   const { payment, raffle } = expireTicketPayload;
-  const scanCommandParams: ScanCommandInput = {
+  const queryCommandParams: QueryCommandInput = {
     TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
-    FilterExpression: `raffle.id = :raffleId and payment.id = :paymentId and #status = :status`,
+    KeyConditionExpression: `raffleId = :raffleId`,
+    FilterExpression: `payment.id = :paymentId and #status = :status`,
     ExpressionAttributeNames: {
       '#status': 'status',
     },
@@ -74,7 +76,7 @@ const getTicketByRaffleAndPayment = async (
       ':status': ITicketStatus.PendingPayment,
     }),
   };
-  const { Items } = await ddbClient.send(new ScanCommand(scanCommandParams));
+  const { Items } = await ddbClient.send(new QueryCommand(queryCommandParams));
   if (!Items) {
     return [];
   }

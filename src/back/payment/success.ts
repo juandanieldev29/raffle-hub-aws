@@ -30,6 +30,7 @@ const setPaymentStatusToComplete = async (
   paymentSuccessPayload: IPaymentSuccessPayload,
 ) => {
   const pendingPayment: IPayment = {
+    raffleId: payment.raffleId,
     id: payment.id,
     raffle: payment.raffle,
     currency: payment.currency,
@@ -52,12 +53,12 @@ const setPaymentStatusToComplete = async (
 const getPaymentById = async (
   paymentSuccessPayload: IPaymentSuccessPayload,
 ): Promise<IPayment | null> => {
-  const { payment: payloadPayment } = paymentSuccessPayload;
-  const scanCommandParams: GetItemCommandInput = {
+  const { raffle: payloadRaffle, payment: payloadPayment } = paymentSuccessPayload;
+  const getItemCommandParams: GetItemCommandInput = {
     TableName: process.env.DYNAMODB_TABLE_NAME,
-    Key: marshall({ id: payloadPayment.id }),
+    Key: marshall({ raffleId: payloadRaffle.id, id: payloadPayment.id }),
   };
-  const { Item } = await ddbClient.send(new GetItemCommand(scanCommandParams));
+  const { Item } = await ddbClient.send(new GetItemCommand(getItemCommandParams));
   if (!Item) {
     return null;
   }

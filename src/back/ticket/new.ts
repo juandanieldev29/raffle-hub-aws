@@ -2,8 +2,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import {
   GetItemCommand,
   GetItemCommandInput,
-  ScanCommand,
-  ScanCommandInput,
+  QueryCommand,
+  QueryCommandInput,
   BatchWriteItemCommand,
   BatchWriteItemCommandInput,
   WriteRequest,
@@ -33,6 +33,7 @@ interface NewTicketBody extends Array<NewTicketItem> {}
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const id = event.pathParameters?.id;
+    const ownerId = event.queryStringParameters?.ownerId;
     const body: NewTicketBody = JSON.parse(event.body!);
     if (!id) {
       return {
@@ -48,9 +49,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         headers: CORS_HEADERS,
       };
     }
+    if (!ownerId) {
+      return {
+        statusCode: 400,
+        body: 'You must provide an owner id',
+        headers: CORS_HEADERS,
+      };
+    }
     const params: GetItemCommandInput = {
       TableName: process.env.RAFFLE_DYNAMODB_TABLE_NAME,
-      Key: marshall({ id }),
+      Key: marshall({ ownerId, id }),
     };
     const { Item } = await ddbClient.send(new GetItemCommand(params));
     if (!Item) {
@@ -179,9 +187,10 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
   const numbersToBuy = body.map(({ number }) => number);
   const numbersRangeQuery = formatNumbersFilter(numbersToBuy);
   const numbersRangeQueryKeys = Object.keys(formatNumbersFilter(numbersToBuy));
-  const scanCommandParams: ScanCommandInput = {
+  const queryCommandParams: QueryCommandInput = {
     TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
-    FilterExpression: `raffle.id = :raffleId and #status <> :status and #number in (${numbersRangeQueryKeys.join(',')})`,
+    KeyConditionExpression: `raffleId = :raffleId`,
+    FilterExpression: `and #status <> :status and #number in (${numbersRangeQueryKeys.join(',')})`,
     ExpressionAttributeNames: {
       '#status': 'status',
       '#number': 'number',
@@ -194,7 +203,7 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
     ProjectionExpression: 'raffle, #number',
     Limit: 1,
   };
-  const { Count } = await ddbClient.send(new ScanCommand(scanCommandParams));
+  const { Count } = await ddbClient.send(new QueryCommand(queryCommandParams));
   return Count;
 };
 
@@ -202,6 +211,7 @@ const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
     [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId }) => {
       const ticket: ITicket = {
+        raffleId: raffle.id,
         id: uuidv4(),
         number,
         raffle: {

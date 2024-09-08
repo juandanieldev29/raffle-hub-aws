@@ -1,4 +1,5 @@
 export interface ITicket {
+  raffleId: string;
   id: string;
   number: number;
   raffle: {

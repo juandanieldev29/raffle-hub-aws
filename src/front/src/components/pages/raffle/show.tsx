@@ -105,11 +105,14 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     });
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
-      const res = await fetch(`https://api.raffle-hub.net/ticket/${raffle.id}`, {
-        cache: 'no-store',
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `https://api.raffle-hub.net/ticket/${raffle.id}?ownerId=${raffle.ownerId}`,
+        {
+          cache: 'no-store',
+          method: 'POST',
+          body: JSON.stringify(payload),
+        },
+      );
       const payment: IRaffle = await res.json();
       return payment;
     } catch (err) {
