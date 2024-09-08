@@ -1,0 +1,13 @@
+{
+  "name": "@src/voucher",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.55.0",
+    "@aws-sdk/util-dynamodb": "^3.55.0",
+    "aws-jwt-verify": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.141"
+  }
+}

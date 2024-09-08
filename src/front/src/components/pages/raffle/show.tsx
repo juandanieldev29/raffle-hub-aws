@@ -2,27 +2,35 @@
 
 import { useEffect, useState, useContext } from 'react';
 import { fetchAuthSession } from '@aws-amplify/auth';
-import { StorageManager } from '@aws-amplify/ui-react-storage';
 import { toast } from 'react-toastify';
+import { v4 as uuidv4 } from 'uuid';
 
 import { navigateTo } from '@/app/actions';
 import RaffleCard from '@/components/raffle/raffle-card';
 import Modal from '@/components/modal';
+import FileUploadModal from '@/components/file-upload-modal';
 import AvailableNumbers from '@/components/raffle/available-numbers';
 import { formatNumber } from '@/utils';
 import { LoadingContext } from '@/contexts/loading-context';
 import { LoadingAction } from '@/enums/loading-action';
-import { IRaffle, IPayment } from '@/types';
+import { IRaffle, IPayment, IVoucher } from '@/types';
 
 type RaffleShowProps = {
   raffle: IRaffle;
   availableNumbers: Array<number>;
 };
 
+type NewTicketPayload = Array<{
+  number: number;
+  paymentId?: string;
+  voucherURL?: string;
+}>;
+
 export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps) {
   const { dispatch } = useContext(LoadingContext);
   const [displayCardPaymentModal, setDisplayCardPaymentModal] = useState(false);
   const [displaySinpeModal, setDisplaySinpeModal] = useState(false);
+  const [displayFileUploadModal, setDisplayFileUploadModal] = useState(false);
   const [selectedNumbers, setSelectedNumbers] = useState<Array<number>>([]);
   const [priceToPay, setPriceToPay] = useState(0);
 
@@ -64,6 +72,19 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     setDisplaySinpeModal(false);
   };
 
+  const openFileUploadModal = () => {
+    setDisplayFileUploadModal(true);
+  };
+
+  const closeFileUploadModal = () => {
+    setDisplayFileUploadModal(false);
+  };
+
+  const confirmSinpePayment = () => {
+    closeSinpePaymentModal();
+    openFileUploadModal();
+  };
+
   const generatePaymentLink = async (idToken?: string) => {
     const payload = selectedNumbers.map((selectedNumber) => {
       return {
@@ -96,13 +117,54 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     }
   };
 
-  const generateTicket = async (paymentId: string) => {
-    const payload = selectedNumbers.map((selectedNumber) => {
+  const generateVoucherLink = async (voucherURL: string, idToken?: string) => {
+    const payload = {
+      voucherURL,
+    };
+    try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
+      const res = await fetch(`https://api.raffle-hub.net/voucher/${raffle.id}`, {
+        headers: idToken
+          ? {
+              Authorization: `Bearer ${idToken}`,
+            }
+          : undefined,
+        cache: 'no-store',
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const voucher: IVoucher = await res.json();
+      return voucher;
+    } catch (err) {
+      toast.error('No se pudo generar el link del pago', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+      throw err;
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
+    }
+  };
+
+  const generateCardPaymentPayload = (voucherURL: string) => {
+    return selectedNumbers.map((selectedNumber) => {
+      return {
+        number: selectedNumber,
+        voucherURL,
+      };
+    });
+  };
+
+  const generateVoucherPaymentPayload = (paymentId: string) => {
+    return selectedNumbers.map((selectedNumber) => {
       return {
         number: selectedNumber,
         paymentId,
       };
     });
+  };
+
+  const generateTicket = async (payload: NewTicketPayload) => {
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const res = await fetch(
@@ -146,8 +208,23 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     try {
       const idToken = await fetchSession();
       const payment = await generatePaymentLink(idToken);
-      await generateTicket(payment.id);
+      const payload = generateCardPaymentPayload(payment.id);
+      await generateTicket(payload);
       navigateTo(payment.url);
+    } catch (err) {
+      toast.error('Ha ocurrido un error', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+    }
+  };
+
+  const confirmVoucher = async (voucherURL: string) => {
+    try {
+      const idToken = await fetchSession();
+      const voucher = await generateVoucherLink(voucherURL, idToken);
+      const payload = generateVoucherPaymentPayload(voucher.id);
+      await generateTicket(payload);
     } catch (err) {
       toast.error('Ha ocurrido un error', {
         position: 'top-center',
@@ -167,6 +244,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
         <Modal
           title={`Confirmar compra con tarjeta`}
           message={`Estás a punto de comprar los números ${selectedNumbers.join(', ')} y pagar un total de ${formatNumber(priceToPay)}`}
+          boldMessage={`Tendrás 10 minutos para realizar la compra`}
           onClose={closeCardPaymentModal}
           onConfirm={confirmPurchase}
         />
@@ -177,25 +255,21 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
           message={`Estás a punto de comprar los números ${selectedNumbers.join(', ')} y pagar un total de ${formatNumber(priceToPay)}`}
           boldMessage={`Es importante que adjuntes una imagen con la transferencia SINPE, asi el dueño de la rifa podrá verificar el pago`}
           onClose={closeSinpePaymentModal}
-          onConfirm={confirmPurchase}
+          onConfirm={confirmSinpePayment}
           shouldConfirmRead
+        />
+      )}
+      {displayFileUploadModal && (
+        <FileUploadModal
+          title={`Subir imagen de comprobante de transferencia SINPE`}
+          message={`El dueño de la rifa deberá validar que la transferencia SINPE sea válida`}
+          fileUploadPath={`${raffle.ownerId}/${raffle.id}/${uuidv4()}`}
+          onClose={closeFileUploadModal}
+          onConfirm={confirmVoucher}
         />
       )}
       <h1 className="width margin-bottom text-4xl md:text-5xl">Información acerca de la rifa</h1>
       <RaffleCard raffle={raffle} />
-      <div className="width margin-bottom">
-        <StorageManager
-          accessLevel="guest"
-          acceptedFileTypes={['image/*']}
-          path="public/"
-          maxFileCount={1}
-          isResumable
-          maxFileSize={5242880}
-          onUploadError={(e) => {
-            console.log(e);
-          }}
-        />
-      </div>
       <h2 className="width margin-bottom text-2xl md:text-3xl font-medium">
         Números disponibles para compra
       </h2>

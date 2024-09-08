@@ -6,12 +6,14 @@ export class RaffleHubDatabase extends Construct {
   public readonly raffleTable: ITable;
   public readonly ticketTable: ITable;
   public readonly paymentTable: ITable;
+  public readonly voucherTable: ITable;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
     this.raffleTable = this.createRaffleTable();
     this.ticketTable = this.createTicketTable();
     this.paymentTable = this.createPaymentTable();
+    this.voucherTable = this.createVoucherTable();
   }
 
   private createRaffleTable(): ITable {
@@ -49,7 +51,7 @@ export class RaffleHubDatabase extends Construct {
   }
 
   private createPaymentTable(): ITable {
-    const ticketTable = new TableV2(this, 'PaymentDatabaseTable', {
+    const paymentTable = new TableV2(this, 'PaymentDatabaseTable', {
       partitionKey: {
         name: 'raffleId',
         type: AttributeType.STRING,
@@ -62,6 +64,23 @@ export class RaffleHubDatabase extends Construct {
       removalPolicy: RemovalPolicy.DESTROY,
       billing: Billing.onDemand(),
     });
-    return ticketTable;
+    return paymentTable;
+  }
+
+  private createVoucherTable(): ITable {
+    const voucherTable = new TableV2(this, 'VoucherDatabaseTable', {
+      partitionKey: {
+        name: 'raffleId',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      tableName: 'voucher',
+      removalPolicy: RemovalPolicy.DESTROY,
+      billing: Billing.onDemand(),
+    });
+    return voucherTable;
   }
 }
