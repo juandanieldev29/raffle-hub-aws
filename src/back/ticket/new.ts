@@ -215,6 +215,7 @@ const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
     [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId, voucherId }) => {
       const payment = paymentId ? { id: paymentId } : null;
       const voucher = voucherId ? { id: voucherId } : null;
+      const status = voucher ? ITicketStatus.PendingVerification : ITicketStatus.PendingPayment;
       const ticket: ITicket = {
         raffleId: raffle.id,
         id: uuidv4(),
@@ -225,7 +226,7 @@ const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
         },
         payment,
         voucher,
-        status: ITicketStatus.PendingPayment,
+        status,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
