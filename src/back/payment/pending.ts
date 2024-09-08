@@ -27,6 +27,7 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
 
 const setPaymentStatusToPendingPayment = async (payment: IPayment) => {
   const pendingPayment: IPayment = {
+    raffleId: payment.raffleId,
     id: payment.id,
     raffle: payment.raffle,
     currency: payment.currency,
@@ -49,12 +50,12 @@ const setPaymentStatusToPendingPayment = async (payment: IPayment) => {
 const getPaymentById = async (
   pendingPaymentPayload: IPendingPaymentPayload,
 ): Promise<IPayment | null> => {
-  const { payment: payloadPayment } = pendingPaymentPayload;
-  const scanCommandParams: GetItemCommandInput = {
+  const { raffle: payloadRaffle, payment: payloadPayment } = pendingPaymentPayload;
+  const getItemCommandParams: GetItemCommandInput = {
     TableName: process.env.DYNAMODB_TABLE_NAME,
-    Key: marshall({ id: payloadPayment.id }),
+    Key: marshall({ raffleId: payloadRaffle.id, id: payloadPayment.id }),
   };
-  const { Item } = await ddbClient.send(new GetItemCommand(scanCommandParams));
+  const { Item } = await ddbClient.send(new GetItemCommand(getItemCommandParams));
   if (!Item) {
     return null;
   }

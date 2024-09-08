@@ -31,7 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     const params: GetItemCommandInput = {
       TableName: process.env.RAFFLE_DYNAMODB_TABLE_NAME,
-      Key: marshall({ id, ownerId }),
+      Key: marshall({ ownerId, id }),
     };
     const { Item } = await ddbClient.send(new GetItemCommand(params));
     if (!Item) {
@@ -42,7 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
     const raffle: IRaffle = unmarshall(Item) as IRaffle;
-    const scanCommandParams: QueryCommandInput = {
+    const queryCommandParams: QueryCommandInput = {
       TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
       KeyConditionExpression: `raffleId = :raffleId`,
       FilterExpression: '#status <> :status',
@@ -56,7 +56,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       }),
       ProjectionExpression: 'raffle, #number',
     };
-    const { Items = [] } = await ddbClient.send(new QueryCommand(scanCommandParams));
+    const { Items = [] } = await ddbClient.send(new QueryCommand(queryCommandParams));
     const tickets: ITicket[] = Items.map((item) => unmarshall(item)) as ITicket[];
     const boughtNumbers = tickets.map((x) => x.number);
     const availableNumbers = Array.from({ length: raffle.quantityNumbers }, (_, i) => i).filter(

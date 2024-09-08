@@ -1,4 +1,5 @@
 export interface IPayment {
+  raffleId: string;
   id: string;
   raffle: {
     id: string;

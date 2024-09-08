@@ -126,6 +126,7 @@ const createPayment = async (
 ) => {
   const buyer = await verifyToken(authorizationHeader);
   const payment: IPayment = {
+    raffleId: raffleId,
     id: session.id,
     raffle: {
       id: raffleId,
