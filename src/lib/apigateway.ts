@@ -96,7 +96,7 @@ export class RaffleHubApiGateway extends Construct {
             required: ['paymentId'],
           },
           {
-            required: ['voucherURL'],
+            required: ['voucherId'],
           },
         ],
         additionalProperties: false,

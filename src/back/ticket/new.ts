@@ -26,7 +26,7 @@ import { CORS_HEADERS } from '../constants';
 interface NewTicketItem {
   number: number;
   paymentId?: string;
-  voucherURL?: string;
+  voucherId?: string;
 }
 
 interface NewTicketBody extends Array<NewTicketItem> {}
@@ -212,9 +212,9 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
 
 const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
-    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId, voucherURL }) => {
+    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId, voucherId }) => {
       const payment = paymentId ? { id: paymentId } : null;
-      const voucher = voucherURL ? { url: voucherURL } : null;
+      const voucher = voucherId ? { id: voucherId } : null;
       const ticket: ITicket = {
         raffleId: raffle.id,
         id: uuidv4(),

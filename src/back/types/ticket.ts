@@ -10,7 +10,7 @@ export interface ITicket {
     id: string;
   } | null;
   voucher: {
-    url: string;
+    id: string;
   } | null;
   status: ITicketStatus;
   createdAt: string;
