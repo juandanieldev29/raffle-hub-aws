@@ -8,7 +8,10 @@ export interface ITicket {
   };
   payment: {
     id: string;
-  };
+  } | null;
+  voucher: {
+    id: string;
+  } | null;
   status: ITicketStatus;
   createdAt: string;
   updatedAt: string;

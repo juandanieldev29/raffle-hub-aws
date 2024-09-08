@@ -10,6 +10,7 @@ interface RaffleHubMicroservicesProps {
   readonly raffleTable: ITable;
   readonly ticketTable: ITable;
   readonly paymentTable: ITable;
+  readonly voucherTable: ITable;
   readonly stripeKeySecret: ISecret;
   readonly stripeWebookKeySecret: ISecret;
   readonly userPoolId: string;
@@ -29,6 +30,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly paymentSuccessMicroservice: NodejsFunction;
   public readonly pendingPaymentMicroservice: NodejsFunction;
   public readonly ticketExpireMicroservice: NodejsFunction;
+  public readonly voucherNewMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
     super(scope, id);
@@ -55,6 +57,11 @@ export class RaffleHubMicroservices extends Construct {
     this.paymentSuccessMicroservice = this.createPaymentSuccessFunction(props.paymentTable);
     this.pendingPaymentMicroservice = this.createPendingPaymentFunction(props.paymentTable);
     this.ticketExpireMicroservice = this.createExpireTicketFunction(props.ticketTable);
+    this.voucherNewMicroservice = this.createNewVoucherFunction(
+      props.voucherTable,
+      props.userPoolId,
+      props.userPoolClientId,
+    );
   }
 
   private createRaffleIndexFunction(raffleTable: ITable): NodejsFunction {
@@ -326,6 +333,32 @@ export class RaffleHubMicroservices extends Construct {
       ...nodeJsFunctionProps,
     });
     ticketTable.grantReadWriteData(lambdaFunction);
+    return lambdaFunction;
+  }
+
+  private createNewVoucherFunction(
+    voucherTable: ITable,
+    userPoolId: string,
+    userPoolClientId: string,
+  ): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        DYNAMODB_TABLE_NAME: voucherTable.tableName,
+        USER_POOL_ID: userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClientId,
+      },
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'NewVoucherLambdaFunction', {
+      entry: join(__dirname, `/../back/voucher/new.ts`),
+      ...nodeJsFunctionProps,
+    });
+    voucherTable.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 }

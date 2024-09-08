@@ -1,32 +1,40 @@
 'use client';
 
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { StorageManager } from '@aws-amplify/ui-react-storage';
+import { toast } from 'react-toastify';
 
-interface ModalProps {
+interface FileUploadModalProps {
   onClose: Dispatch<SetStateAction<boolean>>;
-  onConfirm: () => Promise<void> | void;
+  onConfirm: (fileURL: string) => Promise<void>;
   title: string;
   message: string;
+  fileUploadPath: string;
   boldMessage?: string;
   shouldConfirmRead?: boolean;
 }
 
-export default function Modal({
+export default function FileUploadModal({
   onClose,
   onConfirm,
   title,
   message,
+  fileUploadPath,
   boldMessage,
   shouldConfirmRead,
-}: ModalProps) {
+}: FileUploadModalProps) {
   const [confirmRead, setConfirmRead] = useState(true);
+
+  const processFile = ({ file }: { file: File }) => {
+    return { file, key: fileUploadPath };
+  };
 
   const cancel = () => {
     onClose(false);
   };
 
-  const confirm = () => {
-    onConfirm();
+  const confirm = (fileURL: string) => {
+    onConfirm(fileURL);
   };
 
   const toggleConfirmRead = () => {
@@ -47,7 +55,7 @@ export default function Modal({
       />
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-center justify-center">
-          <div className="relative transform rounded-md secondary-background-color shadow-xl transition-all small-padding w-11/12 md:w-fit max-w-md">
+          <div className="relative transform rounded-md secondary-background-color shadow-xl transition-all small-padding w-11/12 lg:max-w-screen-md">
             <h3 className="text-lg font-semibold text-center">{title}</h3>
             <div className="small-margin-top">
               <p className="text-sm">{message}</p>
@@ -67,6 +75,34 @@ export default function Modal({
                 <label className="small-margin-top">Confirmo que he leído</label>
               </div>
             )}
+            <div className="small-margin-top">
+              <StorageManager
+                accessLevel="guest"
+                acceptedFileTypes={['image/*']}
+                path={fileUploadPath}
+                maxFileCount={1}
+                isResumable
+                maxFileSize={5242880}
+                onUploadError={() => {
+                  toast.error('No se ha podido subir el archivo', {
+                    position: 'top-center',
+                    theme: 'colored',
+                  });
+                }}
+                onUploadSuccess={({ key }) => {
+                  console.log(key);
+                  confirm(fileUploadPath);
+                }}
+                processFile={processFile}
+                displayText={{
+                  dropFilesText: 'Arrastre archivo aquí',
+                  browseFilesText: 'Seleccione archivo',
+                  getFilesUploadedText(count) {
+                    return `${count} imagenes subidas`;
+                  },
+                }}
+              />
+            </div>
             <div className="margin-top flex items-center justify-end gap-x-4">
               <button
                 type="button"
@@ -74,14 +110,6 @@ export default function Modal({
                 onClick={cancel}
               >
                 Cancelar
-              </button>
-              <button
-                type="submit"
-                className="rounded-md button-padding text-sm shadow-sm transition-colors primary-button-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={confirm}
-                disabled={!confirmRead}
-              >
-                Confirmar
               </button>
             </div>
           </div>

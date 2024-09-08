@@ -22,7 +22,10 @@ export class AwsMicroservicesStack extends Stack {
     const cognito = new RaffleHubCognito(this, 'Cognito', {
       raffleImageBucket: raffleImageBucket,
     });
-    const { raffleTable, ticketTable, paymentTable } = new RaffleHubDatabase(this, 'Database');
+    const { raffleTable, ticketTable, paymentTable, voucherTable } = new RaffleHubDatabase(
+      this,
+      'Database',
+    );
     const { githubTokenSecret, stripeKeySecret, stripeWebookKeySecret } = new RaffleHubSecrets(
       this,
       'Secret',
@@ -41,10 +44,12 @@ export class AwsMicroservicesStack extends Stack {
       paymentSuccessMicroservice,
       pendingPaymentMicroservice,
       ticketExpireMicroservice,
+      voucherNewMicroservice,
     } = new RaffleHubMicroservices(this, 'Microservices', {
       raffleTable: raffleTable,
       ticketTable: ticketTable,
       paymentTable: paymentTable,
+      voucherTable: voucherTable,
       stripeKeySecret: stripeKeySecret,
       stripeWebookKeySecret: stripeWebookKeySecret,
       userPoolId: cognito.userPool.userPoolId,
@@ -88,6 +93,7 @@ export class AwsMicroservicesStack extends Stack {
       ticketNewMicroservice: ticketNewMicroservice,
       paymentNewMicroservice: paymentNewMicroservice,
       processPaymentMicroservice: processPaymentMicroservice,
+      voucherNewMicroservice: voucherNewMicroservice,
       domain: domain,
       userPool: cognito.userPool,
     });

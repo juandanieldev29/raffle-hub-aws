@@ -25,7 +25,8 @@ import { CORS_HEADERS } from '../constants';
 
 interface NewTicketItem {
   number: number;
-  paymentId: string;
+  paymentId?: string;
+  voucherId?: string;
 }
 
 interface NewTicketBody extends Array<NewTicketItem> {}
@@ -94,10 +95,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     await writeTicketsInBatch(body, raffle);
     const paymentId = body[0].paymentId;
-    await Promise.all([
-      await publishExpireTicketEvent(raffle.id, paymentId),
-      await publishPendingPaymentEvent(raffle.id, paymentId),
-    ]);
+    if (paymentId) {
+      await Promise.all([
+        await publishExpireTicketEvent(raffle.id, paymentId),
+        await publishPendingPaymentEvent(raffle.id, paymentId),
+      ]);
+    }
     return {
       statusCode: 201,
       body: JSON.stringify(raffle),
@@ -209,7 +212,10 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
 
 const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
-    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId }) => {
+    [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: body.map(({ number, paymentId, voucherId }) => {
+      const payment = paymentId ? { id: paymentId } : null;
+      const voucher = voucherId ? { id: voucherId } : null;
+      const status = voucher ? ITicketStatus.PendingVerification : ITicketStatus.PendingPayment;
       const ticket: ITicket = {
         raffleId: raffle.id,
         id: uuidv4(),
@@ -218,10 +224,9 @@ const writeTicketsInBatch = async (body: NewTicketBody, raffle: IRaffle) => {
           id: raffle.id,
           ticketPrice: raffle.ticketPrice,
         },
-        payment: {
-          id: paymentId,
-        },
-        status: ITicketStatus.PendingPayment,
+        payment,
+        voucher,
+        status,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
