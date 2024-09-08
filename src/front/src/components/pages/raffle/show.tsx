@@ -23,7 +23,7 @@ type RaffleShowProps = {
 type NewTicketPayload = Array<{
   number: number;
   paymentId?: string;
-  voucherURL?: string;
+  voucherId?: string;
 }>;
 
 export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps) {
@@ -155,11 +155,11 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     });
   };
 
-  const generateVoucherPaymentPayload = (voucherURL: string) => {
+  const generateVoucherPaymentPayload = (voucherId: string) => {
     return selectedNumbers.map((selectedNumber) => {
       return {
         number: selectedNumber,
-        voucherURL,
+        voucherId,
       };
     });
   };
