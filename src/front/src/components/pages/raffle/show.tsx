@@ -146,20 +146,20 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     }
   };
 
-  const generateCardPaymentPayload = (voucherURL: string) => {
-    return selectedNumbers.map((selectedNumber) => {
-      return {
-        number: selectedNumber,
-        voucherURL,
-      };
-    });
-  };
-
-  const generateVoucherPaymentPayload = (paymentId: string) => {
+  const generateCardPaymentPayload = (paymentId: string) => {
     return selectedNumbers.map((selectedNumber) => {
       return {
         number: selectedNumber,
         paymentId,
+      };
+    });
+  };
+
+  const generateVoucherPaymentPayload = (voucherURL: string) => {
+    return selectedNumbers.map((selectedNumber) => {
+      return {
+        number: selectedNumber,
+        voucherURL,
       };
     });
   };
@@ -263,7 +263,8 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
         <FileUploadModal
           title={`Subir imagen de comprobante de transferencia SINPE`}
           message={`El dueño de la rifa deberá validar que la transferencia SINPE sea válida`}
-          fileUploadPath={`${raffle.ownerId}/${raffle.id}/${uuidv4()}`}
+          fileUploadPath={`/${raffle.ownerId}/${raffle.id}/`}
+          fileUploadFilename={`${uuidv4()}`}
           onClose={closeFileUploadModal}
           onConfirm={confirmVoucher}
         />

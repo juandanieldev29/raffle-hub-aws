@@ -10,6 +10,7 @@ interface FileUploadModalProps {
   title: string;
   message: string;
   fileUploadPath: string;
+  fileUploadFilename: string;
   boldMessage?: string;
   shouldConfirmRead?: boolean;
 }
@@ -20,13 +21,14 @@ export default function FileUploadModal({
   title,
   message,
   fileUploadPath,
+  fileUploadFilename,
   boldMessage,
   shouldConfirmRead,
 }: FileUploadModalProps) {
   const [confirmRead, setConfirmRead] = useState(true);
 
   const processFile = ({ file }: { file: File }) => {
-    return { file, key: fileUploadPath };
+    return { file, key: fileUploadFilename };
   };
 
   const cancel = () => {
