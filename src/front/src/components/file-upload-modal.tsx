@@ -26,6 +26,7 @@ export default function FileUploadModal({
   shouldConfirmRead,
 }: FileUploadModalProps) {
   const [confirmRead, setConfirmRead] = useState(true);
+  const [fileUploadedKey, setFileUploadedKey] = useState<string | null>(null);
 
   const processFile = ({ file }: { file: File }) => {
     const fileExtension = file.name.split('.').pop();
@@ -49,6 +50,12 @@ export default function FileUploadModal({
       setConfirmRead(false);
     }
   }, [shouldConfirmRead]);
+
+  useEffect(() => {
+    if (fileUploadedKey) {
+      confirm(fileUploadedKey);
+    }
+  }, [fileUploadedKey]);
 
   return (
     <div className="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -93,8 +100,9 @@ export default function FileUploadModal({
                   });
                 }}
                 onUploadSuccess={({ key }) => {
-                  console.log(key);
-                  confirm(fileUploadPath);
+                  if (key) {
+                    setFileUploadedKey(key);
+                  }
                 }}
                 processFile={processFile}
                 displayText={{
