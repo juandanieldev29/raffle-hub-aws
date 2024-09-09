@@ -193,7 +193,7 @@ const validateNumbersAreNotBought = async (body: NewTicketBody, raffle: IRaffle)
   const queryCommandParams: QueryCommandInput = {
     TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
     KeyConditionExpression: `raffleId = :raffleId`,
-    FilterExpression: `and #status <> :status and #number in (${numbersRangeQueryKeys.join(',')})`,
+    FilterExpression: `#status <> :status and #number in (${numbersRangeQueryKeys.join(',')})`,
     ExpressionAttributeNames: {
       '#status': 'status',
       '#number': 'number',

@@ -28,7 +28,8 @@ export default function FileUploadModal({
   const [confirmRead, setConfirmRead] = useState(true);
 
   const processFile = ({ file }: { file: File }) => {
-    return { file, key: fileUploadFilename };
+    const fileExtension = file.name.split('.').pop();
+    return { file, key: `${fileUploadFilename}.${fileExtension}` };
   };
 
   const cancel = () => {
