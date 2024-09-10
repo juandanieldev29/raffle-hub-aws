@@ -12,7 +12,7 @@ export interface IRaffle {
   quantityNumbers: number;
   quantitySeries: number | null;
   ticketPrice: number;
-  boughtTickets: number;
+  boughtTickets: number[];
   lastAvailableNumber: number;
   completionDate: string;
   createdAt: string;

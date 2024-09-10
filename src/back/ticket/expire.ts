@@ -29,13 +29,14 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
 const setTicketsStatusToExpired = async (tickets: Array<ITicket>) => {
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
     [`${process.env.TICKET_DYNAMODB_TABLE_NAME}`]: tickets.map(
-      ({ raffleId, id, number, payment, raffle, createdAt }) => {
+      ({ raffleId, id, number, payment, raffle, voucher, createdAt }) => {
         const ticket: ITicket = {
           raffleId,
           id,
           number,
           payment,
           raffle,
+          voucher,
           status: ITicketStatus.Expired,
           createdAt,
           updatedAt: new Date().toISOString(),

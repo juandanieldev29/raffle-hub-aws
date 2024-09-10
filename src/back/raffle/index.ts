@@ -1,8 +1,14 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { ScanCommand, ScanCommandInput } from '@aws-sdk/client-dynamodb';
+import {
+  ScanCommand,
+  ScanCommandInput,
+  QueryCommand,
+  QueryCommandInput,
+} from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
+import { IRaffle, ITicket, ITicketStatus } from '../types';
 import { CORS_HEADERS, DEFAULT_PAGINATION_LIMIT, MAX_PAGINATION_LIMIT } from '../constants';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -10,17 +16,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const limitQueryString = event.queryStringParameters?.limit;
     const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
     const limit = getPaginationLimit(limitQueryString);
-    const params: ScanCommandInput = {
-      TableName: process.env.DYNAMODB_TABLE_NAME,
-      Limit: limit,
-      ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
-    };
-    const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
+    const { raffles, lastEvaluatedKey } = await getRaffles(limit, exclusiveStartKey);
+    const rafflesWithAvailableNumbers = await Promise.all(
+      raffles.map((raffle) => {
+        return getTickets(raffle);
+      }),
+    );
     return {
       statusCode: 200,
       body: JSON.stringify({
-        raffles: Items.map((item) => unmarshall(item)),
-        lastEvaluatedKey: LastEvaluatedKey ? unmarshall(LastEvaluatedKey) : null,
+        raffles: rafflesWithAvailableNumbers,
+        lastEvaluatedKey,
       }),
       headers: CORS_HEADERS,
     };
@@ -32,6 +38,42 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       headers: CORS_HEADERS,
     };
   }
+};
+
+const getRaffles = async (
+  limit: number,
+  exclusiveStartKey?: string,
+): Promise<{ raffles: IRaffle[]; lastEvaluatedKey: { id: string } | null }> => {
+  const params: ScanCommandInput = {
+    TableName: process.env.RAFFLE_DYNAMODB_TABLE_NAME,
+    Limit: limit,
+    ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
+  };
+  const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
+  return {
+    raffles: Items.map((item) => unmarshall(item) as IRaffle),
+    lastEvaluatedKey: LastEvaluatedKey ? (unmarshall(LastEvaluatedKey) as { id: string }) : null,
+  };
+};
+
+const getTickets = async (raffle: IRaffle): Promise<IRaffle> => {
+  const queryCommandParams: QueryCommandInput = {
+    TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
+    KeyConditionExpression: `raffleId = :raffleId`,
+    FilterExpression: '#status <> :status',
+    ExpressionAttributeNames: {
+      '#number': 'number',
+      '#status': 'status',
+    },
+    ExpressionAttributeValues: marshall({
+      ':raffleId': raffle.id,
+      ':status': ITicketStatus.Expired,
+    }),
+    ProjectionExpression: '#number',
+  };
+  const { Items = [] } = await ddbClient.send(new QueryCommand(queryCommandParams));
+  const availableNumbers = Items.map((item) => unmarshall(item)) as Pick<ITicket, 'number'>[];
+  return { ...raffle, boughtTickets: availableNumbers.map(({ number }) => number) };
 };
 
 const getPaginationLimit = (queryString: string | undefined): number => {

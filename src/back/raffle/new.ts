@@ -4,7 +4,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ddbClient } from './ddbClient';
-import { IRaffle } from '../types';
+import { ICreateRaffle } from '../types';
 import { CORS_HEADERS } from '../constants';
 
 interface CreateRaffleBody {
@@ -61,7 +61,7 @@ export const handler = async (
       };
     }
     const id = uuidv4();
-    const raffle: IRaffle = {
+    const raffle: ICreateRaffle = {
       ownerId: owner.id,
       id,
       prize,
@@ -70,7 +70,6 @@ export const handler = async (
       quantitySeries,
       ticketPrice,
       description,
-      boughtTickets: 0,
       completionDate,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

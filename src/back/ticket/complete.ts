@@ -29,12 +29,13 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
 const setTicketsStatusToComplete = async (tickets: Array<ITicket>) => {
   let putRequestItems: Record<string, WriteRequest[]> | undefined = {
     [`${process.env.DYNAMODB_TABLE_NAME}`]: tickets.map(
-      ({ raffleId, id, number, payment, raffle, createdAt }) => {
+      ({ raffleId, id, number, payment, raffle, voucher, createdAt }) => {
         const ticket: ITicket = {
           raffleId,
           id,
           number,
           payment,
+          voucher,
           raffle,
           status: ITicketStatus.Complete,
           createdAt,
