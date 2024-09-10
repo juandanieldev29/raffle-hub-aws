@@ -132,8 +132,7 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
   }, []);
 
   return (
-    // <Authenticator socialProviders={['google']} signUpAttributes={['email']}>
-    <>
+    <Authenticator socialProviders={['google']} signUpAttributes={['email']}>
       <h1 className="width margin-bottom text-4xl md:text-5xl">Administración</h1>
       {raffles.map((raffle) => {
         return <RaffleAdminCard key={raffle.id} raffle={raffle} />;
@@ -164,7 +163,6 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
           <i className="fa-solid fa-chevron-right"></i>
         </button>
       </div>
-    </>
-    // </Authenticator>
+    </Authenticator>
   );
 }
