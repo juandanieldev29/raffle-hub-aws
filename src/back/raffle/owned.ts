@@ -4,7 +4,15 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
 import { CORS_HEADERS, DEFAULT_PAGINATION_LIMIT, MAX_PAGINATION_LIMIT } from '../constants';
-import { IRaffle, ITicket, ITicketStatus } from '../types';
+import {
+  IRaffle,
+  IOwnedRaffle,
+  ITicket,
+  ITicketStatus,
+  IPaymentStatus,
+  IPayment,
+  IVoucher,
+} from '../types';
 
 interface CognitoUserSession {
   sub: string;
@@ -29,15 +37,15 @@ export const handler = async (
       userSession.sub,
       exclusiveStartKey,
     );
-    const rafflesWithAvailableNumbers = await Promise.all(
+    const adminRaffles = await Promise.all(
       raffles.map((raffle) => {
-        return getTickets(raffle);
+        return getAdminData(raffle);
       }),
     );
     return {
       statusCode: 200,
       body: JSON.stringify({
-        raffles: rafflesWithAvailableNumbers,
+        raffles: adminRaffles,
         lastEvaluatedKey,
       }),
       headers: CORS_HEADERS,
@@ -50,6 +58,16 @@ export const handler = async (
       headers: CORS_HEADERS,
     };
   }
+};
+
+const getAdminData = async (raffle: IRaffle): Promise<IOwnedRaffle> => {
+  const [tickets, payments, vouchers] = await Promise.all([
+    getTickets(raffle),
+    getPayments(raffle),
+    getVouchers(raffle),
+  ]);
+  const availableNumbers = tickets.map(({ number }) => number);
+  return { ...raffle, tickets, payments, vouchers, boughtTickets: availableNumbers };
 };
 
 const getRaffles = async (
@@ -77,24 +95,53 @@ const getRaffles = async (
   return { raffles: items, lastEvaluatedKey };
 };
 
-const getTickets = async (raffle: IRaffle): Promise<IRaffle> => {
+const getPayments = async (raffle: IRaffle): Promise<IPayment[]> => {
+  const queryCommandParams: QueryCommandInput = {
+    TableName: process.env.PAYMENT_DYNAMODB_TABLE_NAME,
+    KeyConditionExpression: `raffleId = :raffleId`,
+    FilterExpression: '#status <> :status',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+    },
+    ExpressionAttributeValues: marshall({
+      ':raffleId': raffle.id,
+      ':status': IPaymentStatus.Created,
+    }),
+  };
+  const { Items = [] } = await ddbClient.send(new QueryCommand(queryCommandParams));
+  const payments = Items.map((item) => unmarshall(item)) as IPayment[];
+  return payments;
+};
+
+const getVouchers = async (raffle: IRaffle): Promise<IVoucher[]> => {
+  const queryCommandParams: QueryCommandInput = {
+    TableName: process.env.VOUCHER_DYNAMODB_TABLE_NAME,
+    KeyConditionExpression: `raffleId = :raffleId`,
+    ExpressionAttributeValues: marshall({
+      ':raffleId': raffle.id,
+    }),
+  };
+  const { Items = [] } = await ddbClient.send(new QueryCommand(queryCommandParams));
+  const vouchers = Items.map((item) => unmarshall(item)) as IVoucher[];
+  return vouchers;
+};
+
+const getTickets = async (raffle: IRaffle): Promise<ITicket[]> => {
   const queryCommandParams: QueryCommandInput = {
     TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
     KeyConditionExpression: `raffleId = :raffleId`,
     FilterExpression: '#status <> :status',
     ExpressionAttributeNames: {
-      '#number': 'number',
       '#status': 'status',
     },
     ExpressionAttributeValues: marshall({
       ':raffleId': raffle.id,
       ':status': ITicketStatus.Expired,
     }),
-    ProjectionExpression: '#number',
   };
   const { Items = [] } = await ddbClient.send(new QueryCommand(queryCommandParams));
-  const availableNumbers = Items.map((item) => unmarshall(item)) as Pick<ITicket, 'number'>[];
-  return { ...raffle, boughtTickets: availableNumbers.map(({ number }) => number) };
+  const tickets = Items.map((item) => unmarshall(item)) as ITicket[];
+  return tickets;
 };
 
 const getPaginationLimit = (queryString: string | undefined): number => {
