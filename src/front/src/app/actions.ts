@@ -2,8 +2,8 @@
 
 import { redirect } from 'next/navigation';
 
-export async function navigateToRaffleDetail(id: string) {
-  redirect(`/raffle/${id}`);
+export async function navigateToRaffleDetail(id: string, ownerId: string) {
+  redirect(`/raffle/${id}?ownerId=${ownerId}`);
 }
 
 export async function navigateToHome() {

@@ -59,7 +59,7 @@ export default function RaffleNew() {
         body: JSON.stringify(payload, replacer),
       });
       const raffle: IRaffle = await res.json();
-      await navigateToRaffleDetail(raffle.id);
+      await navigateToRaffleDetail(raffle.id, raffle.ownerId);
     } catch (err) {
       toast.error('Ha ocurrido un error', {
         position: 'top-center',
