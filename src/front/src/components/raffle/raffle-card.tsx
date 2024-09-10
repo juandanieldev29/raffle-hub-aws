@@ -54,7 +54,7 @@ export default function RaffleCard({
       </p>
       <p className="md:col-start-3 font-semibold">Números disponibles</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium">
-        {raffle.quantityNumbers - raffle.boughtTickets}
+        {raffle.quantityNumbers - raffle.boughtTickets.length}
       </p>
       <p className="md:col-start-3 font-semibold">Fecha a realizarse la rifa</p>
       <p className="text-sm font-extralight md:col-start-3 font-medium" suppressHydrationWarning>

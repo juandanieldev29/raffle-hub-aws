@@ -34,9 +34,15 @@ export class RaffleHubMicroservices extends Construct {
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
     super(scope, id);
-    this.raffleIndexMicroservice = this.createRaffleIndexFunction(props.raffleTable);
+    this.raffleIndexMicroservice = this.createRaffleIndexFunction(
+      props.raffleTable,
+      props.ticketTable,
+    );
     this.raffleNewMicroservice = this.createRaffleNewFunction(props.raffleTable);
-    this.raffleShowMicroservice = this.createRaffleShowFunction(props.raffleTable);
+    this.raffleShowMicroservice = this.createRaffleShowFunction(
+      props.raffleTable,
+      props.ticketTable,
+    );
     this.raffleOwnedMicroservice = this.createRaffleOwnedFunction(props.raffleTable);
     this.raffleAvailableNumbersMicroservice = this.createRaffleAvailableNumbersFunction(
       props.raffleTable,
@@ -64,13 +70,14 @@ export class RaffleHubMicroservices extends Construct {
     );
   }
 
-  private createRaffleIndexFunction(raffleTable: ITable): NodejsFunction {
+  private createRaffleIndexFunction(raffleTable: ITable, ticketTable: ITable): NodejsFunction {
     const nodeJsFunctionProps: NodejsFunctionProps = {
       bundling: {
         externalModules: ['aws-sdk'],
       },
       environment: {
-        DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        RAFFLE_DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(3),
@@ -82,6 +89,7 @@ export class RaffleHubMicroservices extends Construct {
     });
 
     raffleTable.grantReadWriteData(lambdaFunction);
+    ticketTable.grantReadWriteData(lambdaFunction);
 
     return lambdaFunction;
   }
@@ -108,13 +116,14 @@ export class RaffleHubMicroservices extends Construct {
     return lambdaFunction;
   }
 
-  private createRaffleShowFunction(raffleTable: ITable): NodejsFunction {
+  private createRaffleShowFunction(raffleTable: ITable, ticketTable: ITable): NodejsFunction {
     const nodeJsFunctionProps: NodejsFunctionProps = {
       bundling: {
         externalModules: ['aws-sdk'],
       },
       environment: {
-        DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        RAFFLE_DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        TICKET_DYNAMODB_TABLE_NAME: ticketTable.tableName,
       },
       runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(3),
@@ -126,6 +135,7 @@ export class RaffleHubMicroservices extends Construct {
     });
 
     raffleTable.grantReadWriteData(lambdaFunction);
+    ticketTable.grantReadWriteData(lambdaFunction);
 
     return lambdaFunction;
   }
