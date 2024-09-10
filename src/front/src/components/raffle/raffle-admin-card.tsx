@@ -50,11 +50,11 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
       <p className="md:col-start-2 text-3xl font-bold">{raffle.boughtTickets}</p>
       <p className="md:col-start-2 text-2xl font-semibold">Dinero recaudado</p>
       <p className="md:col-start-2 text-3xl font-bold">
-        {raffle.boughtTickets * raffle.ticketPrice}
+        {raffle.boughtTickets.length * raffle.ticketPrice}
       </p>
       <p className="md:col-start-2 text-2xl font-semibold">Porcentaje de números vendidos</p>
       <p className="md:col-start-2 text-3xl font-bold">
-        {(raffle.boughtTickets / raffle.quantityNumbers) * 100}%
+        {(raffle.boughtTickets.length / raffle.quantityNumbers) * 100}%
       </p>
     </div>
   );

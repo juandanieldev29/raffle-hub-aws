@@ -4,7 +4,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 import { ddbClient } from './ddbClient';
 import { CORS_HEADERS, DEFAULT_PAGINATION_LIMIT, MAX_PAGINATION_LIMIT } from '../constants';
-import { IRaffle } from '../types';
+import { IRaffle, ITicket, ITicketStatus } from '../types';
 
 interface CognitoUserSession {
   sub: string;
@@ -24,16 +24,21 @@ export const handler = async (
     const limitQueryString = event.queryStringParameters?.limit;
     const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
     const limit = getPaginationLimit(limitQueryString);
-    const { raffles, lastEvaluatedKey } = await fetchItems(
+    const { raffles, lastEvaluatedKey } = await getRaffles(
       limit,
       userSession.sub,
       exclusiveStartKey,
     );
+    const rafflesWithAvailableNumbers = await Promise.all(
+      raffles.map((raffle) => {
+        return getTickets(raffle);
+      }),
+    );
     return {
       statusCode: 200,
       body: JSON.stringify({
-        raffles,
-        lastEvaluatedKey: lastEvaluatedKey ? { id: lastEvaluatedKey } : null,
+        raffles: rafflesWithAvailableNumbers,
+        lastEvaluatedKey,
       }),
       headers: CORS_HEADERS,
     };
@@ -47,13 +52,13 @@ export const handler = async (
   }
 };
 
-const fetchItems = async (
+const getRaffles = async (
   limit: number,
   ownerId: string,
   exclusiveStartKey: string | undefined,
-) => {
+): Promise<{ raffles: IRaffle[]; lastEvaluatedKey: { id: string } | null }> => {
   const params: QueryCommandInput = {
-    TableName: process.env.DYNAMODB_TABLE_NAME,
+    TableName: process.env.RAFFLE_DYNAMODB_TABLE_NAME,
     Limit: limit,
     KeyConditionExpression: `ownerId = :ownerId`,
     ExpressionAttributeValues: marshall({
@@ -70,6 +75,26 @@ const fetchItems = async (
     ? (unmarshall(LastEvaluatedKey) as { id: string })
     : null;
   return { raffles: items, lastEvaluatedKey };
+};
+
+const getTickets = async (raffle: IRaffle): Promise<IRaffle> => {
+  const queryCommandParams: QueryCommandInput = {
+    TableName: process.env.TICKET_DYNAMODB_TABLE_NAME,
+    KeyConditionExpression: `raffleId = :raffleId`,
+    FilterExpression: '#status <> :status',
+    ExpressionAttributeNames: {
+      '#number': 'number',
+      '#status': 'status',
+    },
+    ExpressionAttributeValues: marshall({
+      ':raffleId': raffle.id,
+      ':status': ITicketStatus.Expired,
+    }),
+    ProjectionExpression: '#number',
+  };
+  const { Items = [] } = await ddbClient.send(new QueryCommand(queryCommandParams));
+  const availableNumbers = Items.map((item) => unmarshall(item)) as Pick<ITicket, 'number'>[];
+  return { ...raffle, boughtTickets: availableNumbers.map(({ number }) => number) };
 };
 
 const getPaginationLimit = (queryString: string | undefined): number => {
