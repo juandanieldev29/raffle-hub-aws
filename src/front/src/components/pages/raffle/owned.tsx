@@ -6,24 +6,24 @@ import { fetchAuthSession } from '@aws-amplify/auth';
 import { toast } from 'react-toastify';
 
 import RaffleAdminCard from '@/components/raffle/raffle-admin-card';
-import { IRaffle } from '@/types/raffle';
-import { RafflesPaginationResult } from '@/types/pagination';
+import { IOwnedRaffle } from '@/types/raffle';
+import { AdminRafflesPaginationResult } from '@/types/pagination';
 import { INITIAL_LIMIT } from '@/utils/constants';
 import { LoadingContext } from '@/contexts/loading-context';
 import { LoadingAction } from '@/enums/loading-action';
 import { AuthSession } from 'aws-amplify/auth';
 
 interface RaffleOwnedProps {
-  rafflesPaginated: RafflesPaginationResult;
+  rafflesPaginated: AdminRafflesPaginationResult;
 }
 
 export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
   const { dispatch } = useContext(LoadingContext);
   const [limit] = useState(INITIAL_LIMIT);
   const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
-  const [raffles, setRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
+  const [raffles, setRaffles] = useState<Array<IOwnedRaffle>>(rafflesPaginated.raffles);
   const [paginationHistory, setPaginationHistory] = useState<
-    Array<RafflesPaginationResult['lastEvaluatedKey']>
+    Array<AdminRafflesPaginationResult['lastEvaluatedKey']>
   >([]);
   const [session, setSession] = useState<AuthSession | null>(null);
 
@@ -39,7 +39,7 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
   };
 
   const fetchRaffles = async (
-    exclusiveStartKey: RafflesPaginationResult['lastEvaluatedKey'],
+    exclusiveStartKey: AdminRafflesPaginationResult['lastEvaluatedKey'],
     previousPage = false,
   ) => {
     let urlSearchParams = new URLSearchParams();
@@ -58,7 +58,7 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
           cache: 'no-store',
         },
       );
-      const { raffles, lastEvaluatedKey }: RafflesPaginationResult = await res.json();
+      const { raffles, lastEvaluatedKey }: AdminRafflesPaginationResult = await res.json();
       if (raffles.length) {
         setExclusiveStartKey(lastEvaluatedKey);
         setRaffles(raffles);
@@ -89,7 +89,9 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
     fetchRaffles(exclusiveStartKey);
   };
 
-  const getPreviousPaginationHistory = (): RafflesPaginationResult['lastEvaluatedKey'] | null => {
+  const getPreviousPaginationHistory = ():
+    | AdminRafflesPaginationResult['lastEvaluatedKey']
+    | null => {
     let history = [...paginationHistory];
     if (history.length <= 1) {
       history = [];
