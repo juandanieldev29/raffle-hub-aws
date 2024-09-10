@@ -14,9 +14,14 @@ import { CORS_HEADERS, DEFAULT_PAGINATION_LIMIT, MAX_PAGINATION_LIMIT } from '..
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const limitQueryString = event.queryStringParameters?.limit;
-    const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
+    const exclusiveStartKeyOwnerId = event.queryStringParameters?.exclusiveStartKeyOwnerId;
+    const exclusiveStartKeyId = event.queryStringParameters?.exclusiveStartKeyId;
     const limit = getPaginationLimit(limitQueryString);
-    const { raffles, lastEvaluatedKey } = await getRaffles(limit, exclusiveStartKey);
+    const { raffles, lastEvaluatedKey } = await getRaffles(
+      limit,
+      exclusiveStartKeyOwnerId,
+      exclusiveStartKeyId,
+    );
     const rafflesWithAvailableNumbers = await Promise.all(
       raffles.map((raffle) => {
         return getTickets(raffle);
@@ -42,17 +47,23 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 const getRaffles = async (
   limit: number,
-  exclusiveStartKey?: string,
-): Promise<{ raffles: IRaffle[]; lastEvaluatedKey: { id: string } | null }> => {
+  exclusiveStartKeyOwnerId?: string,
+  exclusiveStartKeyId?: string,
+): Promise<{ raffles: IRaffle[]; lastEvaluatedKey: { ownerId: string; id: string } | null }> => {
   const params: ScanCommandInput = {
     TableName: process.env.RAFFLE_DYNAMODB_TABLE_NAME,
     Limit: limit,
-    ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
+    ExclusiveStartKey:
+      exclusiveStartKeyOwnerId && exclusiveStartKeyId
+        ? marshall({ ownerId: exclusiveStartKeyOwnerId, id: exclusiveStartKeyId })
+        : undefined,
   };
   const { Items = [], LastEvaluatedKey } = await ddbClient.send(new ScanCommand(params));
   return {
     raffles: Items.map((item) => unmarshall(item) as IRaffle),
-    lastEvaluatedKey: LastEvaluatedKey ? (unmarshall(LastEvaluatedKey) as { id: string }) : null,
+    lastEvaluatedKey: LastEvaluatedKey
+      ? (unmarshall(LastEvaluatedKey) as { ownerId: string; id: string })
+      : null,
   };
 };
 

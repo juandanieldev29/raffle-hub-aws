@@ -20,7 +20,7 @@ interface RaffleOwnedProps {
 export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
   const { dispatch } = useContext(LoadingContext);
   const [limit] = useState(INITIAL_LIMIT);
-  const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
+  const [lastEvaluatedKey, setLastEvaluatedKey] = useState(rafflesPaginated.lastEvaluatedKey);
   const [raffles, setRaffles] = useState<Array<IOwnedRaffle>>(rafflesPaginated.raffles);
   const [paginationHistory, setPaginationHistory] = useState<
     Array<AdminRafflesPaginationResult['lastEvaluatedKey']>
@@ -44,7 +44,16 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
   ) => {
     let urlSearchParams = new URLSearchParams();
     urlSearchParams = prepareURLParams(urlSearchParams, 'limit', limit);
-    urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
+    urlSearchParams = prepareURLParams(
+      urlSearchParams,
+      'exclusiveStartKeyOwnerId',
+      exclusiveStartKey?.ownerId,
+    );
+    urlSearchParams = prepareURLParams(
+      urlSearchParams,
+      'exclusiveStartKeyId',
+      exclusiveStartKey?.id,
+    );
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const res = await fetch(
@@ -60,7 +69,7 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
       );
       const { raffles, lastEvaluatedKey }: AdminRafflesPaginationResult = await res.json();
       if (raffles.length) {
-        setExclusiveStartKey(lastEvaluatedKey);
+        setLastEvaluatedKey(lastEvaluatedKey);
         setRaffles(raffles);
       }
       if (!previousPage) {
@@ -86,7 +95,7 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
   };
 
   const fetchNextPageRaffles = async () => {
-    fetchRaffles(exclusiveStartKey);
+    fetchRaffles(lastEvaluatedKey);
   };
 
   const getPreviousPaginationHistory = ():
@@ -156,7 +165,7 @@ export default function RaffleOwned({ rafflesPaginated }: RaffleOwnedProps) {
         </button>
         <button
           className="button-padding primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
-          disabled={exclusiveStartKey === null}
+          disabled={lastEvaluatedKey === null}
           onClick={fetchNextPageRaffles}
           title="Next page"
         >
