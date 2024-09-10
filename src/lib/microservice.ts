@@ -411,7 +411,7 @@ export class RaffleHubMicroservices extends Construct {
       timeout: Duration.seconds(3),
       memorySize: 128,
     };
-    const lambdaFunction = new NodejsFunction(this, 'NewVoucherLambdaFunction', {
+    const lambdaFunction = new NodejsFunction(this, 'RafflePaymentsLambdaFunction', {
       entry: join(__dirname, `/../back/raffle/payments.ts`),
       ...nodeJsFunctionProps,
     });
