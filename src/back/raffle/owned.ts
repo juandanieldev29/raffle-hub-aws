@@ -58,7 +58,7 @@ const getRaffles = async (
   exclusiveStartKey: string | undefined,
 ): Promise<{ raffles: IRaffle[]; lastEvaluatedKey: { id: string } | null }> => {
   const params: QueryCommandInput = {
-    TableName: process.env.DYNAMODB_TABLE_NAME,
+    TableName: process.env.RAFFLE_DYNAMODB_TABLE_NAME,
     Limit: limit,
     KeyConditionExpression: `ownerId = :ownerId`,
     ExpressionAttributeValues: marshall({
