@@ -32,7 +32,7 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
         className="lg:max-w-96 lg:max-h-96 max-w-80 max-h-80 row-span-full"
         options={{ responsive: true }}
         data={{
-          labels: ['Vendido', 'Total'],
+          labels: ['Vendido', 'Restantes'],
           datasets: [
             {
               label: 'Cantidad',
