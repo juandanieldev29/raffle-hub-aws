@@ -36,7 +36,10 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
           datasets: [
             {
               label: 'Cantidad',
-              data: [raffle.boughtTickets, raffle.quantityNumbers],
+              data: [
+                raffle.boughtTickets.length,
+                raffle.quantityNumbers - raffle.boughtTickets.length,
+              ],
               backgroundColor: ['rgb(29, 78, 216)', 'rgb(147, 197, 253)'],
             },
           ],
@@ -47,7 +50,7 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
         {missingDays < 0 ? 'Expirado' : missingDays}
       </p>
       <p className="md:col-start-2 text-2xl font-semibold">Números vendidos</p>
-      <p className="md:col-start-2 text-3xl font-bold">{raffle.boughtTickets}</p>
+      <p className="md:col-start-2 text-3xl font-bold">{raffle.boughtTickets.length}</p>
       <p className="md:col-start-2 text-2xl font-semibold">Dinero recaudado</p>
       <p className="md:col-start-2 text-3xl font-bold">
         {raffle.boughtTickets.length * raffle.ticketPrice}
