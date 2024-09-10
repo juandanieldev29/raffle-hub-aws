@@ -9,7 +9,14 @@ export interface IPayment {
   mode: 'payment' | 'setup' | 'subscription';
   payment_method_types: Array<string>;
   payment_status: 'no_payment_required' | 'unpaid' | 'paid';
-  status: 'open' | 'complete' | 'expired';
+  status: IPaymentStatus;
   success_url: string;
   url: string;
+}
+
+export enum IPaymentStatus {
+  Complete = 'Complete',
+  PendingPayment = 'PendingPayment',
+  Created = 'Created',
+  Expired = 'Expired',
 }

@@ -49,4 +49,5 @@ export enum IPaymentStatus {
   Complete = 'Complete',
   PendingPayment = 'PendingPayment',
   Created = 'Created',
+  Expired = 'Expired',
 }
