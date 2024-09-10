@@ -22,6 +22,8 @@ export class RaffleHubMicroservices extends Construct {
   public readonly raffleNewMicroservice: NodejsFunction;
   public readonly raffleShowMicroservice: NodejsFunction;
   public readonly raffleOwnedMicroservice: NodejsFunction;
+  public readonly raffleVouchersMicroservice: NodejsFunction;
+  public readonly rafflePaymentsMicroservice: NodejsFunction;
   public readonly raffleAvailableNumbersMicroservice: NodejsFunction;
   public readonly ticketNewMicroservice: NodejsFunction;
   public readonly ticketCompleteMicroservice: NodejsFunction;
@@ -72,6 +74,14 @@ export class RaffleHubMicroservices extends Construct {
       props.voucherTable,
       props.userPoolId,
       props.userPoolClientId,
+    );
+    this.rafflePaymentsMicroservice = this.createRafflePaymentsFunction(
+      props.raffleTable,
+      props.voucherTable,
+    );
+    this.raffleVouchersMicroservice = this.createRaffleVouchersFunction(
+      props.raffleTable,
+      props.voucherTable,
     );
   }
 
@@ -382,6 +392,49 @@ export class RaffleHubMicroservices extends Construct {
     };
     const lambdaFunction = new NodejsFunction(this, 'NewVoucherLambdaFunction', {
       entry: join(__dirname, `/../back/voucher/new.ts`),
+      ...nodeJsFunctionProps,
+    });
+    voucherTable.grantReadWriteData(lambdaFunction);
+    return lambdaFunction;
+  }
+
+  private createRafflePaymentsFunction(raffleTable: ITable, paymentTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        RAFFLE_DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        PAYMENT_DYNAMODB_TABLE_NAME: paymentTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'NewVoucherLambdaFunction', {
+      entry: join(__dirname, `/../back/raffle/payments.ts`),
+      ...nodeJsFunctionProps,
+    });
+    raffleTable.grantReadWriteData(lambdaFunction);
+    paymentTable.grantReadWriteData(lambdaFunction);
+    return lambdaFunction;
+  }
+
+  private createRaffleVouchersFunction(raffleTable: ITable, voucherTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        RAFFLE_DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        VOUCHER_DYNAMODB_TABLE_NAME: voucherTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'RaffleVouchersLambdaFunction', {
+      entry: join(__dirname, `/../back/raffle/vouchers.ts`),
       ...nodeJsFunctionProps,
     });
     voucherTable.grantReadWriteData(lambdaFunction);

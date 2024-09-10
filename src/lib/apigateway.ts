@@ -19,6 +19,8 @@ interface RaffleHubApiGatewayProps {
   raffleNewMicroservice: IFunction;
   raffleShowMicroservice: IFunction;
   raffleOwnedMicroservice: IFunction;
+  raffleVouchersMicroservice: IFunction;
+  rafflePaymentsMicroservice: IFunction;
   raffleAvailableNumbersMicroservice: IFunction;
   ticketNewMicroservice: IFunction;
   paymentNewMicroservice: IFunction;
@@ -36,6 +38,8 @@ export class RaffleHubApiGateway extends Construct {
       props.raffleNewMicroservice,
       props.raffleShowMicroservice,
       props.raffleOwnedMicroservice,
+      props.raffleVouchersMicroservice,
+      props.rafflePaymentsMicroservice,
       props.raffleAvailableNumbersMicroservice,
       props.ticketNewMicroservice,
       props.paymentNewMicroservice,
@@ -151,6 +155,8 @@ export class RaffleHubApiGateway extends Construct {
     raffleNewMicroservice: IFunction,
     raffleShowMicroservice: IFunction,
     raffleOwnedMicroservice: IFunction,
+    raffleVouchersMicroservice: IFunction,
+    rafflePaymentsMicroservice: IFunction,
     raffleAvailableNumbersMicroservice: IFunction,
     ticketNewMicroservice: IFunction,
     paymentNewMicroservice: IFunction,
@@ -213,6 +219,16 @@ export class RaffleHubApiGateway extends Construct {
       'GET',
       new LambdaIntegration(raffleAvailableNumbersMicroservice),
     );
+    const paymentsByRaffle = singleRaffle.addResource('payments');
+    paymentsByRaffle.addMethod('GET', new LambdaIntegration(rafflePaymentsMicroservice), {
+      authorizer: endpointAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    const vouchersByRaffle = singleRaffle.addResource('vouchers');
+    vouchersByRaffle.addMethod('GET', new LambdaIntegration(raffleVouchersMicroservice), {
+      authorizer: endpointAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     const ticket = apigw.root.addResource('ticket', {
       defaultCorsPreflightOptions: {
