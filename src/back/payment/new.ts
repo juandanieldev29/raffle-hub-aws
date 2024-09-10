@@ -19,11 +19,19 @@ interface NewTicketBody extends Array<NewTicketItem> {}
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const id = event.pathParameters?.id;
+    const ownerId = event.queryStringParameters?.ownerId;
     const body: NewTicketBody = JSON.parse(event.body!);
     if (!id) {
       return {
         statusCode: 400,
         body: 'You must provide a raffle id',
+        headers: CORS_HEADERS,
+      };
+    }
+    if (!ownerId) {
+      return {
+        statusCode: 400,
+        body: 'You must provide an owner id',
         headers: CORS_HEADERS,
       };
     }
@@ -69,8 +77,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         raffleId: id,
       },
       mode: 'payment',
-      success_url: `${referer}raffle/${id}`,
-      cancel_url: `${referer}raffle/${id}`,
+      success_url: `${referer}raffle/${id}?ownerId=${ownerId}`,
+      cancel_url: `${referer}raffle/${id}?ownerId=${ownerId}`,
     });
     const authorizationHeader = event.headers['Authorization'] || event.headers['authorization'];
     await createPayment(id, session, authorizationHeader);

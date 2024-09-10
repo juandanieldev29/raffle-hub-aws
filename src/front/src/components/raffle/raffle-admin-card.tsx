@@ -7,7 +7,7 @@ import { IOwnedRaffle } from '@/types/raffle';
 import { differenceInDays } from '@/utils';
 
 import 'chart.js/auto';
-import { IVoucherStatus } from '@/types';
+import { IPaymentStatus, IVoucherStatus } from '@/types';
 
 interface RaffleAdminCardProps {
   raffle: IOwnedRaffle;
@@ -64,7 +64,7 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
         Pagos con tarjeta completados
       </p>
       <p className="md:col-start-3 md:row-start-2 text-3xl font-bold">
-        {raffle.payments.filter((x) => x.status === 'complete').length}
+        {raffle.payments.filter((x) => x.status === IPaymentStatus.Complete).length}
       </p>
       <p className="md:col-start-3 md:row-start-3 text-2xl font-bold">
         Pagos con SINPE movil completados

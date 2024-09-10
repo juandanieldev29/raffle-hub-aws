@@ -94,16 +94,19 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     });
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
-      const res = await fetch(`https://api.raffle-hub.net/payment/${raffle.id}`, {
-        headers: idToken
-          ? {
-              Authorization: `Bearer ${idToken}`,
-            }
-          : undefined,
-        cache: 'no-store',
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `https://api.raffle-hub.net/payment/${raffle.id}?ownerId=${raffle.ownerId}`,
+        {
+          headers: idToken
+            ? {
+                Authorization: `Bearer ${idToken}`,
+              }
+            : undefined,
+          cache: 'no-store',
+          method: 'POST',
+          body: JSON.stringify(payload),
+        },
+      );
       const payment: IPayment = await res.json();
       return payment;
     } catch (err) {
