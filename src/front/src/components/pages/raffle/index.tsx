@@ -17,7 +17,7 @@ interface RaffleListProps {
 export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   const { dispatch } = useContext(LoadingContext);
   const [limit] = useState(INITIAL_LIMIT);
-  const [exclusiveStartKey, setExclusiveStartKey] = useState(rafflesPaginated.lastEvaluatedKey);
+  const [lastEvaluatedKey, setLastEvaluatedKey] = useState(rafflesPaginated.lastEvaluatedKey);
   const [raffles, setRaffles] = useState<Array<IRaffle>>(rafflesPaginated.raffles);
   const [paginationHistory, setPaginationHistory] = useState<
     Array<RafflesPaginationResult['lastEvaluatedKey']>
@@ -40,7 +40,16 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   ) => {
     let urlSearchParams = new URLSearchParams();
     urlSearchParams = prepareURLParams(urlSearchParams, 'limit', limit);
-    urlSearchParams = prepareURLParams(urlSearchParams, 'exclusiveStartKey', exclusiveStartKey?.id);
+    urlSearchParams = prepareURLParams(
+      urlSearchParams,
+      'exclusiveStartKeyOwnerId',
+      exclusiveStartKey?.ownerId,
+    );
+    urlSearchParams = prepareURLParams(
+      urlSearchParams,
+      'exclusiveStartKeyId',
+      exclusiveStartKey?.id,
+    );
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
       const res = await fetch(`https://api.raffle-hub.net/raffle?${urlSearchParams.toString()}`, {
@@ -48,7 +57,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
       });
       const { raffles, lastEvaluatedKey }: RafflesPaginationResult = await res.json();
       if (raffles.length) {
-        setExclusiveStartKey(lastEvaluatedKey);
+        setLastEvaluatedKey(lastEvaluatedKey);
         setRaffles(raffles);
       }
       if (!previousPage) {
@@ -74,7 +83,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
   };
 
   const fetchNextPageRaffles = async () => {
-    fetchRaffles(exclusiveStartKey);
+    fetchRaffles(lastEvaluatedKey);
   };
 
   const getPreviousPaginationHistory = (): RafflesPaginationResult['lastEvaluatedKey'] | null => {
@@ -129,7 +138,7 @@ export default function RaffleIndex({ rafflesPaginated }: RaffleListProps) {
         </button>
         <button
           className="button-padding primary-button-colors disabled:cursor-not-allowed disabled:opacity-20 ring-1 ring-inset ring-gray-300"
-          disabled={exclusiveStartKey === null}
+          disabled={lastEvaluatedKey === null}
           onClick={fetchNextPageRaffles}
           title="Next page"
         >

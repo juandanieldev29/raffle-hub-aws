@@ -30,12 +30,14 @@ export const handler = async (
       [x in keyof CognitoUserSession]: string;
     };
     const limitQueryString = event.queryStringParameters?.limit;
-    const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
+    const exclusiveStartKeyOwnerId = event.queryStringParameters?.exclusiveStartKeyOwnerId;
+    const exclusiveStartKeyId = event.queryStringParameters?.exclusiveStartKeyId;
     const limit = getPaginationLimit(limitQueryString);
     const { raffles, lastEvaluatedKey } = await getRaffles(
       limit,
       userSession.sub,
-      exclusiveStartKey,
+      exclusiveStartKeyOwnerId,
+      exclusiveStartKeyId,
     );
     const adminRaffles = await Promise.all(
       raffles.map((raffle) => {
@@ -73,7 +75,8 @@ const getAdminData = async (raffle: IRaffle): Promise<IOwnedRaffle> => {
 const getRaffles = async (
   limit: number,
   ownerId: string,
-  exclusiveStartKey: string | undefined,
+  exclusiveStartKeyOwnerId?: string,
+  exclusiveStartKeyId?: string,
 ): Promise<{ raffles: IRaffle[]; lastEvaluatedKey: { id: string } | null }> => {
   const params: QueryCommandInput = {
     TableName: process.env.RAFFLE_DYNAMODB_TABLE_NAME,
@@ -82,7 +85,10 @@ const getRaffles = async (
     ExpressionAttributeValues: marshall({
       ':ownerId': ownerId,
     }),
-    ExclusiveStartKey: exclusiveStartKey ? marshall({ id: exclusiveStartKey }) : undefined,
+    ExclusiveStartKey:
+      exclusiveStartKeyOwnerId && exclusiveStartKeyId
+        ? marshall({ ownerId: exclusiveStartKeyOwnerId, id: exclusiveStartKeyId })
+        : undefined,
   };
   const { Items = [], LastEvaluatedKey } = await ddbClient.send(new QueryCommand(params));
   const items = Items.map((item) => {
