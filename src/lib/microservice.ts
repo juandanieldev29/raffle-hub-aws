@@ -77,7 +77,7 @@ export class RaffleHubMicroservices extends Construct {
     );
     this.rafflePaymentsMicroservice = this.createRafflePaymentsFunction(
       props.raffleTable,
-      props.voucherTable,
+      props.paymentTable,
     );
     this.raffleVouchersMicroservice = this.createRaffleVouchersFunction(
       props.raffleTable,
