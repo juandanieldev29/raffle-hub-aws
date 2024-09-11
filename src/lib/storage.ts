@@ -18,7 +18,7 @@ export class RaffleHubStorage extends Construct {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
-          allowedMethods: [HttpMethods.GET, HttpMethods.POST, HttpMethods.PUT],
+          allowedMethods: [HttpMethods.GET, HttpMethods.POST, HttpMethods.PUT, HttpMethods.HEAD],
           allowedOrigins: ['https://raffle-hub.net'],
           allowedHeaders: ['*'],
         },
