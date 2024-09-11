@@ -35,7 +35,7 @@ export default function RaffleVoucherCard({
         {createdAt}
       </p>
       <p
-        className="text-sm font-extralight font-medium md:col-start-1 row-end-5 md:row-end-4 row-start-1 md:row-span-full md:col-span-2"
+        className="text-sm font-extralight font-medium md:col-start-1 row-end-5 row-start-1 md:row-span-full md:col-span-2"
         suppressHydrationWarning
       >
         <StorageImage path={`public/${voucher.url}`} alt="Factura de compra" />
