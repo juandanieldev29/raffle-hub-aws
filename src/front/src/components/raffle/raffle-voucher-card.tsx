@@ -44,10 +44,10 @@ export default function RaffleVoucherCard({
         Es válida la factura?
       </p>
       <div className="md:col-start-3 flex gap">
-        <button className="grow button-padding transition-transform rounded-md transition-colors primary-button-colors">
+        <button className="grow button-padding transition-transform rounded-md transition-colors primary-button-colors max-w-40 max-h-10">
           Sí
         </button>
-        <button className="grow button-padding transition-transform rounded-md transition-colors secondary-button-colors">
+        <button className="grow button-padding transition-transform rounded-md transition-colors secondary-button-colors max-w-40 max-h-10">
           No
         </button>
       </div>
