@@ -24,7 +24,7 @@ export default function RaffleVoucherCard({
   return (
     <div
       className={classNames(
-        'width secondary-background-color padding margin-bottom rounded-2xl transition-transform grid grid-cols-1 md:grid-cols-3 grid-rows-4 md:grid-rows-6 md:gap-x-8 gap-2 shadow-lg min-h-12',
+        'width secondary-background-color padding margin-bottom rounded-2xl transition-transform grid grid-cols-1 md:grid-cols-3 grid-rows-4 md:grid-rows-8 md:gap-x-8 gap-2 shadow-lg min-h-12',
         {
           'md:hover:scale-[1.01]': !disableAnimations,
         },
