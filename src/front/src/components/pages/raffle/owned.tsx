@@ -6,8 +6,7 @@ import { fetchAuthSession } from '@aws-amplify/auth';
 import { toast } from 'react-toastify';
 
 import RaffleAdminCard from '@/components/raffle/raffle-admin-card';
-import { IOwnedRaffle } from '@/types/raffle';
-import { AdminRafflesPaginationResult } from '@/types/pagination';
+import { IOwnedRaffle, AdminRafflesPaginationResult } from '@/types';
 import { INITIAL_LIMIT } from '@/utils/constants';
 import { LoadingContext } from '@/contexts/loading-context';
 import { LoadingAction } from '@/enums/loading-action';

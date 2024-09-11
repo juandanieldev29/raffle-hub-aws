@@ -1,5 +1,5 @@
 import RaffleDetail from '@/components/pages/raffle/show';
-import { IRaffle } from '@/types/raffle';
+import { IRaffle } from '@/types';
 
 export default async function RaffleShowPage({
   params,

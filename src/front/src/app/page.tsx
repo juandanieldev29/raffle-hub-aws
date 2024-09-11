@@ -1,8 +1,8 @@
 import RaffleList from '@/components/pages/raffle';
 import { INITIAL_LIMIT } from '@/utils/constants';
-import { RafflesPaginationResult } from '@/types/pagination';
+import { RafflesPaginationResult } from '@/types';
 
-export default async function Home() {
+export default async function HomePage() {
   const res = await fetch(`https://api.raffle-hub.net/raffle?limit=${INITIAL_LIMIT}`, {
     cache: 'no-store',
   });

@@ -2,7 +2,7 @@
 
 import { useState, createContext, Dispatch, SetStateAction, ReactNode } from 'react';
 
-import { CurrentUser } from '@/types/current-user';
+import { CurrentUser } from '@/types';
 
 export const UserContext = createContext<
   [CurrentUser | null, Dispatch<SetStateAction<CurrentUser | null>>]

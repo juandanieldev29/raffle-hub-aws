@@ -19,7 +19,6 @@ export const handler = async (
       [x in keyof IUserSession]: string;
     };
     const id = event.pathParameters?.id;
-    const ownerId = event.queryStringParameters?.ownerId;
     if (!id) {
       return {
         statusCode: 400,
@@ -27,14 +26,7 @@ export const handler = async (
         headers: CORS_HEADERS,
       };
     }
-    if (!ownerId) {
-      return {
-        statusCode: 400,
-        body: 'You must provide an owner id',
-        headers: CORS_HEADERS,
-      };
-    }
-    const raffle = await getRaffle(ownerId, id);
+    const raffle = await getRaffle(userSession.sub, id);
     if (!raffle) {
       return {
         statusCode: 404,
