@@ -437,6 +437,7 @@ export class RaffleHubMicroservices extends Construct {
       entry: join(__dirname, `/../back/raffle/vouchers.ts`),
       ...nodeJsFunctionProps,
     });
+    raffleTable.grantReadWriteData(lambdaFunction);
     voucherTable.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
