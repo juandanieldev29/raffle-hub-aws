@@ -24,20 +24,33 @@ export default function RaffleVoucherCard({
   return (
     <div
       className={classNames(
-        'width secondary-background-color padding margin-bottom rounded-2xl transition-transform grid grid-rows-6 md:gap-x-8 gap-2 shadow-lg min-h-12',
+        'width secondary-background-color padding margin-bottom rounded-2xl transition-transform grid md:grid-cols-3 grid-rows-6 md:gap-x-8 gap-2 shadow-lg min-h-12',
         {
           'md:hover:scale-[1.01]': !disableAnimations,
         },
       )}
     >
-      <p className="font-semibold">Imagen de factura</p>
-      <p className="text-sm font-extralight font-medium" suppressHydrationWarning>
-        <StorageImage path={`public/${voucher.url}`} alt="Factura de compra" />
-      </p>
-      <p className="font-semibold">Fecha de compra</p>
-      <p className="text-sm font-extralight font-medium" suppressHydrationWarning>
+      <p className="md:col-start-3 font-semibold">Fecha de compra</p>
+      <p className="text-sm font-extralight font-medium md:col-start-3" suppressHydrationWarning>
         {createdAt}
       </p>
+      <p
+        className="text-sm font-extralight font-medium md:col-start-1 md:row-start-1"
+        suppressHydrationWarning
+      >
+        <StorageImage path={`public/${voucher.url}`} alt="Factura de compra" className="" />
+      </p>
+      <p className="font-extralight font-semibold md:col-start-3" suppressHydrationWarning>
+        Es válida la factura?
+      </p>
+      <div className="md:col-start-3 flex gap">
+        <button className="grow button-padding transition-transform rounded-md transition-colors primary-button-colors">
+          Sí
+        </button>
+        <button className="grow button-padding transition-transform rounded-md transition-colors secondary-button-colors">
+          No
+        </button>
+      </div>
     </div>
   );
 }
