@@ -13,25 +13,29 @@ export default async function RaffleBillingPage({ params }: { params: { raffleId
     nextServerContext: { cookies },
     operation: (contextSpec) => fetchAuthSession(contextSpec),
   });
-  if (session.tokens?.idToken) {
-    const [paymentsRes, vouchersRes] = await Promise.all([
-      fetch(`https://api.raffle-hub.net/raffle/${raffleId}/payments`, {
-        cache: 'no-store',
-      }),
-      fetch(`https://api.raffle-hub.net/raffle/${raffleId}/vouchers`, {
-        cache: 'no-store',
-      }),
-    ]);
-    const [payments, vouchers]: [IPayment[], IVoucher[]] = await Promise.all([
-      paymentsRes.json(),
-      vouchersRes.json(),
-    ]);
-    return (
-      <main className="margin-top margin-bottom">
-        <RaffleBilling payments={payments} vouchers={vouchers} />
-      </main>
-    );
-  }
-
-  return <Error statusCode={401} />;
+  const [paymentsRes, vouchersRes] = await Promise.all([
+    fetch(`https://api.raffle-hub.net/raffle/${raffleId}/payments`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.tokens?.idToken}`,
+      },
+    }),
+    fetch(`https://api.raffle-hub.net/raffle/${raffleId}/vouchers`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.tokens?.idToken}`,
+      },
+    }),
+  ]);
+  const [payments, vouchers]: [IPayment[], IVoucher[]] = await Promise.all([
+    paymentsRes.json(),
+    vouchersRes.json(),
+  ]);
+  return (
+    <main className="margin-top margin-bottom">
+      <RaffleBilling payments={payments} vouchers={vouchers} />
+    </main>
+  );
 }
