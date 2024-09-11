@@ -24,7 +24,7 @@ export default function RaffleVoucherCard({
   return (
     <div
       className={classNames(
-        'width secondary-background-color padding margin-bottom rounded-2xl transition-transform grid md:grid-cols-3 grid-rows-6 md:gap-x-8 gap-2 shadow-lg min-h-12',
+        'width secondary-background-color padding margin-bottom rounded-2xl transition-transform grid grid-cols-1 md:grid-cols-3 grid-rows-6 md:gap-x-8 gap-2 shadow-lg min-h-12',
         {
           'md:hover:scale-[1.01]': !disableAnimations,
         },
@@ -35,10 +35,10 @@ export default function RaffleVoucherCard({
         {createdAt}
       </p>
       <p
-        className="text-sm font-extralight font-medium md:col-start-1 md:row-start-1"
+        className="text-sm font-extralight font-medium md:col-start-1 row-end-4 row-start-1 md:row-span-full md:col-span-2"
         suppressHydrationWarning
       >
-        <StorageImage path={`public/${voucher.url}`} alt="Factura de compra" className="" />
+        <StorageImage path={`public/${voucher.url}`} alt="Factura de compra" />
       </p>
       <p className="font-extralight font-semibold md:col-start-3" suppressHydrationWarning>
         Es válida la factura?
