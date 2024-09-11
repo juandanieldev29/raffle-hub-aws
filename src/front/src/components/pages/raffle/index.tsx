@@ -4,8 +4,7 @@ import { useContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 import RaffleCard from '@/components/raffle/raffle-card';
-import { IRaffle } from '@/types/raffle';
-import { RafflesPaginationResult } from '@/types/pagination';
+import { IRaffle, RafflesPaginationResult } from '@/types';
 import { INITIAL_LIMIT } from '@/utils/constants';
 import { LoadingContext } from '@/contexts/loading-context';
 import { LoadingAction } from '@/enums/loading-action';

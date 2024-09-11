@@ -9,7 +9,7 @@ import { replacer } from '@/utils';
 import { LoadingContext } from '@/contexts/loading-context';
 import { LoadingAction } from '@/enums/loading-action';
 import { navigateToRaffleDetail, navigateToHome } from '@/app/actions';
-import { IRaffle } from '@/types/raffle';
+import { IRaffle } from '@/types';
 import DatePicker from '@/components/date/date-picker';
 
 export default function RaffleNew() {

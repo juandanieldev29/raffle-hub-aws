@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import classNames from 'classnames';
-import { IRaffle } from '@/types/raffle';
+import { IRaffle } from '@/types';
 import { formatNumber, formatDate } from '@/utils';
 
 interface RaffleCardProps {
@@ -40,7 +40,7 @@ export default function RaffleCard({
     >
       <h2
         title={raffle.description}
-        className="title text-2xl md:text-3xl line-clamp-3 text-wrap md:line-clamp-6 md:col-span-2 row-span-3 md:row-span-6 font-semibold"
+        className="text-2xl md:text-3xl line-clamp-3 text-wrap md:line-clamp-6 md:col-span-2 row-span-3 md:row-span-6 font-semibold"
       >
         {raffle.description}
       </h2>

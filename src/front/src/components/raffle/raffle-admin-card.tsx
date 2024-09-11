@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import Link from 'next/link';
 
-import { IOwnedRaffle } from '@/types/raffle';
+import { IOwnedRaffle, IPaymentStatus, IVoucherStatus } from '@/types';
 import { differenceInDays } from '@/utils';
 
 import 'chart.js/auto';
-import { IPaymentStatus, IVoucherStatus } from '@/types';
 
 interface RaffleAdminCardProps {
   raffle: IOwnedRaffle;
@@ -78,6 +78,11 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
       <p className="md:col-start-3 md:row-start-6 text-3xl font-bold">
         {raffle.vouchers.filter((x) => x.status === IVoucherStatus.Created).length}
       </p>
+      <Link href={`/raffle/${raffle.id}/billing`} className="md:col-start-3 md:row-start-8">
+        <button className="button-padding transition-transform rounded-md transition-colors primary-button-colors">
+          Ver detalles de facturas
+        </button>
+      </Link>
     </div>
   );
 }

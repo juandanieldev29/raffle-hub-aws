@@ -4,9 +4,9 @@ import { fetchAuthSession } from 'aws-amplify/auth/server';
 import RaffleOwned from '@/components/pages/raffle/owned';
 import { runWithAmplifyServerContext } from '@/utils/amplifyServerUtils';
 import { INITIAL_LIMIT } from '@/utils/constants';
-import { AdminRafflesPaginationResult } from '@/types/pagination';
+import { AdminRafflesPaginationResult } from '@/types';
 
-export default async function OwnedRaffle() {
+export default async function OwnedRafflePage() {
   const session = await runWithAmplifyServerContext({
     nextServerContext: { cookies },
     operation: (contextSpec) => fetchAuthSession(contextSpec),

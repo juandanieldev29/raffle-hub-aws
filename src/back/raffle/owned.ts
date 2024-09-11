@@ -12,22 +12,15 @@ import {
   IPaymentStatus,
   IPayment,
   IVoucher,
+  IUserSession,
 } from '../types';
-
-interface CognitoUserSession {
-  sub: string;
-  email: string;
-  given_name: string;
-  family_name?: string;
-  picture?: string;
-}
 
 export const handler = async (
   event: APIGatewayProxyWithCognitoAuthorizerEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const userSession: CognitoUserSession = event.requestContext.authorizer.claims as {
-      [x in keyof CognitoUserSession]: string;
+    const userSession: IUserSession = event.requestContext.authorizer.claims as {
+      [x in keyof IUserSession]: string;
     };
     const limitQueryString = event.queryStringParameters?.limit;
     const exclusiveStartKeyOwnerId = event.queryStringParameters?.exclusiveStartKeyOwnerId;

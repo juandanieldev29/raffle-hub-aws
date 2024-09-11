@@ -4,7 +4,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ddbClient } from './ddbClient';
-import { ICreateRaffle } from '../types';
+import { ICreateRaffle, IUserSession } from '../types';
 import { CORS_HEADERS } from '../constants';
 
 interface CreateRaffleBody {
@@ -14,14 +14,6 @@ interface CreateRaffleBody {
   ticketPrice: number;
   description: string;
   completionDate: string;
-}
-
-interface CognitoUserSession {
-  sub: string;
-  email: string;
-  given_name: string;
-  family_name?: string;
-  picture?: string;
 }
 
 interface Owner {
@@ -35,8 +27,8 @@ export const handler = async (
   event: APIGatewayProxyWithCognitoAuthorizerEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const userSession: CognitoUserSession = event.requestContext.authorizer.claims as {
-      [x in keyof CognitoUserSession]: string;
+    const userSession: IUserSession = event.requestContext.authorizer.claims as {
+      [x in keyof IUserSession]: string;
     };
     const owner: Owner = {
       id: userSession.sub,

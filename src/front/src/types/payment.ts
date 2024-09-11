@@ -1,17 +1,24 @@
 export interface IPayment {
+  raffleId: string;
   id: string;
-  amount_subtotal: number;
-  amount_total: number;
-  created: number;
-  currency: 'crc';
-  expires_at: number;
-  livemode: boolean;
-  mode: 'payment' | 'setup' | 'subscription';
-  payment_method_types: Array<string>;
-  payment_status: 'no_payment_required' | 'unpaid' | 'paid';
+  raffle: {
+    id: string;
+  };
+  currency: string | null;
+  buyer: {
+    id: string;
+  } | null;
+  customerDetails: {
+    country: string | null;
+    email: string | null;
+    name: string | null;
+  } | null;
+  total: number | null;
   status: IPaymentStatus;
-  success_url: string;
-  url: string;
+  url: string | null;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: number;
 }
 
 export enum IPaymentStatus {

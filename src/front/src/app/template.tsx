@@ -1,10 +1,10 @@
 'use client';
 
 import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { Amplify, ResourcesConfig } from 'aws-amplify';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '@aws-amplify/ui-react/styles.css';
 
 const config: ResourcesConfig = {
   Auth: {

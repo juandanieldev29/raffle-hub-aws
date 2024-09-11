@@ -1,4 +1,4 @@
-import { IOwnedRaffle, IRaffle } from '@/types/raffle';
+import { IOwnedRaffle, IRaffle } from '@/types';
 
 export interface RafflesPaginationResult {
   lastEvaluatedKey: { ownerId: string; id: string } | null;

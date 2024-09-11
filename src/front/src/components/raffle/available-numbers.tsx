@@ -1,7 +1,7 @@
 'use client';
 
 import { range } from '@/utils';
-import { IRaffle } from '@/types/raffle';
+import { IRaffle } from '@/types';
 
 type AvailableNumbersProps = {
   raffle: IRaffle;

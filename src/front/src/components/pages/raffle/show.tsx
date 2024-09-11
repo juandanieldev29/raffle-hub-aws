@@ -213,7 +213,9 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
       const payment = await generatePaymentLink(idToken);
       const payload = generateCardPaymentPayload(payment.id);
       await generateTicket(payload);
-      navigateTo(payment.url);
+      if (payment.url) {
+        navigateTo(payment.url);
+      }
     } catch (err) {
       toast.error('Ha ocurrido un error', {
         position: 'top-center',
