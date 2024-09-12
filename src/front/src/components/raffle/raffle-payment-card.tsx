@@ -27,7 +27,7 @@ export default function RafflePaymentCard({
   return (
     <div
       className={classNames(
-        'width secondary-background-color padding margin-bottom rounded-2xl transition-transform grid grid-rows-6 md:gap-x-8 gap-2 shadow-lg',
+        'secondary-background-color padding margin-bottom rounded-2xl transition-transform grid grid-rows-6 md:gap-x-8 gap-2 shadow-lg',
         {
           'md:hover:scale-[1.01]': !disableAnimations,
         },
