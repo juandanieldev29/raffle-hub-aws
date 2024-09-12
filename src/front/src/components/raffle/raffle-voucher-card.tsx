@@ -8,14 +8,24 @@ import { formatDate } from '@/utils';
 
 interface RaffleVoucherCardProps {
   voucher: IVoucher;
+  displayValidationControls: boolean;
+  approveVoucher?: (voucher: IVoucher) => Promise<void>;
   disableAnimations?: boolean;
 }
 
 export default function RaffleVoucherCard({
   voucher,
+  displayValidationControls,
+  approveVoucher,
   disableAnimations = true,
 }: RaffleVoucherCardProps) {
   const [createdAt, setCreatedAt] = useState<string | null>(null);
+
+  const onApproveVoucher = () => {
+    if (approveVoucher) {
+      approveVoucher(voucher);
+    }
+  };
 
   useEffect(() => {
     setCreatedAt(formatDate(voucher.createdAt));
@@ -40,17 +50,24 @@ export default function RaffleVoucherCard({
       >
         <StorageImage path={`public/${voucher.url}`} alt="Factura de compra" />
       </p>
-      <p className="font-extralight font-semibold md:col-start-3" suppressHydrationWarning>
-        Es válida la factura?
-      </p>
-      <div className="md:col-start-3 flex gap">
-        <button className="grow button-padding transition-transform rounded-md transition-colors primary-button-colors max-w-40 max-h-10">
-          Sí
-        </button>
-        <button className="grow button-padding transition-transform rounded-md transition-colors secondary-button-colors max-w-40 max-h-10">
-          No
-        </button>
-      </div>
+      {displayValidationControls && (
+        <>
+          <p className="font-extralight font-semibold md:col-start-3" suppressHydrationWarning>
+            Es válida la factura?
+          </p>
+          <div className="md:col-start-3 flex gap">
+            <button
+              className="grow button-padding transition-transform rounded-md transition-colors primary-button-colors max-w-40 max-h-10"
+              onClick={onApproveVoucher}
+            >
+              Sí
+            </button>
+            <button className="grow button-padding transition-transform rounded-md transition-colors secondary-button-colors max-w-40 max-h-10">
+              No
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
