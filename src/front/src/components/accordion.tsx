@@ -50,7 +50,7 @@ export default function Accordion({
           </svg>
         </span>
       </div>
-      {open && <div>{children}</div>}
+      <div className={classNames({ 'h-0 overflow-hidden': !open })}>{children}</div>
     </div>
   );
 }
