@@ -76,7 +76,7 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
         Pagos con SINPE movil pendientes de verificación
       </p>
       <p className="md:col-start-3 md:row-start-6 text-3xl font-bold">
-        {raffle.vouchers.filter((x) => x.status === IVoucherStatus.Created).length}
+        {raffle.vouchers.filter((x) => x.status === IVoucherStatus.PendingVerification).length}
       </p>
       <Link href={`/raffle/${raffle.id}/billing`} className="md:col-start-3 md:row-start-8">
         <button className="button-padding transition-transform rounded-md transition-colors primary-button-colors">

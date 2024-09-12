@@ -48,6 +48,7 @@ export class AwsMicroservicesStack extends Stack {
       ticketExpireMicroservice,
       voucherNewMicroservice,
       paymentExpireMicroservice,
+      pendingVoucherMicroservice,
     } = new RaffleHubMicroservices(this, 'Microservices', {
       raffleTable: raffleTable,
       ticketTable: ticketTable,
@@ -65,12 +66,14 @@ export class AwsMicroservicesStack extends Stack {
       paymentSuccessQueue,
       pendingPaymentQueue,
       expirePaymentQueue,
+      pendingVoucherQueue,
     } = new RaffleHubQueue(this, 'Queue', {
       ticketExpireConsumer: ticketExpireMicroservice,
       ticketCompleteConsumer: ticketCompleteMicroservice,
       processPaymentConsumer: paymentSuccessMicroservice,
       pendingPaymentConsumer: pendingPaymentMicroservice,
       expirePaymentConsumer: paymentExpireMicroservice,
+      pendingVoucherConsumer: pendingVoucherMicroservice,
     });
 
     new RaffleHubEventBus(this, 'EventBus', {
@@ -83,6 +86,8 @@ export class AwsMicroservicesStack extends Stack {
       pendingPaymentQueue: pendingPaymentQueue,
       expirePaymentPublisher: ticketNewMicroservice,
       expirePaymentQueue: expirePaymentQueue,
+      pendingVoucherPublisher: ticketNewMicroservice,
+      pendingVoucherQueue: pendingVoucherQueue,
     });
 
     const { certificate } = new RaffleHubCertificate(this, 'Certificate');

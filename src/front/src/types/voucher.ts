@@ -15,6 +15,7 @@ export interface IVoucher {
 
 export enum IVoucherStatus {
   Complete = 'Complete',
-  PendingPayment = 'PendingPayment',
+  PendingVerification = 'PendingVerification',
   Created = 'Created',
+  Rejected = 'Rejected',
 }
