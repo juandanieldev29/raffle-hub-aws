@@ -158,7 +158,7 @@ export class RaffleHubApiGateway extends Construct {
         type: JsonSchemaType.OBJECT,
         required: ['voucherId'],
         properties: {
-          voucherURL: { type: JsonSchemaType.STRING, format: 'uuid' },
+          voucherId: { type: JsonSchemaType.STRING, format: 'uuid' },
         },
       },
     });
