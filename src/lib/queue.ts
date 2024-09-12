@@ -9,6 +9,7 @@ interface RaffleHubQueueProps {
   ticketCompleteConsumer: IFunction;
   processPaymentConsumer: IFunction;
   pendingPaymentConsumer: IFunction;
+  expirePaymentConsumer: IFunction;
 }
 
 export class RaffleHubQueue extends Construct {
@@ -16,6 +17,7 @@ export class RaffleHubQueue extends Construct {
   public readonly ticketCompleteQueue: IQueue;
   public readonly paymentSuccessQueue: IQueue;
   public readonly pendingPaymentQueue: IQueue;
+  public readonly expirePaymentQueue: IQueue;
 
   constructor(scope: Construct, id: string, props: RaffleHubQueueProps) {
     super(scope, id);
@@ -23,6 +25,7 @@ export class RaffleHubQueue extends Construct {
     this.ticketCompleteQueue = this.createTicketCompleteQueue(props.ticketCompleteConsumer);
     this.paymentSuccessQueue = this.createPaymentSucessQueue(props.processPaymentConsumer);
     this.pendingPaymentQueue = this.createPendingPaymentQueue(props.pendingPaymentConsumer);
+    this.expirePaymentQueue = this.createExpirePaymentQueue(props.expirePaymentConsumer);
   }
 
   private createExpireTicketQueue(ticketExpireConsumer: IFunction) {
@@ -64,5 +67,16 @@ export class RaffleHubQueue extends Construct {
 
     pendingPaymentConsumer.addEventSource(new SqsEventSource(pendingPaymentQueue));
     return pendingPaymentQueue;
+  }
+
+  private createExpirePaymentQueue(paymentExpireConsumer: IFunction) {
+    const expirePaymentQueue = new Queue(this, 'ExpirePaymentQueue', {
+      queueName: 'ExpirePaymentQueue',
+      visibilityTimeout: Duration.seconds(30),
+      deliveryDelay: Duration.minutes(10),
+    });
+
+    paymentExpireConsumer.addEventSource(new SqsEventSource(expirePaymentQueue));
+    return expirePaymentQueue;
   }
 }

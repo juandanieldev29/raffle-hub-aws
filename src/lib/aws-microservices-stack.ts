@@ -47,6 +47,7 @@ export class AwsMicroservicesStack extends Stack {
       pendingPaymentMicroservice,
       ticketExpireMicroservice,
       voucherNewMicroservice,
+      paymentExpireMicroservice,
     } = new RaffleHubMicroservices(this, 'Microservices', {
       raffleTable: raffleTable,
       ticketTable: ticketTable,
@@ -58,13 +59,19 @@ export class AwsMicroservicesStack extends Stack {
       userPoolClientId: cognito.userPoolClient.userPoolClientId,
     });
 
-    const { expireTicketQueue, ticketCompleteQueue, paymentSuccessQueue, pendingPaymentQueue } =
-      new RaffleHubQueue(this, 'Queue', {
-        ticketExpireConsumer: ticketExpireMicroservice,
-        ticketCompleteConsumer: ticketCompleteMicroservice,
-        processPaymentConsumer: paymentSuccessMicroservice,
-        pendingPaymentConsumer: pendingPaymentMicroservice,
-      });
+    const {
+      expireTicketQueue,
+      ticketCompleteQueue,
+      paymentSuccessQueue,
+      pendingPaymentQueue,
+      expirePaymentQueue,
+    } = new RaffleHubQueue(this, 'Queue', {
+      ticketExpireConsumer: ticketExpireMicroservice,
+      ticketCompleteConsumer: ticketCompleteMicroservice,
+      processPaymentConsumer: paymentSuccessMicroservice,
+      pendingPaymentConsumer: pendingPaymentMicroservice,
+      expirePaymentConsumer: paymentExpireMicroservice,
+    });
 
     new RaffleHubEventBus(this, 'EventBus', {
       expireTicketPublisher: ticketNewMicroservice,
@@ -74,6 +81,8 @@ export class AwsMicroservicesStack extends Stack {
       paymentSuccessQueue: paymentSuccessQueue,
       pendingPaymentPublisher: ticketNewMicroservice,
       pendingPaymentQueue: pendingPaymentQueue,
+      expirePaymentPublisher: ticketNewMicroservice,
+      expirePaymentQueue: expirePaymentQueue,
     });
 
     const { certificate } = new RaffleHubCertificate(this, 'Certificate');

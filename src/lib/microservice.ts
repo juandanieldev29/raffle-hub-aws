@@ -33,6 +33,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly pendingPaymentMicroservice: NodejsFunction;
   public readonly ticketExpireMicroservice: NodejsFunction;
   public readonly voucherNewMicroservice: NodejsFunction;
+  public readonly paymentExpireMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
     super(scope, id);
@@ -82,6 +83,10 @@ export class RaffleHubMicroservices extends Construct {
     this.raffleVouchersMicroservice = this.createRaffleVouchersFunction(
       props.raffleTable,
       props.voucherTable,
+    );
+    this.paymentExpireMicroservice = this.createExpirePaymentFunction(
+      props.paymentTable,
+      props.stripeKeySecret,
     );
   }
 
@@ -369,6 +374,31 @@ export class RaffleHubMicroservices extends Construct {
       ...nodeJsFunctionProps,
     });
     ticketTable.grantReadWriteData(lambdaFunction);
+    return lambdaFunction;
+  }
+
+  private createExpirePaymentFunction(
+    paymentTable: ITable,
+    stripeKeySecret: ISecret,
+  ): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        DYNAMODB_TABLE_NAME: paymentTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'PaymentExpireLambdaFunction', {
+      entry: join(__dirname, `/../back/payment/expire.ts`),
+      ...nodeJsFunctionProps,
+    });
+    paymentTable.grantReadWriteData(lambdaFunction);
+    stripeKeySecret.grantRead(lambdaFunction);
+
     return lambdaFunction;
   }
 

@@ -30,6 +30,15 @@ export interface IPendingPaymentPayload {
   };
 }
 
+export interface IExpirePaymentPayload {
+  raffle: {
+    id: string;
+  };
+  payment: {
+    id: string;
+  };
+}
+
 export interface IPaymentSuccessPayload {
   raffle: {
     id: string;
