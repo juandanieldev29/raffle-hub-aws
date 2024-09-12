@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ddbClient } from './ddbClient';
 import { eventBridgeClient } from './eventBridgeClient';
 import {
+  IExpirePaymentPayload,
   IExpireTicketPayload,
   IPendingPaymentPayload,
   IRaffle,
@@ -97,8 +98,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const paymentId = body[0].paymentId;
     if (paymentId) {
       await Promise.all([
-        await publishExpireTicketEvent(raffle.id, paymentId),
-        await publishPendingPaymentEvent(raffle.id, paymentId),
+        publishExpireTicketEvent(raffle.id, paymentId),
+        publishPendingPaymentEvent(raffle.id, paymentId),
+        publishExpirePaymentEvent(raffle.id, paymentId),
       ]);
     }
     return {
@@ -137,6 +139,29 @@ const publishExpireTicketEvent = async (raffleId: string, paymentId: string) => 
     ],
   };
   await eventBridgeClient.send(new PutEventsCommand(expireTicketParams));
+};
+
+const publishExpirePaymentEvent = async (raffleId: string, paymentId: string) => {
+  const expirePaymentPayload: IExpirePaymentPayload = {
+    raffle: {
+      id: raffleId,
+    },
+    payment: {
+      id: paymentId,
+    },
+  };
+  const expirePaymentParams: PutEventsCommandInput = {
+    Entries: [
+      {
+        Source: 'com.rafflehub.payment.expire',
+        Detail: JSON.stringify(expirePaymentPayload),
+        DetailType: 'ExpirePayment',
+        Resources: [],
+        EventBusName: 'RaffleHubEventBus',
+      },
+    ],
+  };
+  await eventBridgeClient.send(new PutEventsCommand(expirePaymentParams));
 };
 
 const publishPendingPaymentEvent = async (raffleId: string, paymentId: string) => {
