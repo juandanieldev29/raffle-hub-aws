@@ -13,8 +13,18 @@ export interface IVoucher {
   updatedAt: string;
 }
 
+export interface IPendingVoucherPayload {
+  raffle: {
+    id: string;
+  };
+  voucher: {
+    id: string;
+  };
+}
+
 export enum IVoucherStatus {
   Complete = 'Complete',
-  PendingPayment = 'PendingPayment',
+  PendingVerification = 'PendingVerification',
   Created = 'Created',
+  Rejected = 'Rejected',
 }

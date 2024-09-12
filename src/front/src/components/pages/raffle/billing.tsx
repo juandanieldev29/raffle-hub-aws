@@ -22,7 +22,7 @@ export default function RaffleBilling({ vouchers, payments }: RaffleBillingProps
 
   useEffect(() => {
     setCompletedVouchers(vouchers.filter((x) => x.status === IVoucherStatus.Complete));
-    setPendingVouchers(vouchers.filter((x) => x.status === IVoucherStatus.Created));
+    setPendingVouchers(vouchers.filter((x) => x.status === IVoucherStatus.PendingVerification));
   }, [payments]);
 
   return (

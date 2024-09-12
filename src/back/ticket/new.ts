@@ -18,6 +18,7 @@ import {
   IExpirePaymentPayload,
   IExpireTicketPayload,
   IPendingPaymentPayload,
+  IPendingVoucherPayload,
   IRaffle,
   ITicket,
   ITicketStatus,
@@ -37,6 +38,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const id = event.pathParameters?.id;
     const ownerId = event.queryStringParameters?.ownerId;
     const body: NewTicketBody = JSON.parse(event.body!);
+    const paymentAndVoucherIncluded = body.some(
+      ({ paymentId, voucherId }) => paymentId && voucherId,
+    );
+    if (paymentAndVoucherIncluded) {
+      return {
+        statusCode: 400,
+        body: `A ticket can't have both a payment and a voucher`,
+        headers: CORS_HEADERS,
+      };
+    }
     if (!id) {
       return {
         statusCode: 400,
@@ -96,12 +107,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     await writeTicketsInBatch(body, raffle);
     const paymentId = body[0].paymentId;
+    const voucherId = body[0].voucherId;
     if (paymentId) {
       await Promise.all([
         publishExpireTicketEvent(raffle.id, paymentId),
         publishPendingPaymentEvent(raffle.id, paymentId),
         publishExpirePaymentEvent(raffle.id, paymentId),
       ]);
+    }
+    if (voucherId) {
+      await publishPendingVoucherEvent(raffle.id, voucherId);
     }
     return {
       statusCode: 201,
@@ -185,6 +200,29 @@ const publishPendingPaymentEvent = async (raffleId: string, paymentId: string) =
     ],
   };
   await eventBridgeClient.send(new PutEventsCommand(pendingPaymentParams));
+};
+
+const publishPendingVoucherEvent = async (raffleId: string, voucherId: string) => {
+  const pendingVoucherPayload: IPendingVoucherPayload = {
+    raffle: {
+      id: raffleId,
+    },
+    voucher: {
+      id: voucherId,
+    },
+  };
+  const pendingVoucherParams: PutEventsCommandInput = {
+    Entries: [
+      {
+        Source: 'com.rafflehub.voucher.pending',
+        Detail: JSON.stringify(pendingVoucherPayload),
+        DetailType: 'PendingVoucher',
+        Resources: [],
+        EventBusName: 'RaffleHubEventBus',
+      },
+    ],
+  };
+  await eventBridgeClient.send(new PutEventsCommand(pendingVoucherParams));
 };
 
 const getUniqueNumbers = (numbers: Array<number>) => {
