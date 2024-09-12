@@ -45,7 +45,7 @@ export default function RaffleBilling({ vouchers, payments }: RaffleBillingProps
         return;
       }
       const idToken = session.tokens.idToken.toString();
-      await fetch(`https://api.raffle-hub.net/raffle/${voucher.raffleId}/approve`, {
+      await fetch(`https://api.raffle-hub.net/voucher/${voucher.raffleId}/approve`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
