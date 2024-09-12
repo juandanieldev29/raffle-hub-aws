@@ -12,6 +12,8 @@ interface RaffleHubEventBusProps {
   paymentSuccessQueue: IQueue;
   pendingPaymentPublisher: IFunction;
   pendingPaymentQueue: IQueue;
+  expirePaymentPublisher: IFunction;
+  expirePaymentQueue: IQueue;
 }
 
 export class RaffleHubEventBus extends Construct {
@@ -35,6 +37,11 @@ export class RaffleHubEventBus extends Construct {
       this.eventBus,
       props.pendingPaymentPublisher,
       props.pendingPaymentQueue,
+    );
+    this.createExpirePaymentRule(
+      this.eventBus,
+      props.expirePaymentPublisher,
+      props.expirePaymentQueue,
     );
   }
 
@@ -103,5 +110,25 @@ export class RaffleHubEventBus extends Construct {
     });
     pendingPaymentRule.addTarget(new SqsQueue(pendingPaymentQueue));
     eventBus.grantPutEventsTo(pendingPaymentPublisher);
+  }
+
+  private createExpirePaymentRule(
+    eventBus: EventBus,
+    expirePaymentPublisher: IFunction,
+    expirePaymentQueue: IQueue,
+  ) {
+    const expirePaymentRule = new Rule(this, 'ExpirePayment', {
+      eventBus: eventBus,
+      enabled: true,
+      description:
+        'When a pending payment do not successfully get processed before the expiry date',
+      eventPattern: {
+        source: ['com.rafflehub.payment.expire'],
+        detailType: ['ExpirePayment'],
+      },
+      ruleName: 'ExpirePaymentRule',
+    });
+    expirePaymentRule.addTarget(new SqsQueue(expirePaymentQueue));
+    eventBus.grantPutEventsTo(expirePaymentPublisher);
   }
 }
