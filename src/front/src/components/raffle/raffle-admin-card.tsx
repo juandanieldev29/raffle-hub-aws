@@ -5,7 +5,7 @@ import { Doughnut } from 'react-chartjs-2';
 import Link from 'next/link';
 
 import { IOwnedRaffle, IPaymentStatus, IVoucherStatus } from '@/types';
-import { differenceInDays } from '@/utils';
+import { differenceInDays, formatNumber } from '@/utils';
 
 import 'chart.js/auto';
 
@@ -15,11 +15,13 @@ interface RaffleAdminCardProps {
 
 export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
   const [missingDays, setMissingDays] = useState<number>(0);
+  const [totalMoney, setTotalMoney] = useState<string | null>(null);
 
   useEffect(() => {
     if (raffle) {
       const days = differenceInDays(new Date(), new Date(raffle.completionDate));
       setMissingDays(days);
+      setTotalMoney(formatNumber(raffle.boughtTickets.length * raffle.ticketPrice));
     }
   }, [raffle]);
 
@@ -53,9 +55,7 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
       <p className="md:col-start-2 text-2xl font-semibold">Números vendidos</p>
       <p className="md:col-start-2 text-3xl font-bold">{raffle.boughtTickets.length}</p>
       <p className="md:col-start-2 text-2xl font-semibold">Dinero recaudado</p>
-      <p className="md:col-start-2 text-3xl font-bold">
-        {raffle.boughtTickets.length * raffle.ticketPrice}
-      </p>
+      <p className="md:col-start-2 text-3xl font-bold">{totalMoney}</p>
       <p className="md:col-start-2 text-2xl font-semibold">Porcentaje de números vendidos</p>
       <p className="md:col-start-2 text-3xl font-bold">
         {(raffle.boughtTickets.length / raffle.quantityNumbers) * 100}%
