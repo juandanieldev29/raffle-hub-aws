@@ -35,6 +35,7 @@ export class RaffleHubMicroservices extends Construct {
   public readonly voucherNewMicroservice: NodejsFunction;
   public readonly paymentExpireMicroservice: NodejsFunction;
   public readonly pendingVoucherMicroservice: NodejsFunction;
+  public readonly voucherApproveMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: RaffleHubMicroservicesProps) {
     super(scope, id);
@@ -90,6 +91,10 @@ export class RaffleHubMicroservices extends Construct {
       props.stripeKeySecret,
     );
     this.pendingVoucherMicroservice = this.createPendingVoucherFunction(props.voucherTable);
+    this.voucherApproveMicroservice = this.createApproveVoucherFunction(
+      props.raffleTable,
+      props.voucherTable,
+    );
   }
 
   private createRaffleIndexFunction(raffleTable: ITable, ticketTable: ITable): NodejsFunction {
@@ -490,6 +495,28 @@ export class RaffleHubMicroservices extends Construct {
       entry: join(__dirname, `/../back/voucher/pending.ts`),
       ...nodeJsFunctionProps,
     });
+    voucherTable.grantReadWriteData(lambdaFunction);
+    return lambdaFunction;
+  }
+
+  private createApproveVoucherFunction(raffleTable: ITable, voucherTable: ITable): NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        RAFFLE_DYNAMODB_TABLE_NAME: raffleTable.tableName,
+        VOUCHER_DYNAMODB_TABLE_NAME: voucherTable.tableName,
+      },
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(3),
+      memorySize: 128,
+    };
+    const lambdaFunction = new NodejsFunction(this, 'ApproveVoucherLambdaFunction', {
+      entry: join(__dirname, `/../back/voucher/approve.ts`),
+      ...nodeJsFunctionProps,
+    });
+    raffleTable.grantReadWriteData(lambdaFunction);
     voucherTable.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }

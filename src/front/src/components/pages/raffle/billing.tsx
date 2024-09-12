@@ -1,9 +1,14 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
+import { fetchAuthSession } from '@aws-amplify/auth';
+import { toast } from 'react-toastify';
+
 import RafflePaymentCard from '@/components/raffle/raffle-payment-card';
 import RaffleVoucherCard from '@/components/raffle/raffle-voucher-card';
 import Accordion from '@/components/accordion';
+import { LoadingContext } from '@/contexts/loading-context';
+import { LoadingAction } from '@/enums/loading-action';
 import { IPaymentStatus, IVoucherStatus } from '@/types';
 import { IVoucher, IPayment } from '@/types';
 
@@ -13,9 +18,56 @@ type RaffleBillingProps = {
 };
 
 export default function RaffleBilling({ vouchers, payments }: RaffleBillingProps) {
+  const { dispatch } = useContext(LoadingContext);
   const [completedPayments, setCompletedPayments] = useState<IPayment[]>([]);
   const [completedVouchers, setCompletedVouchers] = useState<IVoucher[]>([]);
   const [pendingVouchers, setPendingVouchers] = useState<IVoucher[]>([]);
+
+  const approveVoucher = async (voucher: IVoucher) => {
+    const payload = {
+      voucherId: voucher.id,
+    };
+    if (!voucher.id) {
+      toast.error('La factura no tiene una identificación válida', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+      return;
+    }
+    try {
+      dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
+      const session = await fetchAuthSession();
+      if (!session.tokens?.idToken) {
+        toast.error('Debes iniciar sesión para aprobar una factura', {
+          position: 'top-center',
+          theme: 'colored',
+        });
+        return;
+      }
+      const idToken = session.tokens.idToken.toString();
+      await fetch(`https://api.raffle-hub.net/raffle/${voucher.raffleId}/approve`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        credentials: 'same-origin',
+        cache: 'no-store',
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      toast.success('La factura ha sido aprovada', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+    } catch (err) {
+      toast.error('Ha ocurrido un error', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+    } finally {
+      dispatch({ type: LoadingAction.DECREASE_HTTP_REQUEST_COUNT });
+    }
+  };
 
   useEffect(() => {
     setCompletedPayments(payments.filter((x) => x.status === IPaymentStatus.Complete));
@@ -42,7 +94,14 @@ export default function RaffleBilling({ vouchers, payments }: RaffleBillingProps
           </div>
         )}
         {pendingVouchers.map((x) => {
-          return <RaffleVoucherCard key={x.id} voucher={x} />;
+          return (
+            <RaffleVoucherCard
+              key={x.id}
+              voucher={x}
+              displayValidationControls
+              approveVoucher={approveVoucher}
+            />
+          );
         })}
       </Accordion>
 
@@ -74,7 +133,7 @@ export default function RaffleBilling({ vouchers, payments }: RaffleBillingProps
           </div>
         )}
         {completedVouchers.map((x) => {
-          return <RaffleVoucherCard key={x.id} voucher={x} />;
+          return <RaffleVoucherCard key={x.id} voucher={x} displayValidationControls={false} />;
         })}
       </Accordion>
     </Authenticator>

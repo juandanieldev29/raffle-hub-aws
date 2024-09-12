@@ -26,6 +26,7 @@ interface RaffleHubApiGatewayProps {
   paymentNewMicroservice: IFunction;
   processPaymentMicroservice: IFunction;
   voucherNewMicroservice: IFunction;
+  voucherApproveMicroservice: IFunction;
   domain: DomainName;
   userPool: UserPool;
 }
@@ -45,6 +46,7 @@ export class RaffleHubApiGateway extends Construct {
       props.paymentNewMicroservice,
       props.processPaymentMicroservice,
       props.voucherNewMicroservice,
+      props.voucherApproveMicroservice,
       props.domain,
       props.userPool,
     );
@@ -147,7 +149,27 @@ export class RaffleHubApiGateway extends Construct {
       },
     });
 
-    return { createRaffleModel, createTicketModel, createPaymentModel, createVoucherModel };
+    const approveVoucherModel = new Model(this, 'ApproveVoucherValidator', {
+      restApi: apiGateway,
+      contentType: 'application/json',
+      description: 'Validates the request body for approving a voucher',
+      modelName: 'ApproveVoucherValidator',
+      schema: {
+        type: JsonSchemaType.OBJECT,
+        required: ['voucherId'],
+        properties: {
+          voucherURL: { type: JsonSchemaType.STRING, format: 'uuid' },
+        },
+      },
+    });
+
+    return {
+      createRaffleModel,
+      createTicketModel,
+      createPaymentModel,
+      createVoucherModel,
+      approveVoucherModel,
+    };
   }
 
   private createApiGateway(
@@ -162,6 +184,7 @@ export class RaffleHubApiGateway extends Construct {
     paymentNewMicroservice: IFunction,
     processPaymentMicroservice: IFunction,
     voucherNewMicroservice: IFunction,
+    voucherApproveMicroservice: IFunction,
     domain: DomainName,
     userPool: UserPool,
   ) {
@@ -181,8 +204,13 @@ export class RaffleHubApiGateway extends Construct {
       cognitoUserPools: [userPool],
     });
 
-    const { createRaffleModel, createTicketModel, createPaymentModel, createVoucherModel } =
-      this.createModelValidators(apigw);
+    const {
+      createRaffleModel,
+      createTicketModel,
+      createPaymentModel,
+      createVoucherModel,
+      approveVoucherModel,
+    } = this.createModelValidators(apigw);
 
     const raffle = apigw.root.addResource('raffle', {
       defaultCorsPreflightOptions: {
@@ -290,6 +318,20 @@ export class RaffleHubApiGateway extends Construct {
       }),
       requestModels: {
         'application/json': createVoucherModel,
+      },
+    });
+
+    const voucherApprove = raffleVouchers.addResource('approve');
+    voucherApprove.addMethod('POST', new LambdaIntegration(voucherApproveMicroservice), {
+      authorizer: endpointAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+      requestValidator: new RequestValidator(this, 'ApproveVoucherBodyValidator', {
+        restApi: apigw,
+        requestValidatorName: 'ApproveVoucherBodyValidator',
+        validateRequestBody: true,
+      }),
+      requestModels: {
+        'application/json': approveVoucherModel,
       },
     });
 
