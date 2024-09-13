@@ -60,7 +60,14 @@ export class RaffleHubApiGateway extends Construct {
       modelName: 'CreateRaffleValidator',
       schema: {
         type: JsonSchemaType.OBJECT,
-        required: ['prize', 'description', 'ticketPrice', 'completionDate'],
+        required: [
+          'prize',
+          'description',
+          'ticketPrice',
+          'completionDate',
+          'allowCardPayment',
+          'allowVoucherPayment',
+        ],
         properties: {
           prize: { type: JsonSchemaType.INTEGER, minimum: 1 },
           ticketPrice: { type: JsonSchemaType.INTEGER, minimum: 1 },
@@ -68,7 +75,21 @@ export class RaffleHubApiGateway extends Construct {
           quantityNumbers: { type: JsonSchemaType.INTEGER, minimum: 1, default: 100 },
           quantitySeries: { type: JsonSchemaType.INTEGER, minimum: 1, default: 1000 },
           completionDate: { type: JsonSchemaType.STRING, minLength: 1, maxLength: 255 },
+          allowCardPayment: { type: JsonSchemaType.BOOLEAN },
+          allowVoucherPayment: { type: JsonSchemaType.BOOLEAN },
         },
+        oneOf: [
+          {
+            properties: {
+              allowCardPayment: { enum: [true] },
+            },
+          },
+          {
+            properties: {
+              allowVoucherPayment: { enum: [true] },
+            },
+          },
+        ],
       },
     });
 

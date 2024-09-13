@@ -84,7 +84,7 @@ export default function RaffleBilling({ vouchers, payments }: RaffleBillingProps
       <Accordion
         containerClassname="width"
         titleClassname="text-2xl md:text-3xl font-medium"
-        title="Pagos con SINPE movil pendientes de verificación"
+        title="Pagos con SINPE móvil pendientes de verificación"
         initiallyOpen
       >
         {!Boolean(pendingVouchers.length) && (
@@ -124,7 +124,7 @@ export default function RaffleBilling({ vouchers, payments }: RaffleBillingProps
       <Accordion
         containerClassname="width"
         titleClassname="text-2xl md:text-3xl font-medium"
-        title="Pagos completados con SINPE movil completados"
+        title="Pagos completados con SINPE móvil completados"
       >
         {!Boolean(completedVouchers.length) && (
           <div className="secondary-background-color padding margin-bottom rounded-2xl transition-transform gap shadow-lg flex items-center">

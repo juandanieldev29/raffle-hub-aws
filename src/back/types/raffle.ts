@@ -18,6 +18,8 @@ export interface ICreateRaffle {
   ticketPrice: number;
   lastAvailableNumber: number;
   completionDate: string;
+  allowCardPayment: boolean;
+  allowVoucherPayment: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +40,8 @@ export interface IRaffle {
   ticketPrice: number;
   lastAvailableNumber: number;
   completionDate: string;
+  allowCardPayment: boolean;
+  allowVoucherPayment: boolean;
   boughtTickets: number[];
   createdAt: string;
   updatedAt: string;

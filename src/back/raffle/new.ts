@@ -14,6 +14,8 @@ interface CreateRaffleBody {
   ticketPrice: number;
   description: string;
   completionDate: string;
+  allowCardPayment: boolean;
+  allowVoucherPayment: boolean;
 }
 
 interface Owner {
@@ -44,6 +46,8 @@ export const handler = async (
       ticketPrice,
       description,
       completionDate,
+      allowCardPayment,
+      allowVoucherPayment,
     } = body;
     if (new Date(completionDate).toString() === 'Invalid Date') {
       return {
@@ -63,6 +67,8 @@ export const handler = async (
       ticketPrice,
       description,
       completionDate,
+      allowCardPayment,
+      allowVoucherPayment,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       owner,
