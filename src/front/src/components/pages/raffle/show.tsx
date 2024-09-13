@@ -33,6 +33,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
   const [displayFileUploadModal, setDisplayFileUploadModal] = useState(false);
   const [selectedNumbers, setSelectedNumbers] = useState<Array<number>>([]);
   const [priceToPay, setPriceToPay] = useState(0);
+  const [isRaffleCompletionDatePast, setIsRaffleCompletionDatePast] = useState(false);
 
   const selectOrUnselectNumber = (raffleNumber: number) => {
     let numbers = [...selectedNumbers];
@@ -238,10 +239,29 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
     }
   };
 
+  const displayExpiredRaffleMessage = () => {
+    toast.error('Rifa expirada, no podrás comprar números', {
+      position: 'top-center',
+      theme: 'colored',
+    });
+  };
+
   useEffect(() => {
     const price = calculatePriceToPay();
     setPriceToPay(price);
   }, [selectedNumbers]);
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const raffleCompletionDate = new Date(raffle.completionDate);
+    setIsRaffleCompletionDatePast(currentDate.getTime() >= raffleCompletionDate.getTime());
+  }, [raffle]);
+
+  useEffect(() => {
+    if (isRaffleCompletionDatePast) {
+      displayExpiredRaffleMessage();
+    }
+  }, [isRaffleCompletionDatePast]);
 
   return (
     <>
@@ -275,6 +295,14 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
         />
       )}
       <h1 className="width margin-bottom text-4xl md:text-5xl">Información acerca de la rifa</h1>
+      {isRaffleCompletionDatePast && (
+        <div className="width margin-bottom flex items-center">
+          <i className="fa-solid fa-circle-info small-margin-right" />
+          <p className="text-2xl md:text-3xl font-black">
+            Rifa expirada, no podrás comprar números
+          </p>
+        </div>
+      )}
       <RaffleCard raffle={raffle} />
       <h2 className="width margin-bottom text-2xl md:text-3xl font-medium">
         Números disponibles para compra
@@ -306,7 +334,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
             <button
               onClick={openCardPaymentModal}
               className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
-              disabled={!selectedNumbers.length}
+              disabled={!selectedNumbers.length || isRaffleCompletionDatePast}
             >
               Pago con tarjeta
             </button>
@@ -315,7 +343,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
             <button
               onClick={openSinpePaymentModal}
               className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
-              disabled={!selectedNumbers.length}
+              disabled={!selectedNumbers.length || isRaffleCompletionDatePast}
             >
               Pago con SINPE móvil
             </button>
@@ -340,6 +368,7 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
           availableNumbers={availableNumbers}
           selectedNumbers={selectedNumbers}
           selectOrUnselectNumber={selectOrUnselectNumber}
+          raffleExpired={isRaffleCompletionDatePast}
         />
       </div>
     </>
