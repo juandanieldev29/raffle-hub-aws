@@ -67,13 +67,13 @@ export default function RaffleAdminCard({ raffle }: RaffleAdminCardProps) {
         {raffle.payments.filter((x) => x.status === IPaymentStatus.Complete).length}
       </p>
       <p className="md:col-start-3 md:row-start-3 text-2xl font-bold">
-        Pagos con SINPE movil completados
+        Pagos con SINPE móvil completados
       </p>
       <p className="md:col-start-3 md:row-start-4 text-3xl font-bold">
         {raffle.vouchers.filter((x) => x.status === IVoucherStatus.Complete).length}
       </p>
       <p className="md:col-start-3 md:row-start-5 text-2xl font-bold">
-        Pagos con SINPE movil pendientes de verificación
+        Pagos con SINPE móvil pendientes de verificación
       </p>
       <p className="md:col-start-3 md:row-start-6 text-3xl font-bold">
         {raffle.vouchers.filter((x) => x.status === IVoucherStatus.PendingVerification).length}

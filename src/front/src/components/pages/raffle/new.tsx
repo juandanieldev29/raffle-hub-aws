@@ -22,6 +22,8 @@ export default function RaffleNew() {
   const [overwriteQuantityNumbers, setOverwriteQuantityNumbers] = useState(false);
   const [completionDate, setCompletionDate] = useState(new Date());
   const [includeSeries, setIncludeSeries] = useState(false);
+  const [allowCardPayment, setAllowCardPayment] = useState(false);
+  const [allowVoucherPayment, setAllowVoucherPayment] = useState(false);
 
   const onSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -29,6 +31,13 @@ export default function RaffleNew() {
   };
 
   const createNewRaffle = async () => {
+    if (!allowCardPayment && !allowVoucherPayment) {
+      toast.error('Debes permitir al menos un método de pago', {
+        position: 'top-center',
+        theme: 'colored',
+      });
+      return;
+    }
     const payload = {
       description,
       prize,
@@ -36,6 +45,8 @@ export default function RaffleNew() {
       quantityNumbers,
       quantitySeries,
       completionDate,
+      allowCardPayment,
+      allowVoucherPayment,
     };
     try {
       dispatch({ type: LoadingAction.INCREASE_HTTP_REQUEST_COUNT });
@@ -86,27 +97,23 @@ export default function RaffleNew() {
       >
         <h1 className="text-4xl md:text-5xl">Crear nueva rifa</h1>
         <div className="border-b border-gray-900/10 section-divider-padding margin-top">
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="col-span-full">
-              <label htmlFor="description" className="block font-medium leading-6 text-xl">
-                Descripción
-              </label>
-              <div className="margin-top">
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={3}
-                  className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
-                  required
-                  maxLength={255}
-                  onChange={({ target }) => setDescription(target.value)}
-                ></textarea>
-              </div>
-              <p className="text-lg">
-                Agrega una descripción para que los usuarios sepan sobre el motivo de la rifa
-              </p>
-            </div>
+          <label htmlFor="description" className="block font-medium leading-6 text-xl">
+            Descripción
+          </label>
+          <div className="margin-top">
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
+              required
+              maxLength={255}
+              onChange={({ target }) => setDescription(target.value)}
+            ></textarea>
           </div>
+          <p className="text-lg">
+            Agrega una descripción para que los usuarios sepan sobre el motivo de la rifa
+          </p>
         </div>
 
         <div className="section-divider-padding margin-top flex flex-col items-center">
@@ -118,13 +125,13 @@ export default function RaffleNew() {
           <p className="text-xl">
             Agrega información sobre cuantos números va a tener la rifa y cual va a ser el premio
           </p>
-          <div className="relative flex flex-col md:flex-row gap-x-3 margin-bottom margin-top">
+          <div className="relative flex flex-col md:flex-row small-gap md:gap margin-bottom margin-top">
             <div className="flex h-6 items-center">
               <input
                 id="include-series"
                 name="include-series"
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                className="h-4 w-4"
                 onChange={({ target }) => setIncludeSeries(target.checked)}
               />
             </div>
@@ -139,7 +146,7 @@ export default function RaffleNew() {
                 id="series"
                 name="series"
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                className="h-4 w-4"
                 onChange={({ target }) => setOverwriteQuantityNumbers(target.checked)}
               />
             </div>
@@ -150,7 +157,7 @@ export default function RaffleNew() {
               <p>La rifa va a tener mas de 100 números?</p>
             </div>
           </div>
-          <div className="margin-top grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-5">
+          <div className="margin-top grid grid-cols-1 small-gap md:large-gap md:grid-cols-5">
             <div className="sm:col-span-1 sm:col-start-1">
               <label htmlFor="prize" className="block text-base	font-medium">
                 Premio
@@ -163,6 +170,7 @@ export default function RaffleNew() {
                   className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
                   required
                   onChange={({ target }) => setPrize(Number.parseInt(target.value, 10))}
+                  min={1}
                 />
               </div>
             </div>
@@ -178,6 +186,7 @@ export default function RaffleNew() {
                   className="block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 button-padding"
                   required
                   onChange={({ target }) => setTicketPrice(Number.parseInt(target.value, 10))}
+                  min={1}
                 />
               </div>
             </div>
@@ -195,6 +204,7 @@ export default function RaffleNew() {
                   placeholder="100"
                   disabled={!overwriteQuantityNumbers}
                   onChange={({ target }) => setQuantityNumbers(Number.parseInt(target.value, 10))}
+                  min={1}
                 />
               </div>
             </div>
@@ -213,13 +223,48 @@ export default function RaffleNew() {
                     placeholder="1000"
                     required
                     onChange={({ target }) => setQuantitySeries(Number.parseInt(target.value, 10))}
+                    min={1}
                   />
                 </div>
               </div>
             )}
           </div>
         </div>
-        <div className="margin-top flex items-center justify-end gap-x-6">
+        <div className="border-b border-gray-900/10 section-divider-padding margin-top">
+          <p className="text-xl">Agrega los métodos de pago</p>
+          <div className="relative flex flex-col md:flex-row small-gap md:gap margin-bottom margin-top">
+            <div className="flex h-6 items-center">
+              <input
+                id="card-payment"
+                name="card-payment"
+                type="checkbox"
+                className="h-4 w-4"
+                onChange={({ target }) => setAllowCardPayment(target.checked)}
+              />
+            </div>
+            <div className="text-sm">
+              <label htmlFor="card-payment" className="font-medium text-base">
+                Tarjeta de crédito
+              </label>
+            </div>
+            <div className="flex h-6 items-center">
+              <input
+                id="voucher-payment"
+                name="voucher-payment"
+                type="checkbox"
+                className="h-4 w-4"
+                onChange={({ target }) => setAllowVoucherPayment(target.checked)}
+              />
+            </div>
+            <div className="text-sm">
+              <label htmlFor="voucher-payment" className="font-medium text-base">
+                SINPE móvil
+              </label>
+              <p>Es importante que valides que la transferencia sea válida por tu propia cuenta</p>
+            </div>
+          </div>
+        </div>
+        <div className="margin-top flex items-center justify-end gap">
           <button
             type="button"
             className="rounded-md button-padding text-sm shadow-sm secondary-button-colors"

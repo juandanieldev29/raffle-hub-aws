@@ -82,6 +82,20 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
     const raffle = unmarshall(Item) as IRaffle;
+    if (!raffle.allowCardPayment && body.some((x) => x.paymentId)) {
+      return {
+        statusCode: 400,
+        body: `Raffle does not allow card payments`,
+        headers: CORS_HEADERS,
+      };
+    }
+    if (!raffle.allowVoucherPayment && body.some((x) => x.voucherId)) {
+      return {
+        statusCode: 400,
+        body: `Raffle does not allow voucher payments`,
+        headers: CORS_HEADERS,
+      };
+    }
     const validNumbers = validateNumbers(body, raffle);
     if (!validNumbers) {
       return {

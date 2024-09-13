@@ -302,20 +302,24 @@ export default function RaffleShow({ raffle, availableNumbers }: RaffleShowProps
           Total a pagar:<span className="font-bold text-sm"> {formatNumber(priceToPay)}</span>
         </p>
         <div className="flex gap small-margin-bottom">
-          <button
-            onClick={openCardPaymentModal}
-            className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
-            disabled={!selectedNumbers.length}
-          >
-            Pago con tarjeta
-          </button>
-          <button
-            onClick={openSinpePaymentModal}
-            className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
-            disabled={!selectedNumbers.length}
-          >
-            Pago con SINPE móvil
-          </button>
+          {raffle.allowCardPayment && (
+            <button
+              onClick={openCardPaymentModal}
+              className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
+              disabled={!selectedNumbers.length}
+            >
+              Pago con tarjeta
+            </button>
+          )}
+          {raffle.allowVoucherPayment && (
+            <button
+              onClick={openSinpePaymentModal}
+              className="button-padding transition-transform rounded-md transition-colors primary-button-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:opacity-25"
+              disabled={!selectedNumbers.length}
+            >
+              Pago con SINPE móvil
+            </button>
+          )}
         </div>
         <div className="flex flex-wrap">
           {selectedNumbers.map((x) => {

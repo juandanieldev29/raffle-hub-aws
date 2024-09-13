@@ -19,6 +19,8 @@ export interface IRaffle {
   boughtTickets: number[];
   lastAvailableNumber: number;
   completionDate: string;
+  allowCardPayment: boolean;
+  allowVoucherPayment: boolean;
   createdAt: string;
   updatedAt: string;
 }
