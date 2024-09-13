@@ -96,6 +96,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         headers: CORS_HEADERS,
       };
     }
+    const currentDate = new Date();
+    const raffleCompletionDate = new Date(raffle.completionDate);
+    if (currentDate.getTime() >= raffleCompletionDate.getTime()) {
+      return {
+        statusCode: 400,
+        body: `Raffle is already completed`,
+        headers: CORS_HEADERS,
+      };
+    }
     const validNumbers = validateNumbers(body, raffle);
     if (!validNumbers) {
       return {

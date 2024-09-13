@@ -1,5 +1,7 @@
 'use client';
 
+import classNames from 'classnames';
+
 import { range } from '@/utils';
 import { IRaffle } from '@/types';
 
@@ -8,6 +10,7 @@ type AvailableNumbersProps = {
   availableNumbers: Array<number>;
   selectedNumbers: Array<number>;
   selectOrUnselectNumber: (raffleNumber: number) => void;
+  raffleExpired: boolean;
 };
 
 export default function AvailableNumbers({
@@ -15,6 +18,7 @@ export default function AvailableNumbers({
   availableNumbers,
   selectedNumbers,
   selectOrUnselectNumber,
+  raffleExpired,
 }: AvailableNumbersProps) {
   const isNumberSelected = (raffleNumber: number) => {
     return selectedNumbers.includes(raffleNumber);
@@ -28,9 +32,12 @@ export default function AvailableNumbers({
         return (
           <button
             key={x}
-            className={`w-10 h-10 relative disabled:cursor-not-allowed enabled:cursor-pointer md:hover:dark:bg-blue-900 md:hover:bg-slate-100 transition-transform duration-300`}
+            className={classNames(
+              `w-10 h-10 relative disabled:cursor-not-allowed enabled:cursor-pointer md:hover:dark:bg-blue-900 md:hover:bg-slate-100 transition-transform duration-300`,
+              { 'disabled:opacity-50': raffleExpired },
+            )}
             onClick={() => selectOrUnselectNumber(x)}
-            disabled={isNumberBought}
+            disabled={isNumberBought || raffleExpired}
           >
             <div className="border border-solid text-center relative leading-10">{x}</div>
             {isNumberBought && (
