@@ -36,6 +36,7 @@ export class RaffleHubQueue extends Construct {
       queueName: 'ExpireTicketQueue',
       visibilityTimeout: Duration.seconds(30),
       deliveryDelay: Duration.minutes(10),
+      receiveMessageWaitTime: Duration.seconds(20),
     });
 
     ticketExpireConsumer.addEventSource(new SqsEventSource(expireTicketQueue));
@@ -46,6 +47,7 @@ export class RaffleHubQueue extends Construct {
     const ticketCompleteQueue = new Queue(this, 'TicketCompleteQueue', {
       queueName: 'TicketCompleteQueue',
       visibilityTimeout: Duration.seconds(30),
+      receiveMessageWaitTime: Duration.seconds(20),
     });
 
     ticketCompleteConsumer.addEventSource(new SqsEventSource(ticketCompleteQueue));
@@ -56,6 +58,7 @@ export class RaffleHubQueue extends Construct {
     const paymentSuccessQueue = new Queue(this, 'PaymentSuccessQueue', {
       queueName: 'PaymentSuccessQueue',
       visibilityTimeout: Duration.seconds(30),
+      receiveMessageWaitTime: Duration.seconds(20),
     });
 
     paymentSuccessConsumer.addEventSource(new SqsEventSource(paymentSuccessQueue));
@@ -66,6 +69,7 @@ export class RaffleHubQueue extends Construct {
     const pendingPaymentQueue = new Queue(this, 'PendingPaymentQueue', {
       queueName: 'PendingPaymentQueue',
       visibilityTimeout: Duration.seconds(30),
+      receiveMessageWaitTime: Duration.seconds(20),
     });
 
     pendingPaymentConsumer.addEventSource(new SqsEventSource(pendingPaymentQueue));
@@ -77,6 +81,7 @@ export class RaffleHubQueue extends Construct {
       queueName: 'ExpirePaymentQueue',
       visibilityTimeout: Duration.seconds(30),
       deliveryDelay: Duration.minutes(10),
+      receiveMessageWaitTime: Duration.seconds(20),
     });
 
     paymentExpireConsumer.addEventSource(new SqsEventSource(expirePaymentQueue));
@@ -87,6 +92,7 @@ export class RaffleHubQueue extends Construct {
     const pendingVoucherQueue = new Queue(this, 'PendingVoucherQueue', {
       queueName: 'PendingVoucherQueue',
       visibilityTimeout: Duration.seconds(30),
+      receiveMessageWaitTime: Duration.seconds(20),
     });
 
     pendingVoucherConsumer.addEventSource(new SqsEventSource(pendingVoucherQueue));
